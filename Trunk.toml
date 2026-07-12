@@ -1,0 +1,20 @@
+[build]
+target = "index.html"
+# The public URL is injected at build time for GitHub Pages via the CI workflow:
+#   trunk build --release --public-url /rust-blog/
+# For local development (`trunk serve`) the default public URL of "/" is used.
+
+[serve]
+address = "127.0.0.1"
+port = 8080
+open = false
+
+[tools]
+# Pin the trunk auto-install version used by the build if desired.
+# version = "0.21.14"
+
+# Copy the generated RSS feed into the dist output so it is served alongside the app.
+[[hooks]]
+stage = "post_build"
+command = "cp"
+command_arguments = ["rss.xml", "dist/rss.xml"]

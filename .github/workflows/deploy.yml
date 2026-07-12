@@ -1,46 +1,59 @@
-name: Deploy Rust Wasm to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
+  workflow_dispatch:
 
-# ตั้งค่า permission ให้ GITHUB_TOKEN สามารถ deploy ไปที่ Pages ได้
 permissions:
   contents: read
   pages: write
   id-token: write
 
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7 
+        uses: actions/checkout@v7
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
-          target: wasm32-unknown-unknown
-          override: true
+          targets: wasm32-unknown-unknown
 
-      - name: Download Trunk
-        uses: jetli/trunk-action@v0.5.1 
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install Trunk
+        uses: jetli/trunk-action@v0.5.1
         with:
-          version: 'latest'
+          version: "0.21.14"
 
-      - name: Build with Trunk
-        # *** อย่าลืมเปลี่ยน /ชื่อ-repo-ของคุณ/ ให้ตรงกับชื่อ repository จริงๆ ***
-        # ตัวอย่าง: ถ้า repo ชื่อ "rust-blog-demo" บรรทัดนี้จะเป็น:
-        # run: trunk build --release --public-url /rust-blog-demo/
+      - name: Build (release)
+        # public-url must match the repository name for GitHub Pages.
         run: trunk build --release --public-url /rust-blog/
 
+      - name: Prepare SPA fallback (404.html)
+        # Serve the app shell for unknown paths so client-side routing works.
+        run: cp dist/index.html dist/404.html
+
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5 
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5 
+        uses: actions/deploy-pages@v5

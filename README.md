@@ -1,88 +1,116 @@
-# Rust Variables: Interactive Blog 🦀
+# rust-blog 🦀
 
-![Build Status](https://github.com/suradet-ps/rust-blog/actions/workflows/deploy.yml/badge.svg)
-![Rust](https://img.shields.io/badge/built_with-Rust-dca282.svg)
-![Leptos](https://img.shields.io/badge/framework-Leptos-red)
-![Tailwind](https://img.shields.io/badge/styling-Tailwind_CSS-38bdf8)
+> A production-grade blog built with **Rust + Leptos 0.8 (CSR)**, compiled to **WebAssembly** and deployed on **GitHub Pages**.
 
-A modern, interactive blog post demonstrating **Rust Variables and Mutability**.
-This project is not just *about* Rust—it is **built with Rust**, running entirely in the browser using WebAssembly (Wasm) via the **Leptos** framework.
+[![Deploy to GitHub Pages](https://github.com/suradet-ps/rust-blog/actions/workflows/deploy.yml/badge.svg)](https://github.com/suradet-ps/rust-blog/actions/workflows/deploy.yml)
+[![Rust](https://img.shields.io/badge/built_with-Rust-dca282.svg)](https://www.rust-lang.org/)
+[![Leptos](https://img.shields.io/badge/framework-Leptos-orange)](https://leptos.dev/)
 
-[**View Live Demo**](https://suradet-ps.github.io/rust-blog/)
+Live site: **https://suradet-ps.github.io/rust-blog/**
 
-## About The Project
+## Features
 
-This application serves as an interactive educational material (in Thai) to explain the core concepts of Rust's memory safety model:
-*   **Immutability by default:** Why Rust variables cannot be changed without permission.
-*   **The `mut` keyword:** How to explicitly opt-in to mutability.
-*   **Interactive State:** Demonstrates a real Rust Signal counter running in the browser to prove Wasm execution.
+- ⚡ **Client-Side Rendering** with Leptos 0.8 compiled to WebAssembly
+- 📝 **Content-as-Markdown** — drop a file in `content/posts/` and it appears automatically
+- 🔍 **Search & tag filtering** on the home page
+- 🌗 **Light / Dark mode** with OS preference detection and persistence
+- 🎨 Hand-crafted design system using a custom color palette (no CSS framework)
+- 📜 **Syntax highlighting** via highlight.js
+- 📰 **RSS feed** (`/rss.xml`) generated at build time
+- 📱 Fully responsive, with SEO `<title>`/`<meta>` per page
+- 🚀 Automated CI/CD to GitHub Pages
 
 ## Tech Stack
 
-*   **Language:** [Rust](https://www.rust-lang.org/) (Edition 2024)
-*   **Framework:** [Leptos](https://leptos.dev/) (Client-Side Rendering / CSR)
-*   **Build Tool:** [Trunk](https://trunkrs.dev/)
-*   **Styling:** [Tailwind CSS](https://tailwindcss.com/) (via CDN for simplicity)
-*   **Deployment:** GitHub Pages (Automated via GitHub Actions)
+| Layer        | Choice                                |
+| ------------ | ------------------------------------- |
+| Language     | Rust (Edition 2024)                   |
+| Framework    | [Leptos](https://leptos.dev/) 0.8     |
+| Rendering    | Client-Side Rendering (CSR)           |
+| Bundler      | [Trunk](https://trunkrs.dev/)         |
+| Styling      | Custom CSS design system              |
+| Markdown     | pulldown-cmark                        |
+| Hosting      | GitHub Pages                          |
 
 ## Getting Started
 
-To run this project locally, you need to have Rust installed on your machine.
-
 ### Prerequisites
 
-1.  **Install Rust**:
-    ```sh
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    ```
+```sh
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-2.  **Add Wasm Target**:
-    ```sh
-    rustup target add wasm32-unknown-unknown
-    ```
+# Add the WebAssembly target
+rustup target add wasm32-unknown-unknown
 
-3.  **Install Trunk** (Wasm web bundler):
-    ```sh
-    cargo install trunk
-    ```
+# Install Trunk
+cargo install trunk
+```
 
-### Running Locally
+### Local development
 
-1.  **Clone the repository**
-    ```sh
-    git clone https://github.com/suradet-ps/rust-blog.git
-    cd rust-blog
-    ```
+```sh
+trunk serve
+# → http://127.0.0.1:8080
+```
 
-2.  **Start the development server**
-    ```sh
-    trunk serve
-    ```
+### Production build
 
-3.  **Open in Browser**
-    Go to `http://localhost:8080`. The app will automatically reload when you modify the code.
+```sh
+trunk build --release --public-url /rust-blog/
+```
+
+## Writing a new post
+
+Create a Markdown file in `content/posts/`. Frontmatter is required:
+
+```markdown
+---
+title: "ชื่อบทความ"
+date: "2024-07-01"
+description: "คำอธิบายสั้นๆ สำหรับตัวอย่างและ RSS"
+tags: [rust, wasm]
+author: "suradet-ps"   # optional
+draft: false            # set true to hide
+slug: "my-post"         # optional, defaults to the filename
+---
+
+เนื้อหาบทความเขียนด้วย Markdown ปกติ...
+```
+
+That's it — the home page, filtering, and RSS feed update automatically.
 
 ## Project Structure
 
 ```text
 rust-blog/
-├── Cargo.toml      # Dependencies (Leptos, etc.)
-├── index.html      # Entry point & Tailwind configuration
+├── Cargo.toml          # Dependencies & release profile
+├── Trunk.toml          # Trunk config + post-build hook (RSS copy)
+├── build.rs            # Generates rss.xml from content at build time
+├── index.html          # App entry point
+├── styles/
+│   └── main.css        # Design system
+├── content/
+│   └── posts/          # ← add your .md posts here
 ├── src/
-│   └── main.rs     # Application logic & UI Components
-└── .github/
-    └── workflows/  # CI/CD pipeline for GitHub Pages
+│   ├── main.rs         # App root, router, providers
+│   ├── content.rs      # Post model + embedded content loader
+│   ├── markdown.rs     # Markdown → HTML rendering
+│   ├── util.rs         # Theme, highlighting, date formatting, base path
+│   ├── components.rs   # Nav, Footer, ThemeToggle, PostCard, TagChip
+│   └── pages/          # Home, Post, About, NotFound
+└── .github/workflows/  # CI/CD to GitHub Pages
 ```
 
 ## Deployment
 
-This repository uses **GitHub Actions** to automatically build and deploy to GitHub Pages.
-The workflow is defined in `.github/workflows/deploy.yml`.
+Pushes to `main` trigger `.github/workflows/deploy.yml`, which:
 
-1.  Triggers on push to `main`.
-2.  Sets up Rust and Trunk.
-3.  Builds the project in release mode (`trunk build --release`).
-4.  Deploys the `dist` artifact to GitHub Pages.
+1. Installs Rust + the `wasm32-unknown-unknown` target and Trunk
+2. Runs `build.rs` to generate the RSS feed
+3. Builds the app with `trunk build --release --public-url /rust-blog/`
+4. Copies `dist/index.html` → `dist/404.html` for SPA routing
+5. Publishes the `dist/` artifact to GitHub Pages
 
 ## License
 

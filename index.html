@@ -1,28 +1,28 @@
 <!doctype html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8" />
-        <title>Rust Variables: The Interactive Demo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        colors: {
-                            brand: "#4b63c5",
-                            accent: "#7e9ddc",
-                            font: "#232748",
-                            bg: "#f2f5fc",
-                            card: "#ffffff",
-                        },
-                    },
-                },
-            };
-        </script>
+        <meta name="color-scheme" content="light dark" />
+        <title>suradet-ps · Rust Blog</title>
+        <meta
+            name="description"
+            content="บันทึกการเรียนรู้ Rust, WebAssembly และการพัฒนาเว็บ — สร้างด้วย Leptos และ Rust"
+        />
+
+        <!-- Inline SVG favicon: an orange rounded square with a white "R" -->
+        <link
+            rel="icon"
+            href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23cd8407'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,sans-serif' font-size='38' font-weight='700' fill='%23ffffff'%3ER%3C/text%3E%3C/svg%3E"
+        />
+
+        <!-- Syntax highlighting (core build, common languages including Rust) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+
+        <!-- Main design-system stylesheet (processed & fingerprinted by Trunk) -->
+        <link data-trunk rel="css" href="styles/main.css" />
+
         <link data-trunk rel="rust" data-wasm-opt="z" />
     </head>
-    <body class="bg-bg text-font font-sans antialiased">
-        <div id="app"></div>
-    </body>
+    <body></body>
 </html>
