@@ -1,5 +1,5 @@
 use crate::markdown;
-use include_dir::{include_dir, Dir};
+use include_dir::{include_dir, Dir, File};
 use serde::Deserialize;
 
 /// Embedded content directory. Drop a new `content/posts/<slug>.md` file in and
@@ -53,7 +53,12 @@ pub struct Post {
 pub fn load_posts() -> Vec<Post> {
     let mut posts = Vec::new();
 
-    for file in CONTENT_DIR.files() {
+    // include_dir's `files()` is non-recursive, so collect every file in the
+    // tree (including the nested `posts/` directory) first.
+    let mut files = Vec::new();
+    collect_files(&CONTENT_DIR, &mut files);
+
+    for file in files {
         let path = file.path();
         let is_markdown = path
             .extension()
@@ -77,6 +82,35 @@ pub fn load_posts() -> Vec<Post> {
 
     posts.sort_by(|a, b| b.meta.date.cmp(&a.meta.date));
     posts
+}
+
+/// Recursively gather every file beneath a directory.
+fn collect_files(dir: &Dir<'static>, out: &mut Vec<&File<'static>>) {
+    for file in dir.files() {
+        out.push(file);
+    }
+    for sub in dir.dirs() {
+        collect_files(sub, out);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn loads_embedded_posts() {
+        let posts = load_posts();
+        assert!(
+            posts.len() >= 2,
+            "expected at least 2 embedded posts, found {}",
+            posts.len()
+        );
+        assert!(posts.iter().any(|p| p.slug == "welcome"));
+        assert!(posts.iter().any(|p| p.slug == "rust-variables"));
+        // newest first
+        assert!(posts[0].meta.date >= posts[1].meta.date);
+    }
 }
 
 /// Parse a single markdown file into a [`Post`].
