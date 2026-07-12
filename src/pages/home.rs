@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos_meta::Title;
 
 use crate::components::{PostCard, TagChip};
-use crate::content::{all_tags, site, Post};
+use crate::content::{Post, all_tags, site};
 
 /// Home page: hero, search + tag filtering, and the post grid.
 #[component]
@@ -15,8 +15,6 @@ pub fn Home() -> impl IntoView {
     let (active_tag, set_active_tag) = signal(None::<String>);
 
     let filtered = Memo::new({
-        let query = query.clone();
-        let active_tag = active_tag.clone();
         move |_| {
             let q = query.get().to_lowercase();
             let tag = active_tag.get();
@@ -30,11 +28,7 @@ pub fn Home() -> impl IntoView {
                     let matches_q = q.is_empty()
                         || p.meta.title.to_lowercase().contains(&q)
                         || p.meta.description.to_lowercase().contains(&q)
-                        || p
-                            .meta
-                            .tags
-                            .iter()
-                            .any(|t| t.to_lowercase().contains(&q));
+                        || p.meta.tags.iter().any(|t| t.to_lowercase().contains(&q));
                     matches_tag && matches_q
                 })
                 .cloned()
@@ -42,9 +36,9 @@ pub fn Home() -> impl IntoView {
         }
     });
 
-    let filtered_grid = filtered.clone();
-    let filtered_count = filtered.clone();
-    let filtered_show = filtered.clone();
+    let filtered_grid = filtered;
+    let filtered_count = filtered;
+    let filtered_show = filtered;
 
     view! {
         <div class="container home">
@@ -69,15 +63,15 @@ pub fn Home() -> impl IntoView {
 
                 <div class="tag-filters">
                     {move || {
-                        let active_tag = active_tag.clone();
-                        let set_active_tag = set_active_tag.clone();
+                        let active_tag = active_tag;
+                        let set_active_tag = set_active_tag;
                         let mut chips = vec![
                             view! {
                                 <TagChip
                                     tag="ทั้งหมด".to_string()
                                     active=active_tag.get().is_none()
                                     on_click=Callback::new({
-                                        let set = set_active_tag.clone();
+                                        let set = set_active_tag;
                                         move |_| set.set(None)
                                     })
                                 />
@@ -85,7 +79,7 @@ pub fn Home() -> impl IntoView {
                         ];
                         for t in &tags {
                             let t2 = t.clone();
-                            let set = set_active_tag.clone();
+                            let set = set_active_tag;
                             chips.push(
                                 view! {
                                     <TagChip

@@ -43,6 +43,10 @@
     --accent: var(--color-orange-600);
     --accent-strong: var(--color-red-600);
     --accent-soft: rgba(205, 132, 7, 0.12);
+    /* readable accent-coloured text (links, active states) */
+    --accent-text: var(--color-red-700);
+    /* text placed on top of an accent-filled control */
+    --accent-contrast: var(--color-navy-900);
     --tag-bg: var(--color-gray-100);
     --tag-text: var(--color-gray-700);
 
@@ -84,6 +88,8 @@
     --accent: var(--color-orange-400);
     --accent-strong: var(--color-orange-500);
     --accent-soft: rgba(235, 157, 42, 0.16);
+    --accent-text: var(--color-orange-400);
+    --accent-contrast: var(--color-navy-900);
     --tag-bg: #2b2d24;
     --tag-text: var(--color-gray-300);
 
@@ -188,7 +194,7 @@ button {
     height: 32px;
     border-radius: 9px;
     background: var(--accent);
-    color: var(--color-white);
+    color: var(--accent-contrast);
     font-weight: 800;
     box-shadow: var(--shadow-sm);
 }
@@ -215,11 +221,11 @@ button {
 
 .nav-links a:hover .nav-link {
     background: var(--surface-2);
-    color: var(--text);
+    color: var(--accent-text);
 }
 
 .nav-links a[aria-current="page"] .nav-link {
-    color: var(--accent);
+    color: var(--accent-text);
     background: var(--accent-soft);
 }
 
@@ -261,7 +267,7 @@ button {
     padding: 0.35rem 0.85rem;
     border-radius: 999px;
     background: var(--accent-soft);
-    color: var(--accent);
+    color: var(--accent-text);
     font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0.02em;
@@ -349,13 +355,13 @@ button {
 
 .tag-chip:not(.static):hover {
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-text);
 }
 
 .tag-chip.active {
     background: var(--accent);
     border-color: var(--accent);
-    color: var(--color-white);
+    color: var(--accent-contrast);
 }
 
 .tag-chip.static {
@@ -469,7 +475,7 @@ a:hover .post-card {
 
 a:hover .back-link,
 .back-link:hover {
-    color: var(--accent);
+    color: var(--accent-text);
 }
 
 .article-tags {
@@ -534,7 +540,7 @@ a:hover .back-link,
 }
 
 .prose a {
-    color: var(--accent);
+    color: var(--accent-text);
     text-decoration: underline;
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
@@ -695,7 +701,7 @@ a:hover .back-link,
     padding: 0.7rem 1.4rem;
     border-radius: 999px;
     background: var(--accent);
-    color: var(--color-white);
+    color: var(--accent-contrast);
     font-weight: 600;
     box-shadow: var(--shadow-sm);
     transition: transform 0.2s ease, background-color 0.2s ease;
@@ -744,7 +750,7 @@ a:hover .back-link,
 }
 
 .footer-links a:hover {
-    color: var(--accent);
+    color: var(--accent-text);
 }
 
 /* =========================================================================

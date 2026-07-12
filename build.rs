@@ -21,8 +21,7 @@ struct Frontmatter {
 
 const SITE_URL: &str = "https://suradet-ps.github.io/rust-blog";
 const SITE_TITLE: &str = "suradet-ps";
-const SITE_DESCRIPTION: &str =
-    "บล็อกที่เขียนด้วย Rust และ Leptos — รันบนเบราว์เซอร์ด้วย WebAssembly";
+const SITE_DESCRIPTION: &str = "บล็อกที่เขียนด้วย Rust และ Leptos — รันบนเบราว์เซอร์ด้วย WebAssembly";
 
 fn main() {
     println!("cargo:rerun-if-changed=content");
@@ -41,10 +40,10 @@ fn main() {
                 Ok(s) => s,
                 Err(_) => continue,
             };
-            if let Some((fm, slug)) = parse(&raw, &path) {
-                if !fm.draft {
-                    posts.push((fm, slug));
-                }
+            if let Some((fm, slug)) = parse(&raw, &path)
+                && !fm.draft
+            {
+                posts.push((fm, slug));
             }
         }
     }

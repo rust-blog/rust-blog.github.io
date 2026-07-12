@@ -1,8 +1,8 @@
 use leptos::prelude::*;
 use leptos_router::components::A;
 
-use crate::content::{site, Post};
-use crate::util::{apply_theme, load_theme, save_theme, Theme};
+use crate::content::{Post, site};
+use crate::util::{Theme, apply_theme, load_theme, save_theme};
 
 /// Shared theme state, provided near the root of the app.
 #[derive(Clone, Copy)]

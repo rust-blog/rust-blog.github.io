@@ -1,5 +1,5 @@
 use crate::markdown;
-use include_dir::{include_dir, Dir, File};
+use include_dir::{Dir, File, include_dir};
 use serde::Deserialize;
 
 /// Embedded content directory. Drop a new `content/posts/<slug>.md` file in and
@@ -11,8 +11,7 @@ static CONTENT_DIR: Dir = include_dir!("content");
 pub mod site {
     pub const TITLE: &str = "suradet-ps";
     pub const TAGLINE: &str = "บันทึกการเรียนรู้ Rust, WebAssembly และการพัฒนาเว็บ";
-    pub const DESCRIPTION: &str =
-        "บล็อกที่เขียนด้วย Rust และ Leptos — รันบนเบราว์เซอร์ด้วย WebAssembly";
+    pub const DESCRIPTION: &str = "บล็อกที่เขียนด้วย Rust และ Leptos — รันบนเบราว์เซอร์ด้วย WebAssembly";
     pub const AUTHOR: &str = "suradet-ps";
     pub const AUTHOR_EMAIL: &str = "suradet.pratomsak@gmail.com";
     pub const GITHUB_URL: &str = "https://github.com/suradet-ps/rust-blog";
@@ -69,14 +68,12 @@ pub fn load_posts() -> Vec<Post> {
             .components()
             .any(|c| c.as_os_str().to_string_lossy() == "posts");
 
-        if is_markdown && in_posts {
-            if let Some(raw) = file.contents_utf8() {
-                if let Some(post) = parse_post(raw, path) {
-                    if !post.meta.draft {
-                        posts.push(post);
-                    }
-                }
-            }
+        if is_markdown && in_posts
+            && let Some(raw) = file.contents_utf8()
+            && let Some(post) = parse_post(raw, path)
+            && !post.meta.draft
+        {
+            posts.push(post);
         }
     }
 
@@ -133,10 +130,7 @@ fn parse_post(raw: &str, path: &std::path::Path) -> Option<Post> {
     let slug = meta
         .slug
         .clone()
-        .or_else(|| {
-            path.file_stem()
-                .map(|s| s.to_string_lossy().to_string())
-        })
+        .or_else(|| path.file_stem().map(|s| s.to_string_lossy().to_string()))
         .unwrap_or_default();
 
     let html = markdown::render(&body);

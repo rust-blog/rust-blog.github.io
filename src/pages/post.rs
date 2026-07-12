@@ -3,7 +3,7 @@ use leptos_meta::{Meta, Title};
 use leptos_router::hooks::use_params_map;
 
 use crate::components::PostCard;
-use crate::content::{site, Post};
+use crate::content::{Post, site};
 use crate::pages::not_found::NotFound;
 use crate::util::{format_date, highlight_code_blocks};
 
@@ -14,40 +14,35 @@ pub fn Post() -> impl IntoView {
     let posts = expect_context::<Vec<Post>>();
 
     let slug = {
-        let params = params.clone();
         move || params.get().get("slug").unwrap_or_default()
     };
 
     // (current post, related posts) — recomputed when the slug changes.
     let data = Memo::new({
         let posts = posts.clone();
-        let slug = slug.clone();
         move |_| {
             let s = slug();
-            posts
-                .iter()
-                .position(|p| p.slug == s)
-                .map(|idx| {
-                    let current = posts[idx].clone();
-                    let related = posts
-                        .iter()
-                        .skip(idx + 1)
-                        .take(2)
-                        .cloned()
-                        .collect::<Vec<_>>();
-                    (current, related)
-                })
+            posts.iter().position(|p| p.slug == s).map(|idx| {
+                let current = posts[idx].clone();
+                let related = posts
+                    .iter()
+                    .skip(idx + 1)
+                    .take(2)
+                    .cloned()
+                    .collect::<Vec<_>>();
+                (current, related)
+            })
         }
     });
 
     // Re-run syntax highlighting whenever the rendered post changes.
-    let slug_effect = slug.clone();
+    let slug_effect = slug;
     Effect::new(move |_| {
         let _ = slug_effect();
         highlight_code_blocks();
     });
 
-    let data_for_view = data.clone();
+    let data_for_view = data;
 
     view! {
         <div class="container post-page">

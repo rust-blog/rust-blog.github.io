@@ -1,6 +1,6 @@
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::{window, Document, Storage};
+use wasm_bindgen::prelude::*;
+use web_sys::{Document, Storage, window};
 
 /// Detect the router base path at runtime.
 ///
@@ -40,13 +40,12 @@ pub fn highlight_code_blocks() {
         true
     }
 
-    if !try_hljs() {
-        if let Some(win) = window() {
-            let cb =
-                Closure::once(Box::new(|| highlight_code_blocks()) as Box<dyn FnMut()>);
-            let _ = win.request_animation_frame(cb.as_ref().unchecked_ref());
-            cb.forget();
-        }
+    if !try_hljs()
+        && let Some(win) = window()
+    {
+        let cb = Closure::once(Box::new(highlight_code_blocks) as Box<dyn FnMut()>);
+        let _ = win.request_animation_frame(cb.as_ref().unchecked_ref());
+        cb.forget();
     }
 }
 
@@ -58,14 +57,14 @@ const THEME_KEY: &str = "rust-blog:theme";
 
 /// Read the persisted theme preference, falling back to the OS setting.
 pub fn load_theme() -> Theme {
-    if let Some(storage) = local_storage() {
-        if let Ok(Some(v)) = storage.get_item(THEME_KEY) {
-            return match v.as_str() {
-                "dark" => Theme::Dark,
-                "light" => Theme::Light,
-                _ => system_theme(),
-            };
-        }
+    if let Some(storage) = local_storage()
+        && let Ok(Some(v)) = storage.get_item(THEME_KEY)
+    {
+        return match v.as_str() {
+            "dark" => Theme::Dark,
+            "light" => Theme::Light,
+            _ => system_theme(),
+        };
     }
     system_theme()
 }
@@ -82,11 +81,7 @@ fn system_theme() -> Theme {
         .flatten()
         .map(|m| m.matches())
         .unwrap_or(false);
-    if dark {
-        Theme::Dark
-    } else {
-        Theme::Light
-    }
+    if dark { Theme::Dark } else { Theme::Light }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -118,7 +113,17 @@ pub fn format_date(iso: &str) -> String {
         return iso.to_string();
     }
     let months = [
-        "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.",
+        "ม.ค.",
+        "ก.พ.",
+        "มี.ค.",
+        "เม.ย.",
+        "พ.ค.",
+        "มิ.ย.",
+        "ก.ค.",
+        "ส.ค.",
+        "ก.ย.",
+        "ต.ค.",
+        "พ.ย.",
         "ธ.ค.",
     ];
     let year = parts[0];
