@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use leptos_meta::Title;
 
 use crate::components::{PostCard, TagChip};
 use crate::content::{all_tags, site, Post};
@@ -47,6 +48,7 @@ pub fn Home() -> impl IntoView {
 
     view! {
         <div class="container home">
+            <Title text=format!("{} · บล็อก Rust ที่สร้างด้วย Leptos", site::TITLE)/>
             <section class="hero">
                 <p class="hero-eyebrow">"🦀 สร้างด้วย Rust + WebAssembly"</p>
                 <h1 class="hero-title">{site::TAGLINE}</h1>
