@@ -9,13 +9,12 @@ static CONTENT_DIR: Dir = include_dir!("content");
 /// Site-wide constants used across the UI and the RSS feed.
 #[allow(dead_code)]
 pub mod site {
-    pub const TITLE: &str = "suradet-ps";
+    pub const TITLE: &str = "rust-blog";
     pub const TAGLINE: &str = "บันทึกการเรียนรู้ Rust, WebAssembly และการพัฒนาเว็บ";
     pub const DESCRIPTION: &str = "บล็อกที่เขียนด้วย Rust และ Leptos — รันบนเบราว์เซอร์ด้วย WebAssembly";
-    pub const AUTHOR: &str = "suradet-ps";
-    pub const AUTHOR_EMAIL: &str = "suradet.pratomsak@gmail.com";
-    pub const GITHUB_URL: &str = "https://github.com/suradet-ps/rust-blog";
-    pub const SITE_URL: &str = "https://suradet-ps.github.io/rust-blog";
+    pub const AUTHOR: &str = "rust-blog";
+    pub const GITHUB_URL: &str = "https://github.com/rust-blog/rust-blog.github.io";
+    pub const SITE_URL: &str = "https://rust-blog.github.io";
 }
 
 /// Frontmatter parsed from the top of each post markdown file.

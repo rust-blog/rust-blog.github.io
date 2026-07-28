@@ -19,8 +19,8 @@ struct Frontmatter {
     slug: Option<String>,
 }
 
-const SITE_URL: &str = "https://suradet-ps.github.io/rust-blog";
-const SITE_TITLE: &str = "suradet-ps";
+const SITE_URL: &str = "https://rust-blog.github.io";
+const SITE_TITLE: &str = "rust-blog";
 const SITE_DESCRIPTION: &str = "บล็อกที่เขียนด้วย Rust และ Leptos — รันบนเบราว์เซอร์ด้วย WebAssembly";
 
 fn main() {

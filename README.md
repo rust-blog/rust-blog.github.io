@@ -2,11 +2,11 @@
 
 > A production-grade blog built with **Rust + Leptos 0.8 (CSR)**, compiled to **WebAssembly** and deployed on **GitHub Pages**.
 
-[![Deploy to GitHub Pages](https://github.com/suradet-ps/rust-blog/actions/workflows/deploy.yml/badge.svg)](https://github.com/suradet-ps/rust-blog/actions/workflows/deploy.yml)
+[![Deploy to GitHub Pages](https://github.com/rust-blog/rust-blog.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/rust-blog/rust-blog.github.io/actions/workflows/deploy.yml)
 [![Rust](https://img.shields.io/badge/built_with-Rust-dca282.svg)](https://www.rust-lang.org/)
 [![Leptos](https://img.shields.io/badge/framework-Leptos-orange)](https://leptos.dev/)
 
-Live site: **https://suradet-ps.github.io/rust-blog/**
+Live site: **https://rust-blog.github.io/**
 
 ## Features
 
@@ -57,7 +57,7 @@ trunk serve
 ### Production build
 
 ```sh
-trunk build --release --public-url /rust-blog/
+trunk build --release --public-url /
 ```
 
 ## Writing a new post
@@ -70,7 +70,7 @@ title: "ชื่อบทความ"
 date: "2024-07-01"
 description: "คำอธิบายสั้นๆ สำหรับตัวอย่างและ RSS"
 tags: [rust, wasm]
-author: "suradet-ps"   # optional
+author: "rust-blog"   # optional
 draft: false            # set true to hide
 slug: "my-post"         # optional, defaults to the filename
 ---
@@ -83,7 +83,7 @@ That's it — the home page, filtering, and RSS feed update automatically.
 ## Project Structure
 
 ```text
-rust-blog/
+rust-blog.github.io/
 ├── Cargo.toml          # Dependencies & release profile
 ├── Trunk.toml          # Trunk config + post-build hook (RSS copy)
 ├── build.rs            # Generates rss.xml from content at build time
@@ -108,7 +108,7 @@ Pushes to `main` trigger `.github/workflows/deploy.yml`, which:
 
 1. Installs Rust + the `wasm32-unknown-unknown` target and Trunk
 2. Runs `build.rs` to generate the RSS feed
-3. Builds the app with `trunk build --release --public-url /rust-blog/`
+3. Builds the app with `trunk build --release --public-url /`
 4. Copies `dist/index.html` → `dist/404.html` for SPA routing
 5. Publishes the `dist/` artifact to GitHub Pages
 

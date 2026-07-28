@@ -4,7 +4,7 @@ version = "0.2.0"
 edition = "2024"
 description = "A production-grade blog built with Leptos (CSR) and Rust, deployed on GitHub Pages"
 license = "MIT"
-repository = "https://github.com/suradet-ps/rust-blog"
+repository = "https://github.com/rust-blog/rust-blog.github.io"
 
 [dependencies]
 leptos = { version = "0.8", features = ["csr"] }

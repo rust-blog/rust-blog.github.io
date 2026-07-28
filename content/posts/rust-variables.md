@@ -3,7 +3,7 @@ title: "Rust Variables: The Interactive Demo"
 date: "2024-06-15"
 description: "ทำความเข้าใจ Immutability by default และคีย์เวิร์ด mut ใน Rust ผ่านบทความที่เรนเดอร์ด้วย WebAssembly"
 tags: [rust, wasm]
-author: "suradet-ps"
+author: "rust-blog"
 ---
 
 ในภาษา Rust ตัวแปรจะเป็นแบบ **ไม่สามารถเปลี่ยนแปลง (Immutable)** โดยค่าเริ่มต้น

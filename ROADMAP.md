@@ -13,7 +13,7 @@ acceptance is checked against it.
 > **What rust-blog is.** A *quiet, personal* blog engine written *in* Rust and
 > compiled *to* WebAssembly. The app is a [Leptos](https://leptos.dev/) 0.8
 > client-side-rendered (CSR) SPA, built with [Trunk](https://trunkrs.dev/) and
-> published to GitHub Pages (`https://suradet-ps.github.io/rust-blog/`). Posts
+> published to GitHub Pages (`https://rust-blog.github.io/`). Posts
 > are plain Markdown files in `content/posts/` — no database, no server, no
 > JavaScript authored by hand. The site is primarily Thai-language. Drop a
 > `.md` file in and it appears, indexed, searchable, and syndicated, with zero

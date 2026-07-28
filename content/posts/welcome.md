@@ -3,7 +3,7 @@ title: "ยินดีต้อนรับสู่ rust-blog"
 date: "2024-06-01"
 description: "บล็อกที่เขียนด้วย Rust และ Leptos แล้วทำงานบนเบราว์เซอร์ด้วย WebAssembly"
 tags: [announcement, rust, leptos]
-author: "suradet-ps"
+author: "rust-blog"
 ---
 
 สวัสดีครับ! นี่คือบทความแรกบน **rust-blog** รุ่นใหม่ที่เพิ่งรื้อและวางรากฐานใหม่ทั้งหมด 🎉

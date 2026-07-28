@@ -1,7 +1,7 @@
 [build]
 target = "index.html"
 # The public URL is injected at build time for GitHub Pages via the CI workflow:
-#   trunk build --release --public-url /rust-blog/
+#   trunk build --release --public-url /
 # For local development (`trunk serve`) the default public URL of "/" is used.
 
 [serve]

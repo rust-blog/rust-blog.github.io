@@ -35,8 +35,8 @@ jobs:
           version: "v0.21.14"
 
       - name: Build (release)
-        # public-url must match the repository name for GitHub Pages.
-        run: trunk build --release --public-url /rust-blog/
+        # public-url is "/" for GitHub Pages org/user sites, or "/<repo>/" for project sites.
+        run: trunk build --release --public-url /
 
       - name: Prepare SPA fallback (404.html)
         # Serve the app shell for unknown paths so client-side routing works.
