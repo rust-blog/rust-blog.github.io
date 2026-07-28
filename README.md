@@ -1,4 +1,4 @@
-# rust-blog 🦀
+# rust-blog
 
 > A production-grade blog built with **Rust + Leptos 0.8 (CSR)**, compiled to **WebAssembly** and deployed on **GitHub Pages**.
 

@@ -2,6 +2,7 @@ use leptos::prelude::*;
 use leptos_meta::Title;
 
 use crate::content::site;
+use crate::icons::RustLogo;
 
 /// About page.
 #[component]
@@ -30,7 +31,8 @@ pub fn About() -> impl IntoView {
                         " และเฟรมเวิร์ก "
                         <strong>"Leptos"</strong>
                         " (Client-Side Rendering) จากนั้นถูกคอมไพล์เป็น WebAssembly "
-                        "และทำงานอยู่บนเบราว์เซอร์ของคุณโดยตรง 🦀"
+                        "และทำงานอยู่บนเบราว์เซอร์ของคุณโดยตรง "
+                        <RustLogo/>
                     </p>
                     <h2>"เทคโนโลยีที่ใช้"</h2>
                     <ul>

@@ -3,6 +3,7 @@ use leptos_meta::Title;
 
 use crate::components::{PostCard, TagChip};
 use crate::content::{Post, all_tags, site};
+use crate::icons::SearchIcon;
 
 /// Home page: hero, search + tag filtering, and the post grid.
 #[component]
@@ -44,14 +45,13 @@ pub fn Home() -> impl IntoView {
         <div class="container home">
             <Title text=format!("{} · บล็อก Rust ที่สร้างด้วย Leptos", site::TITLE)/>
             <section class="hero">
-                <p class="hero-eyebrow">"🦀 สร้างด้วย Rust + WebAssembly"</p>
                 <h1 class="hero-title">{site::TAGLINE}</h1>
                 <p class="hero-sub">{site::DESCRIPTION}</p>
             </section>
 
             <div class="post-toolbar">
                 <div class="search-box">
-                    <span class="search-icon" aria-hidden="true">"🔍"</span>
+                    <SearchIcon/>
                     <input
                         type="search"
                         class="search-input"

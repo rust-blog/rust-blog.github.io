@@ -1,7 +1,9 @@
 use leptos::prelude::*;
+use leptos::either::Either;
 use leptos_router::components::A;
 
 use crate::content::{Post, site};
+use crate::icons::{HeartIcon, MoonIcon, RustLogo, SunIcon};
 use crate::util::{Theme, apply_theme, load_theme, save_theme};
 
 /// Shared theme state, provided near the root of the app.
@@ -47,8 +49,8 @@ pub fn ThemeToggle() -> impl IntoView {
         >
             <span class="theme-toggle-icon">
                 {move || match theme.get() {
-                    Theme::Light => "🌙",
-                    Theme::Dark => "☀️",
+                    Theme::Light => Either::Left(view! { <MoonIcon/> }),
+                    Theme::Dark => Either::Right(view! { <SunIcon/> }),
                 }}
             </span>
         </button>
@@ -89,7 +91,11 @@ pub fn Footer() -> impl IntoView {
         <footer class="site-footer">
             <div class="container footer-inner">
                 <p class="footer-copy">
-                    "สร้างด้วย ❤️ และ Rust 🦀 โดย "
+                    "สร้างด้วย "
+                    <HeartIcon/>
+                    " และ Rust "
+                    <RustLogo/>
+                    " โดย "
                     {site::AUTHOR}
                     " · © "
                     {year}
