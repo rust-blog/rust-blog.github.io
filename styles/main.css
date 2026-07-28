@@ -612,7 +612,6 @@ a:hover .back-link,
     font-family: var(--font-mono);
     font-size: 0.9rem;
     line-height: 1.7;
-    color: var(--code-text);
     background: transparent;
     padding: 0;
 }
@@ -751,74 +750,6 @@ a:hover .back-link,
 
 .footer-links a:hover {
     color: var(--accent-text);
-}
-
-/* =========================================================================
-   highlight.js token colors (dark code surface)
-   ========================================================================= */
-
-.hljs-comment,
-.hljs-quote {
-    color: #8a8c80;
-    font-style: italic;
-}
-
-.hljs-keyword,
-.hljs-built_in,
-.hljs-type,
-.hljs-class .hljs-title,
-.hljs-title.class_ {
-    color: var(--color-orange-400);
-}
-
-.hljs-string,
-.hljs-number,
-.hljs-literal,
-.hljs-boolean,
-.hljs-regexp {
-    color: var(--color-green-500);
-}
-
-.hljs-title,
-.hljs-title.function_,
-.hljs-section,
-.hljs-name {
-    color: var(--color-yellow-500);
-}
-
-.hljs-attr,
-.hljs-attribute,
-.hljs-property,
-.hljs-variable,
-.hljs-template-variable,
-.hljs-params {
-    color: #d7d9cf;
-}
-
-.hljs-meta,
-.hljs-symbol,
-.hljs-selector-tag {
-    color: var(--color-gray-400);
-}
-
-.hljs-tag {
-    color: var(--color-orange-400);
-}
-
-.hljs-deletion {
-    color: var(--color-red-500);
-}
-
-.hljs-addition {
-    color: var(--color-green-500);
-}
-
-.hljs-emphasis {
-    font-style: italic;
-}
-
-.hljs-strong {
-    font-weight: 700;
 }
 
 /* =========================================================================
