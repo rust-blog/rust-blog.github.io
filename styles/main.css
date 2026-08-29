@@ -33,7 +33,7 @@
     --border-strong: var(--paper-300);
 
     --accent: var(--rust-600);
-    --accent-strong: var(--rust-500);
+    --accent-strong: #a83708;
     --accent-text: var(--rust-600);
     --accent-soft: var(--rust-soft);
     --tag-text: var(--ink-700);
