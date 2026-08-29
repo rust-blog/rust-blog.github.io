@@ -205,4 +205,8 @@ fn build_counter(slot: &web_sys::HtmlElement) {
 
     slot.append_child(&btn).unwrap();
   });
+
+  // Keep the demo's reactive owner alive for the page lifetime so the
+  // display-sync effect keeps tracking the signal.
+  std::mem::forget(owner);
 }
