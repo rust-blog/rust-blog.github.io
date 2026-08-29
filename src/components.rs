@@ -2,9 +2,9 @@ use leptos::either::Either;
 use leptos::prelude::*;
 use leptos_router::components::A;
 
-use crate::content::{Post, site};
 use crate::icons::{MoonIcon, SunIcon};
 use crate::util::{Theme, apply_theme, load_theme, save_theme};
+use rust_blog::content::{Post, site};
 
 /// Shared theme state, provided near the root of the app.
 #[derive(Clone, Copy)]

@@ -1,8 +1,5 @@
 mod components;
-mod content;
-mod frontmatter;
 mod icons;
-mod markdown;
 mod pages;
 mod util;
 
@@ -11,10 +8,10 @@ use leptos::prelude::*;
 use leptos_meta::provide_meta_context;
 use leptos_router::components::{Route, Router, Routes};
 use leptos_router::path;
+use rust_blog::content::load_posts;
 use std::borrow::Cow;
 
 use components::{Footer, Nav, ThemeProvider};
-use content::load_posts;
 use pages::{about::About, home::Home, not_found::NotFound, post::Post};
 use util::detect_base;
 

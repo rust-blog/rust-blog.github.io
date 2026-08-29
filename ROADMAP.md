@@ -40,7 +40,7 @@ acceptance is checked against it.
 | Syndication       | `rss.xml` built by `build.rs`, copied to `dist/`                |
 | Search / filter   | In-memory substring scan + tag chips on the home page           |
 | Hosting / CI      | GitHub Pages via `deploy.yml` (fmt + clippy + test + trunk gates); Renovate on deps |
-| Tests             | 16 unit tests (content load + markdown render/demo + frontmatter parser/date) |
+| Tests             | 19 unit + 9 integration (golden HTML, RSS round-trip, render fuzzing) |
 | Third-party JS    | None - zero runtime network requests (highlight.js and Google Fonts removed, syntect at build, system Thai font stack) |
 | License           | MIT                                                             |
 
@@ -167,22 +167,29 @@ shows drafts without publishing.
 
 ## Quality
 
-### Phase 7 - Content safety test suite (open, closes gap 6)
+### Phase 7 - Content safety test suite (done, closes gap 6)
 
-- [ ] `tests/golden_content`: exact rendered-HTML assertions for a sample post
+- [x] `tests/golden_content`: exact rendered-HTML assertions for a sample post
   (headings, code fence, footnote, table). A markdown change that alters
-  output breaks the test.
+  output breaks the test. — Caught and fixed a real bug: syntect's trailing
+  `</pre>` survived the trim, so every code block shipped a stray closing
+  tag (`markdown.rs` now trims and strips it; pinned by the golden).
 - [x] Date-validation tests: `2024-02-30`, `2024-13-01`, empty, non-`YYYY-MM-DD`
   all rejected at parse time with a typed error. — covered by
   `frontmatter.rs` tests (`rejects_invalid_calendar_dates`,
   `missing_date_is_an_error`).
-- [ ] Frontmatter schema tests: missing `title`/`date`, unknown keys (warn),
-  duplicate tags (dedupe) behave deterministically. (missing `date` is
-  covered; missing `title`, unknown-key warning, tag dedupe remain.)
-- [ ] Proptest: any string pulldown-cmark accepts renders without panicking.
-- [ ] RSS round-trip: parse `rss.xml` back, assert count == published posts.
+- [x] Frontmatter schema tests: missing `title`/`date`, unknown keys (warn),
+  duplicate tags (dedupe) behave deterministically. — `parse` returns
+  sorted `warnings` for unknown keys (printed by `build.rs`), tags are
+  deduplicated, missing `title`/`date` are typed errors.
+- [x] Proptest: any string pulldown-cmark accepts renders without panicking.
+  — `tests/render_never_panics` (512 cases × 3 strategies: arbitrary
+  markdown, arbitrary frontmatter, head+body).
+- [x] RSS round-trip: parse `rss.xml` back, assert count == published posts.
+  — `tests/rss_round_trip`: item count == published posts, every item
+  matches a post by slug/title with a pubDate, channel fields sane.
 
-**Acceptance:** every item above has a passing test; a bad post fails
+**Acceptance (met):** every item above has a passing test; a bad post fails
 `cargo test`, not production.
 
 ### Phase 8 - Correctness & performance hardening (open, closes gaps 2, 4, 5)

@@ -22,12 +22,12 @@ RSS feed generated at build time. No database, no server, no
 JavaScript authored by hand - and a site that speaks primarily Thai,
 for the readers it serves.
 
-| P0-P2 ▣ | P3-P4 ▣ | P5 ▢ | P6-P10 ☐ |
-|---|---|---|---|
+| P0-P4 ▣ | P5 ▢ | P6-P8 ☐ | P7 ▣ | P9-P10 ☐ |
+|---|---|---|---|---|
 
-*Scaffold, content model, shell, RSS, and the authoring experience are
-sealed; accessibility is half-forged; the asset pipeline, safety
-suite, hardening, and v1.0 stand open.*
+*Scaffold, content model, shell, RSS, the authoring experience, and the
+safety suite are sealed; accessibility is half-forged; the asset pipeline,
+hardening, and v1.0 stand open.*
 
 > Built with Rust 2024 + Leptos 0.8, rendered by `pulldown-cmark`,
 > deployed by one workflow to GitHub Pages.
@@ -111,10 +111,10 @@ is no backend.
 **Where this artifact is heading**
 
 ```
-P0-P2 ▸ scaffold, content model, shell, theme ───────────────────────── ▸ sealed
-P3-P4 ▸ reproducible RSS, authoring experience ──────────────────────── ▸ sealed
+P0-P4 ▸ scaffold, content model, shell, theme, RSS, authoring ───────── ▸ sealed
 P5    ▸ accessibility & SEO ─────────────────────────────────────────── ▸ forging
-P6-P8 ▸ asset pipeline, safety suite, hardening ─────────────────────── ▸ open
+P7    ▸ safety suite (golden, schema, fuzz, RSS round-trip) ─────────── ▸ sealed
+P6-P8 ▸ asset pipeline, hardening ───────────────────────────────────── ▸ open
 P9-P10 ▸ CI hardening, v1.0.0 ────────────────────────────────────────── ▸ open
 ```
 

@@ -34,6 +34,9 @@ fn main() {
     // silently-broken page or a malformed feed.
     let parsed = frontmatter::parse(&raw)
       .unwrap_or_else(|e| panic!("invalid frontmatter in {}: {e}", path.display()));
+    for warning in &parsed.warnings {
+      eprintln!("warning: {}: {warning}", path.display());
+    }
     let slug = parsed
       .meta
       .slug

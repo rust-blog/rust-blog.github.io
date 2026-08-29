@@ -1,8 +1,8 @@
 use leptos::prelude::*;
 use leptos_meta::Title;
 
-use crate::content::site;
 use crate::icons::RustLogo;
+use rust_blog::content::site;
 
 /// About page.
 #[component]

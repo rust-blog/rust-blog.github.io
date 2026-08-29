@@ -2,8 +2,8 @@ use leptos::prelude::*;
 use leptos_meta::Title;
 
 use crate::components::{PostCard, TagChip};
-use crate::content::{Post, all_tags, site};
 use crate::icons::SearchIcon;
+use rust_blog::content::{Post, all_tags, site};
 
 /// Home page: hero, search + tag filtering, and the post grid.
 #[component]

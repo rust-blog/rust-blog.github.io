@@ -37,6 +37,10 @@ serde_yaml = "0.9"
 rss = "2"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 
+[dev-dependencies]
+proptest = "1"
+rss = "2"
+
 [profile.release]
 opt-level = "z"
 lto = true

@@ -5,9 +5,9 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::Closure;
 
 use crate::components::PostCard;
-use crate::content::{Post, site};
 use crate::pages::not_found::NotFound;
 use crate::util::format_date;
+use rust_blog::content::{Post, site};
 
 /// Individual post page, rendered from embedded markdown.
 #[component]

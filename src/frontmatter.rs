@@ -21,6 +21,9 @@ pub struct Frontmatter {
 pub struct Parsed {
   pub meta: Frontmatter,
   pub body: String,
+  /// Non-fatal observations (e.g. unknown frontmatter keys), sorted for
+  /// determinism. Callers decide whether to warn (build.rs) or ignore.
+  pub warnings: Vec<String>,
 }
 
 /// Why a post file failed to parse. Errors are typed so callers can decide
@@ -97,8 +100,23 @@ pub fn parse(raw: &str) -> Result<Parsed, FrontmatterError> {
   let end = rest
     .find("\n---")
     .ok_or(FrontmatterError::MissingClosingDelimiter)?;
+  let fm_text = &rest[..end];
+
+  let mut warnings = Vec::new();
+  let value: serde_yaml::Value =
+    serde_yaml::from_str(fm_text).map_err(|e| FrontmatterError::InvalidYaml(e.to_string()))?;
+  if let serde_yaml::Value::Mapping(map) = &value {
+    for key in map.keys() {
+      if let serde_yaml::Value::String(k) = key
+        && !KNOWN_KEYS.contains(&k.as_str())
+      {
+        warnings.push(format!("unknown frontmatter key `{k}`"));
+      }
+    }
+  }
+  warnings.sort();
   let raw_meta: Raw =
-    serde_yaml::from_str(&rest[..end]).map_err(|e| FrontmatterError::InvalidYaml(e.to_string()))?;
+    serde_yaml::from_value(value).map_err(|e| FrontmatterError::InvalidYaml(e.to_string()))?;
 
   let date = raw_meta.date.ok_or(FrontmatterError::MissingDate)?;
   if !is_valid_iso_date(&date) {
@@ -110,19 +128,36 @@ pub fn parse(raw: &str) -> Result<Parsed, FrontmatterError> {
     body = stripped.to_string();
   }
 
+  let mut tags = raw_meta.tags;
+  let mut seen = std::collections::HashSet::new();
+  tags.retain(|t| seen.insert(t.clone()));
+
   Ok(Parsed {
     meta: Frontmatter {
       title: raw_meta.title,
       date,
       description: raw_meta.description,
-      tags: raw_meta.tags,
+      tags,
       author: raw_meta.author,
       draft: raw_meta.draft,
       slug: raw_meta.slug,
     },
     body,
+    warnings,
   })
 }
+
+/// Keys the frontmatter schema accepts; anything else is reported as a
+/// warning so typos surface instead of being silently dropped.
+const KNOWN_KEYS: [&str; 7] = [
+  "title",
+  "date",
+  "description",
+  "tags",
+  "author",
+  "draft",
+  "slug",
+];
 
 /// Strict `YYYY-MM-DD` check: exact digit counts, plus a real calendar check
 /// (leap years included). No chrono dependency in the WASM binary.
@@ -270,5 +305,31 @@ mod tests {
   fn invalid_yaml_is_a_typed_error() {
     let raw = "---\ntitle: [unclosed\n---\nBody";
     assert!(matches!(parse(raw), Err(FrontmatterError::InvalidYaml(_))));
+  }
+
+  #[test]
+  fn missing_title_is_a_typed_error() {
+    let raw = "---\ndate: \"2026-08-29\"\n---\nBody";
+    assert!(matches!(
+      parse(raw),
+      Err(FrontmatterError::InvalidYaml(msg)) if msg.contains("title")
+    ));
+  }
+
+  #[test]
+  fn unknown_keys_are_reported_as_warnings() {
+    let raw = "---\ntitle: \"Hello\"\ndate: \"2026-08-29\"\ncatagories: [oops]\n---\nBody";
+    let parsed = parse(raw).unwrap();
+    assert_eq!(
+      parsed.warnings,
+      vec!["unknown frontmatter key `catagories`"]
+    );
+    assert!(parse(&sample()).unwrap().warnings.is_empty());
+  }
+
+  #[test]
+  fn duplicate_tags_are_deduplicated() {
+    let raw = "---\ntitle: \"Hello\"\ndate: \"2026-08-29\"\ntags: [rust, wasm, rust]\n---\nBody";
+    assert_eq!(parse(raw).unwrap().meta.tags, vec!["rust", "wasm"]);
   }
 }

@@ -88,11 +88,12 @@ fn highlight_code(lang: &str, code: &str) -> String {
   let html = highlighted_html_for_string(code, syntax_set(), syntax, theme()).unwrap_or_default();
   // syntect wraps the output in a <pre> with an inline background; we already
   // own the <pre> plate, so keep only the highlighted <code> content.
-  let inner = html
+  let trimmed = html
     .trim_start_matches("<pre")
     .trim_start_matches(|c| c != '>')
     .trim_start_matches('>')
-    .trim_end_matches("</pre>");
+    .trim_end();
+  let inner = trimmed.strip_suffix("</pre>").unwrap_or(trimmed);
   scrub_backgrounds(inner)
 }
 
