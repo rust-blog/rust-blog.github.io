@@ -141,6 +141,11 @@ button {
     padding-inline: clamp(1.25rem, 5vw, 2.5rem);
 }
 
+/* Home reuses the centered content column so it lines up with article/about */
+.home {
+    max-width: var(--maxw-index);
+}
+
 .main {
     min-height: 68vh;
     padding-block: 0 5rem;
