@@ -54,8 +54,8 @@ acceptance is checked against it.
    `content.rs::parse_post`) with slightly different body handling. They agree
    today but can drift - the RSS feed and the in-app render could disagree
    about a post's title, date, or slug. (Phase 8.)
-3. **`<html lang="en">` is hardcoded** but the content is Thai - a real
-   a11y/SEO defect for screen readers and search engines. (Phase 5.)
+3. ~~`<html lang="en">` hardcoded.~~ **Resolved:** root `lang="th"` set in
+   `index.html`; matches the primarily-Thai content. (Phase 5.)
 4. ~~The only runtime network dependency is highlight.js from cdnjs.~~
    **Resolved:** highlight.js was removed entirely; `syntect` now highlights
    code at render time, so the app makes **zero runtime network requests** and
@@ -136,8 +136,9 @@ fingerprint into `dist/`; linter rejects malformed frontmatter in CI.
 
 - [x] Per-page `<title>`, post description + OG tags, `color-scheme`, inline SVG favicon, semantic landmarks, `aria-label`s
 
-- [ ] **Open (closes gap 3):** `<html lang="en">` hardcoded but content is
-  Thai. Fixed by setting `lang="th"` (or dynamic per-post).
+- [x] **(closes gap 3):** `<html lang="en">` → `lang="th"` on the document root,
+  matching the primarily-Thai content. Dynamic per-post `lang` remains a future
+  enhancement.
 - [ ] **Open:** no `robots.txt` / `sitemap.xml` / `og:image` / Twitter cards.
 - [ ] **Open:** focus styling, `prefers-reduced-motion`, skip-link not audited.
 
