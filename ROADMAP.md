@@ -167,10 +167,11 @@ generated; no a11y lint failures.
 - [x] Code-fence language label (mono, uppercase, top-right of the plate) -
   shown only when syntect knows the language; unknown fences render plain,
   unlabelled.
-- [x] TOC from `##`/`###` headings in the Post page: headings get stable
-  slugified ids (Thai-safe, deduplicated), the renderer returns
-  `Rendered { html, toc }`, and the page shows a sticky sidebar on wide
-  screens plus a `<details>` "Contents" box on narrow ones.
+- [ ] **Deliberately skipped:** TOC from `##`/`###` headings - implemented
+  once (heading ids, `Rendered { html, toc }`, sticky sidebar + mobile
+  `<details>`) and then removed on design review: the single quiet column
+  is the product, and a sidebar/repeated headings box adds navigation
+  furniture the readers did not ask for. Revisit on demand.
 - [ ] **Deliberately skipped:** KaTeX - heavy runtime dep for content that does
   not need it yet. Revisit on demand.
 - [ ] Local draft preview (`?preview=1` includes drafts).

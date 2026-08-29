@@ -75,29 +75,6 @@ pub fn Post() -> impl IntoView {
                       let tags = p.meta.tags.clone();
                       let date = format_date(&p.meta.date);
                       let reading = p.reading_time;
-                      let toc = p.toc.clone();
-                      let build_toc = |entries: Vec<rust_blog::markdown::TocEntry>| {
-                          entries
-                              .into_iter()
-                              .map(|entry| {
-                                  let class = if entry.level == 2 {
-                                      "toc-h2"
-                                  } else {
-                                      "toc-h3"
-                                  };
-                                  view! {
-                                      <li class=class>
-                                          <a href=format!("#{}", entry.id)>
-                                              {entry.text}
-                                          </a>
-                                      </li>
-                                  }
-                              })
-                              .collect::<Vec<_>>()
-                      };
-                      let has_toc = !toc.is_empty();
-                      let toc_mobile = build_toc(toc.clone());
-                      let toc_desktop = build_toc(toc);
                       let has_related = !related.is_empty();
 
                       view! {
@@ -107,48 +84,33 @@ pub fn Post() -> impl IntoView {
                           <Meta property="og:description" content=desc.clone()/>
                           <Meta property="og:type" content="article"/>
 
-                          <div class="post-layout">
-                              <article class="article">
-                                  <header class="article-header">
-                                      <leptos_router::components::A href="/">
-                                          <span class="back-link">"← Back to articles"</span>
-                                      </leptos_router::components::A>
-                                      <div class="article-tags">
-                                          {tags
-                                              .iter()
-                                              .cloned()
-                                              .map(|t| view! { <span class="tag-chip static">{t}</span> })
-                                              .collect::<Vec<_>>()}
-                                      </div>
-                                      <h1 class="article-title">{title}</h1>
-                                      <div class="article-meta">
-                                          <span>{date}</span>
-                                          <span class="dot">"·"</span>
-                                          <span>{format!("{reading} min read")}</span>
-                                          <span class="dot">"·"</span>
-                                          <span>{author}</span>
-                                      </div>
-                                  </header>
+                          <article class="article">
+                              <header class="article-header">
+                                  <leptos_router::components::A href="/">
+                                      <span class="back-link">"← Back to articles"</span>
+                                  </leptos_router::components::A>
+                                  <div class="article-tags">
+                                      {tags
+                                          .iter()
+                                          .cloned()
+                                          .map(|t| view! { <span class="tag-chip static">{t}</span> })
+                                          .collect::<Vec<_>>()}
+                                  </div>
+                                  <h1 class="article-title">{title}</h1>
+                                  <div class="article-meta">
+                                      <span>{date}</span>
+                                      <span class="dot">"·"</span>
+                                      <span>{format!("{reading} min read")}</span>
+                                      <span class="dot">"·"</span>
+                                      <span>{author}</span>
+                                  </div>
+                              </header>
 
-                                  <Show when=move || has_toc>
-                                      <details class="toc-mobile">
-                                          <summary>"Contents"</summary>
-                                          {toc_mobile.clone()}
-                                      </details>
-                                  </Show>
-
-                                  <div
-                                      class="prose"
-                                      inner_html=Signal::derive(move || html.get())
-                                  ></div>
-                              </article>
-
-                              <Show when=move || has_toc>
-                                  <aside class="toc" aria-label="Table of contents">
-                                      {toc_desktop.clone()}
-                                  </aside>
-                              </Show>
-                          </div>
+                              <div
+                                  class="prose"
+                                  inner_html=Signal::derive(move || html.get())
+                              ></div>
+                          </article>
 
                           <Show when=move || has_related>
                               <section class="related">

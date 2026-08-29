@@ -27,8 +27,6 @@ pub struct Post {
   pub body: String,
   /// Rendered HTML body.
   pub html: String,
-  /// `##`/`###` headings for the table of contents.
-  pub toc: Vec<crate::markdown::TocEntry>,
   /// Estimated reading time in minutes.
   pub reading_time: usize,
 }
@@ -111,7 +109,7 @@ fn parse_post(raw: &str, path: &std::path::Path) -> Option<Post> {
     .or_else(|| path.file_stem().map(|s| s.to_string_lossy().to_string()))
     .unwrap_or_default();
 
-  let rendered = markdown::render(&parsed.body);
+  let html = markdown::render(&parsed.body);
   let reading_time =
     ((parsed.body.split_whitespace().count() as f64 / 200.0).ceil() as usize).max(1);
 
@@ -119,8 +117,7 @@ fn parse_post(raw: &str, path: &std::path::Path) -> Option<Post> {
     slug,
     meta: parsed.meta,
     body: parsed.body,
-    html: rendered.html,
-    toc: rendered.toc,
+    html,
     reading_time,
   })
 }
