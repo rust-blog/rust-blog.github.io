@@ -39,17 +39,16 @@ acceptance is checked against it.
 | Styling           | Hand-written CSS design system, light/dark, no framework        |
 | Syndication       | `rss.xml` built by `build.rs`, copied to `dist/`                |
 | Search / filter   | In-memory substring scan + tag chips on the home page           |
-| Hosting / CI      | GitHub Pages via `deploy.yml`; Renovate on deps                 |
+| Hosting / CI      | GitHub Pages via `deploy.yml` (fmt + clippy + test + trunk gates); Renovate on deps |
 | Tests             | 5 unit tests (content load + markdown render/demo)                         |
 | Third-party JS    | None - zero runtime network requests (highlight.js removed, syntect at build) |
 | License           | MIT                                                             |
 
 ### Gaps found while reading the repo (these shape the phases below)
 
-1. **CI is build-only.** It runs `trunk build --release` and deploys, but
-   never `cargo fmt --check`, `cargo clippy -D warnings`, or `cargo test`.
-   Correctness rests on developer discipline, not a required status check.
-   (Phase 9.)
+1. ~~CI is build-only.~~ **Resolved:** `deploy.yml` now runs `cargo fmt
+   --check`, `cargo clippy -D warnings` (wasm target), and `cargo test` as
+   required build steps before `trunk build --release`. (Phase 9.)
 2. **Frontmatter is parsed in two places** (`build.rs::parse` and
    `content.rs::parse_post`) with slightly different body handling. They agree
    today but can drift - the RSS feed and the in-app render could disagree
@@ -193,16 +192,22 @@ shows drafts without publishing.
 **Acceptance:** one parser; `lang` correct; WASM under budget in CI; zero
 runtime network requests; a11y lint clean.
 
-### Phase 9 - CI hardening & supply chain (open, closes gap 1)
+### Phase 9 - CI hardening & supply chain (partial, closes gap 1)
 
-- [ ] **(gap 1)** Required status checks before merge to `main`: `fmt --check`,
-  `clippy -D warnings`, `cargo test --workspace`, `trunk build --release`.
-- [ ] `cargo audit` + `cargo deny` (license + advisory) as CI steps.
-- [ ] Branch protection: strict required checks, no force-push, no deletion.
-- [ ] Preview deploys from PRs to a non-prod environment.
-- [ ] Pin the Rust toolchain via `rust-toolchain.toml` so CI == local.
-- [ ] Document that the app has **zero hand-written `unsafe`** (only
-  `wasm-bindgen`/`js-sys` FFI); keep it that way.
+- [x] **(gap 1)** Required checks before deploy: `cargo fmt --check`,
+  `cargo clippy --workspace --target wasm32-unknown-unknown -D warnings`,
+  `cargo test --workspace`, then `trunk build --release` (all in `deploy.yml`).
+  Branch protection to *require* these as merge gates is a GitHub setting (see
+  open item below).
+- [x] Pin the Rust toolchain via `rust-toolchain.toml` (channel + wasm32 target
+  + rustfmt/clippy components) so CI == local.
+- [x] Confirmed **zero hand-written `unsafe`** in `src/` (only `wasm-bindgen`/
+  `js-sys` FFI); keep it that way.
+
+- [ ] **Open:** `cargo audit` + `cargo deny` (license + advisory) as CI steps.
+- [ ] **Open:** Branch protection on `main`: strict required checks, no
+  force-push, no deletion (GitHub repo setting, not a file change).
+- [ ] **Open:** Preview deploys from PRs to a non-prod environment.
 
 **Acceptance:** a lint/test regression cannot merge; audit/deny green; branch
 protection enforced; preview URL per PR.

@@ -142,25 +142,25 @@ pub fn TagChip(
 pub fn PostCard(post: Post) -> impl IntoView {
   let date = crate::util::format_date(&post.meta.date);
   view! {
-      <A href=format!("/post/{}", post.slug)>
-          <article class="post-row">
-              <div class="post-row-meta">
-                  <span>{date}</span>
-                  <span class="dot">"·"</span>
-                  <span>{format!("{} min read", post.reading_time)}</span>
+    <A href=format!("/post/{}", post.slug)>
+        <article class="post-row">
+            <div class="post-row-meta">
+                <span>{date}</span>
+                <span class="dot">"·"</span>
+                <span>{format!("{} min read", post.reading_time)}</span>
+            </div>
+            <h2 class="post-row-title">{post.meta.title.clone()}</h2>
+            <p class="post-row-desc">{post.meta.description.clone()}</p>
+              <div class="post-row-tags">
+                  {post
+                      .meta
+                      .tags
+                      .iter()
+                      .cloned()
+                      .map(|t| view! { <span class="tag-chip static">{t}</span> })
+                      .collect::<Vec<_>>()}
               </div>
-              <h2 class="post-row-title">{post.meta.title.clone()}</h2>
-              <p class="post-row-desc">{post.meta.description.clone()}</p>
-                <div class="post-row-tags">
-                    {post
-                        .meta
-                        .tags
-                        .iter()
-                        .cloned()
-                        .map(|t| view! { <span class="tag-chip static">{t}</span> })
-                        .collect::<Vec<_>>()}
-                </div>
-            </article>
-        </A>
-    }
+          </article>
+      </A>
+  }
 }

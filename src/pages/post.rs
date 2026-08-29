@@ -36,9 +36,7 @@ pub fn Post() -> impl IntoView {
   });
 
   // Rendered post HTML, reactive so live demos can be mounted when it changes.
-  let html = Memo::new(move |_| {
-    data.get().map(|(p, _)| p.html).unwrap_or_default()
-  });
+  let html = Memo::new(move |_| data.get().map(|(p, _)| p.html).unwrap_or_default());
 
   // After the post HTML is injected, mount any live demos it references.
   // We defer a frame and query the document so we never race the `inner_html`
@@ -46,11 +44,9 @@ pub fn Post() -> impl IntoView {
   Effect::new(move |_| {
     let _ = html.get();
     let window = web_sys::window().expect("no window");
-    let cb = wasm_bindgen::prelude::Closure::once(
-      Box::new(move |_t: f64| {
-        mount_demos();
-      }) as Box<dyn FnMut(f64)>,
-    );
+    let cb = wasm_bindgen::prelude::Closure::once(Box::new(move |_t: f64| {
+      mount_demos();
+    }) as Box<dyn FnMut(f64)>);
     let _ = window.request_animation_frame(cb.as_ref().unchecked_ref());
     cb.forget();
   });
@@ -144,9 +140,7 @@ fn mount_demos() {
     return;
   };
   let slots = document.get_elements_by_class_name("demo-slot");
-  web_sys::console::log_1(
-    &format!("demo: found {} slot(s)", slots.length()).into(),
-  );
+  web_sys::console::log_1(&format!("demo: found {} slot(s)", slots.length()).into());
   for i in 0..slots.length() {
     if let Some(slot) = slots
       .item(i)
@@ -156,11 +150,10 @@ fn mount_demos() {
       if slot.first_child().is_some() {
         continue;
       }
-      if let Some(name) = slot.get_attribute("data-demo") {
-        match name.as_str() {
-          "counter" => build_counter(&slot),
-          _ => {}
-        }
+      if let Some(name) = slot.get_attribute("data-demo")
+        && name.as_str() == "counter"
+      {
+        build_counter(&slot);
       }
     }
   }
@@ -194,7 +187,6 @@ fn build_counter(slot: &web_sys::HtmlElement) {
       num_view.set_text_content(Some(&count.get().to_string()));
     });
 
-    let set_count = set_count.clone();
     let on_click = Closure::wrap(Box::new(move |_e: web_sys::Event| {
       set_count.update(|n| *n += 1);
     }) as Box<dyn FnMut(web_sys::Event)>);

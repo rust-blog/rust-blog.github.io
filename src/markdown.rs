@@ -147,7 +147,13 @@ mod tests {
     let md = "```demo\ncounter\n```";
     let html = render(md);
     assert!(html.contains("demo-slot"), "missing slot: {html}");
-    assert!(html.contains("data-demo=\"counter\""), "missing name: {html}");
-    assert!(!html.contains("code-plate"), "demo should not be highlighted");
+    assert!(
+      html.contains("data-demo=\"counter\""),
+      "missing name: {html}"
+    );
+    assert!(
+      !html.contains("code-plate"),
+      "demo should not be highlighted"
+    );
   }
 }
