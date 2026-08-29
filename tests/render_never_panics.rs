@@ -15,7 +15,7 @@ proptest! {
 
     #[test]
     fn any_markdown_renders_without_panicking(md in any_string()) {
-        let _ = markdown::render(&md);
+        let _ = markdown::render(&md).html;
     }
 
     #[test]

@@ -677,6 +677,7 @@ a:hover .back-link,
 
 /* code blocks - a dark plate in both themes, highlighted by syntect */
 .prose pre {
+    position: relative;
     margin: 2rem 0;
     padding: 1.25rem 1.4rem;
     border-radius: var(--radius-md);
@@ -684,6 +685,19 @@ a:hover .back-link,
     border: 1px solid var(--code-border);
     overflow-x: auto;
     box-shadow: var(--shadow-sm);
+}
+
+.code-lang {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    opacity: 0.8;
+    pointer-events: none;
 }
 
 .prose pre code {
@@ -718,6 +732,106 @@ a:hover .back-link,
     border-radius: var(--radius-md);
     margin: 2rem 0;
     box-shadow: var(--shadow-xs);
+}
+
+/* =========================================================================
+   Post layout: prose + table of contents sidebar
+   ========================================================================= */
+
+.post-layout {
+    display: block;
+}
+
+.toc-mobile {
+    margin: 0 0 2rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-size: 0.9rem;
+}
+
+.toc-mobile summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-strong);
+}
+
+.toc-mobile ul,
+.toc ul {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+}
+
+.toc-mobile li,
+.toc li {
+    margin: 0.35rem 0;
+}
+
+.toc-mobile a,
+.toc a {
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+}
+
+.toc-mobile a:hover,
+.toc a:hover {
+    color: var(--accent-text);
+}
+
+/* Desktop sidebar: sticky, quiet, only when there is room for it */
+.toc {
+    display: none;
+}
+
+@media (min-width: 1100px) {
+    .post-page {
+        max-width: var(--maxw);
+    }
+
+    .post-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 13rem;
+        gap: 2.5rem;
+        align-items: start;
+    }
+
+    .article {
+        min-width: 0;
+    }
+
+    .toc {
+        display: block;
+        position: sticky;
+        top: 5.25rem;
+        padding-top: clamp(1.5rem, 5vw, 2.5rem);
+        border-left: 1px solid var(--border);
+        padding-left: 1.25rem;
+    }
+
+    .toc-title {
+        margin: 0 0 0.75rem;
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+    }
+
+    .toc li a {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+
+    .toc .toc-h3 {
+        padding-left: 0.85rem;
+        font-size: 0.95em;
+    }
+
+    .toc-mobile {
+        display: none;
+    }
 }
 
 /* =========================================================================

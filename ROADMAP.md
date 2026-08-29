@@ -164,8 +164,13 @@ generated; no a11y lint failures.
 ### Phase 6 - Asset pipeline & multi-format (open)
 
 - [ ] Fingerprint `content/assets/**` into `dist/` (Trunk already fingerprints CSS/JS).
-- [ ] Code-fence language label; highlight only for known languages (syntect).
-- [ ] TOC from `##`/`###` headings (ids already generated) in the Post sidebar.
+- [x] Code-fence language label (mono, uppercase, top-right of the plate) -
+  shown only when syntect knows the language; unknown fences render plain,
+  unlabelled.
+- [x] TOC from `##`/`###` headings in the Post page: headings get stable
+  slugified ids (Thai-safe, deduplicated), the renderer returns
+  `Rendered { html, toc }`, and the page shows a sticky sidebar on wide
+  screens plus a `<details>` "Contents" box on narrow ones.
 - [ ] **Deliberately skipped:** KaTeX - heavy runtime dep for content that does
   not need it yet. Revisit on demand.
 - [ ] Local draft preview (`?preview=1` includes drafts).
