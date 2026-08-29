@@ -1,6 +1,9 @@
+use leptos::html;
 use leptos::prelude::*;
 use leptos_meta::{Meta, Title};
 use leptos_router::hooks::use_params_map;
+use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::Closure;
 
 use crate::components::PostCard;
 use crate::content::{Post, site};
@@ -33,6 +36,21 @@ pub fn Post() -> impl IntoView {
     }
   });
 
+  // Rendered post HTML, reactive so live demos can be mounted when it changes.
+  let html = Memo::new(move |_| {
+    data.get().map(|(p, _)| p.html).unwrap_or_default()
+  });
+
+  let prose_ref = NodeRef::<html::Div>::new();
+
+  // After the post HTML is injected, mount any live demos it references.
+  Effect::new(move |_| {
+    let _ = html.get();
+    if let Some(el) = prose_ref.get_untracked() {
+      mount_demos(&el);
+    }
+  });
+
   let data_for_view = data;
 
   view! {
@@ -57,7 +75,6 @@ pub fn Post() -> impl IntoView {
                       let tags = p.meta.tags.clone();
                       let date = format_date(&p.meta.date);
                       let reading = p.reading_time;
-                      let html = p.html.clone();
 
                       let has_related = !related.is_empty();
 
@@ -90,7 +107,11 @@ pub fn Post() -> impl IntoView {
                                   </div>
                               </header>
 
-                              <div class="prose" inner_html=html></div>
+                              <div
+                                  class="prose"
+                                  node_ref=prose_ref
+                                  inner_html=Signal::derive(move || html.get())
+                              ></div>
                           </article>
 
                           <Show when=move || has_related>
@@ -111,4 +132,68 @@ pub fn Post() -> impl IntoView {
           </Show>
       </div>
   }
+}
+
+/// Mount live demo components into any `.demo-slot` elements left by the
+/// markdown `demo` directive.
+fn mount_demos(root: &web_sys::HtmlElement) {
+  let slots = root.get_elements_by_class_name("demo-slot");
+  for i in 0..slots.length() {
+    if let Some(slot) = slots
+      .item(i)
+      .and_then(|n| n.dyn_into::<web_sys::HtmlElement>().ok())
+    {
+      // Skip slots we have already mounted into.
+      if slot.first_child().is_some() {
+        continue;
+      }
+      if let Some(name) = slot.get_attribute("data-demo") {
+        match name.as_str() {
+          "counter" => build_counter(&slot),
+          _ => {}
+        }
+      }
+    }
+  }
+}
+
+/// Build the interactive counter demo in pure Rust/WASM, backed by a real
+/// Leptos `signal` so its state mirrors what the post describes.
+fn build_counter(slot: &web_sys::HtmlElement) {
+  let owner = Owner::new();
+  owner.with(|| {
+    let (count, set_count) = signal(0u32);
+    let document = web_sys::window().unwrap().document().unwrap();
+
+    let btn = document.create_element("button").unwrap();
+    btn.set_attribute("class", "demo-counter").unwrap();
+    btn.set_attribute("type", "button").unwrap();
+
+    let num = document.create_element("span").unwrap();
+    num.set_text_content(Some("0"));
+
+    let label = document.create_element("span").unwrap();
+    label.set_attribute("class", "demo-counter-label").unwrap();
+    label.set_text_content(Some("clicks"));
+
+    btn.append_child(&num).unwrap();
+    btn.append_child(&label).unwrap();
+
+    // Keep the displayed number in sync with the signal.
+    let num_view = num.clone();
+    Effect::new(move |_| {
+      num_view.set_text_content(Some(&count.get().to_string()));
+    });
+
+    let set_count = set_count.clone();
+    let on_click = Closure::wrap(Box::new(move |_e: web_sys::Event| {
+      set_count.update(|n| *n += 1);
+    }) as Box<dyn FnMut(web_sys::Event)>);
+    btn
+      .add_event_listener_with_callback("click", on_click.as_ref().unchecked_ref())
+      .unwrap();
+    on_click.forget();
+
+    slot.append_child(&btn).unwrap();
+  });
 }

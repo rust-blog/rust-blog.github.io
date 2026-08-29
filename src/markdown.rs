@@ -52,11 +52,24 @@ pub fn render(md: &str) -> String {
         }
         j += 1;
       }
-      let highlighted = highlight_code(&lang, &code);
-      events[i] = Event::Html(pulldown_cmark::CowStr::Boxed(
-        format!("<pre class=\"code-plate\">{highlighted}</pre>").into_boxed_str(),
-      ));
-      events.drain((i + 1)..=j.min(events.len() - 1));
+      if lang == "demo" {
+        // Emit a mount point that the post page turns into a live component.
+        let name = code
+          .trim()
+          .chars()
+          .filter(|c| c.is_ascii_alphanumeric() || *c == '-' || *c == '_')
+          .collect::<String>();
+        events[i] = Event::Html(pulldown_cmark::CowStr::Boxed(
+          format!("<div class=\"demo-slot\" data-demo=\"{name}\"></div>").into_boxed_str(),
+        ));
+        events.drain((i + 1)..=j.min(events.len() - 1));
+      } else {
+        let highlighted = highlight_code(&lang, &code);
+        events[i] = Event::Html(pulldown_cmark::CowStr::Boxed(
+          format!("<pre class=\"code-plate\">{highlighted}</pre>").into_boxed_str(),
+        ));
+        events.drain((i + 1)..=j.min(events.len() - 1));
+      }
     }
     i += 1;
   }
@@ -127,5 +140,14 @@ mod tests {
     assert!(html.contains("<h1>Hello</h1>"));
     assert!(html.contains("<em>emphasis</em>"));
     assert!(!html.contains("code-plate"));
+  }
+
+  #[test]
+  fn demo_block_emits_mount_point() {
+    let md = "```demo\ncounter\n```";
+    let html = render(md);
+    assert!(html.contains("demo-slot"), "missing slot: {html}");
+    assert!(html.contains("data-demo=\"counter\""), "missing name: {html}");
+    assert!(!html.contains("code-plate"), "demo should not be highlighted");
   }
 }

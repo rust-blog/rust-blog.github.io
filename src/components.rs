@@ -151,16 +151,16 @@ pub fn PostCard(post: Post) -> impl IntoView {
               </div>
               <h2 class="post-row-title">{post.meta.title.clone()}</h2>
               <p class="post-row-desc">{post.meta.description.clone()}</p>
-              <div class="post-row-tags">
-                  {post
-                      .meta
-                      .tags
-                      .iter()
-                      .cloned()
-                      .map(|t| view! { <span class="tag-chip static">{t}</span> })
-                      .collect::<Vec<_>>()}
-              </div>
-          </article>
-      </A>
-  }
+                <div class="post-row-tags">
+                    {post
+                        .meta
+                        .tags
+                        .iter()
+                        .cloned()
+                        .map(|t| view! { <span class="tag-chip static">{t}</span> })
+                        .collect::<Vec<_>>()}
+                </div>
+            </article>
+        </A>
+    }
 }
