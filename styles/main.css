@@ -611,7 +611,7 @@ a:hover .back-link,
     color: var(--accent-text);
 }
 
-/* code blocks — a dark plate in both themes */
+/* code blocks — a dark plate in both themes, highlighted by syntect */
 .prose pre {
     margin: 2rem 0;
     padding: 1.25rem 1.4rem;
@@ -622,8 +622,7 @@ a:hover .back-link,
     box-shadow: var(--shadow-sm);
 }
 
-.prose pre code,
-.prose pre code.hljs {
+.prose pre code {
     font-family: var(--font-mono);
     font-size: 0.88rem;
     line-height: 1.75;

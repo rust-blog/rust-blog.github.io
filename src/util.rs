@@ -1,5 +1,3 @@
-use wasm_bindgen::JsCast;
-use wasm_bindgen::prelude::*;
 use web_sys::{Document, Storage, window};
 
 /// Detect the router base path at runtime.
@@ -14,38 +12,6 @@ pub fn detect_base() -> String {
     "/rust-blog".to_string()
   } else {
     String::new()
-  }
-}
-
-/// Trigger highlight.js over every `<pre><code>` block in the document.
-///
-/// highlight.js is loaded from a CDN and may not be ready on the first paint,
-/// so we poll with `requestAnimationFrame` until the global is available.
-pub fn highlight_code_blocks() {
-  fn try_hljs() -> bool {
-    let global = js_sys::global();
-    let hljs = match js_sys::Reflect::get(&global, &JsValue::from_str("hljs")) {
-      Ok(v) if !v.is_undefined() && !v.is_null() => v,
-      _ => return false,
-    };
-    let f = match js_sys::Reflect::get(&hljs, &JsValue::from_str("highlightAll")) {
-      Ok(v) => v,
-      _ => return false,
-    };
-    let f: js_sys::Function = match f.dyn_into() {
-      Ok(f) => f,
-      Err(_) => return false,
-    };
-    let _ = f.call0(&hljs);
-    true
-  }
-
-  if !try_hljs()
-    && let Some(win) = window()
-  {
-    let cb = Closure::once(Box::new(highlight_code_blocks) as Box<dyn FnMut()>);
-    let _ = win.request_animation_frame(cb.as_ref().unchecked_ref());
-    cb.forget();
   }
 }
 

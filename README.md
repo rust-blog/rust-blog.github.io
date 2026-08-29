@@ -69,8 +69,9 @@ One folder, one binary, a quiet set of honest services.
   `include_dir!`, never fetched at runtime: drop a markdown file into
   `content/posts/` and the build collects it, recursively.
 - **Renders** - `pulldown-cmark` with `Options::all()` turns the post
-  into HTML; `highlight.js` lights the code; the hand-crafted CSS
-  design system (light and dark, no framework) carries the look.
+  into HTML; `syntect` highlights fenced code blocks at render time -
+  no CDN, no JavaScript - and the hand-crafted CSS design system
+  (light and dark, no framework) carries the look.
 - **Searches** - the home page filters in memory by substring and tag
   chips - no index to maintain, no backend to ask.
 - **Syndicates** - `build.rs` generates `rss.xml` at build time and

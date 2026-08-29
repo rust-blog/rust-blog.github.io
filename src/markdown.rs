@@ -1,12 +1,131 @@
-use pulldown_cmark::{Options, Parser, html};
+use std::sync::OnceLock;
+
+use pulldown_cmark::{CodeBlockKind, Event, Options, Parser, Tag, TagEnd, html};
+use syntect::highlighting::ThemeSet;
+use syntect::html::highlighted_html_for_string;
+use syntect::parsing::SyntaxSet;
+
+/// Embedded syntax definitions (fancy-regex backend, wasm32-safe).
+fn syntax_set() -> &'static SyntaxSet {
+  static SS: OnceLock<SyntaxSet> = OnceLock::new();
+  SS.get_or_init(SyntaxSet::load_defaults_newlines)
+}
+
+/// Embedded theme set; we render with a dark plate in both UI themes.
+fn theme() -> &'static syntect::highlighting::Theme {
+  static TH: OnceLock<syntect::highlighting::Theme> = OnceLock::new();
+  TH.get_or_init(|| {
+    let themes = ThemeSet::load_defaults();
+    themes
+      .themes
+      .get("base16-eighties.dark")
+      .unwrap_or(&themes.themes["InspiredGitHub"])
+      .clone()
+  })
+}
 
 /// Render markdown source to an HTML string.
 ///
 /// Enables GitHub-flavoured extensions (tables, strikethrough, task lists,
 /// footnotes, and heading attributes) so authors can write rich posts.
+/// Fenced code blocks are highlighted with `syntect` at render time - no
+/// JavaScript, no CDN.
 pub fn render(md: &str) -> String {
   let parser = Parser::new_ext(md, Options::all());
+  let mut events = parser.collect::<Vec<_>>();
   let mut out = String::with_capacity(md.len() + md.len() / 2);
-  html::push_html(&mut out, parser);
+
+  let mut i = 0;
+  while i < events.len() {
+    if let Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(info))) = &events[i] {
+      let lang = info
+        .split_whitespace()
+        .next()
+        .unwrap_or_default()
+        .to_string();
+      // Gather the code text up to the matching End event.
+      let mut code = String::new();
+      let mut j = i + 1;
+      while j < events.len() && !matches!(&events[j], Event::End(TagEnd::CodeBlock)) {
+        if let Event::Text(t) = &events[j] {
+          code.push_str(t);
+        }
+        j += 1;
+      }
+      let highlighted = highlight_code(&lang, &code);
+      events[i] = Event::Html(pulldown_cmark::CowStr::Boxed(
+        format!("<pre class=\"code-plate\">{highlighted}</pre>").into_boxed_str(),
+      ));
+      events.drain((i + 1)..=j.min(events.len() - 1));
+    }
+    i += 1;
+  }
+
+  html::push_html(&mut out, events.into_iter());
   out
+}
+
+/// Highlight a code block body with syntect, keeping the background out so
+/// the design system's `--code-bg` plate shows through.
+fn highlight_code(lang: &str, code: &str) -> String {
+  let syntax = syntax_set()
+    .find_syntax_by_token(lang)
+    .or_else(|| syntax_set().find_syntax_by_extension(lang))
+    .unwrap_or_else(|| syntax_set().find_syntax_plain_text());
+  let html = highlighted_html_for_string(code, syntax_set(), syntax, theme()).unwrap_or_default();
+  // syntect wraps the output in a <pre> with an inline background; we already
+  // own the <pre> plate, so keep only the highlighted <code> content.
+  let inner = html
+    .trim_start_matches("<pre")
+    .trim_start_matches(|c| c != '>')
+    .trim_start_matches('>')
+    .trim_end_matches("</pre>");
+  scrub_backgrounds(inner)
+}
+
+/// Remove `background-color:#…;` declarations from syntect's inline styles so
+/// the CSS plate (`--code-bg`) stays the single source of the code surface.
+fn scrub_backgrounds(html: &str) -> String {
+  let mut out = String::with_capacity(html.len());
+  let mut rest = html;
+  while let Some(rel) = rest.find("background-color:") {
+    out.push_str(&rest[..rel]);
+    rest = &rest[rel + "background-color:".len()..];
+    if let Some(semi) = rest.find(';') {
+      rest = &rest[semi + 1..];
+    }
+  }
+  out.push_str(rest);
+  out
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn highlights_fenced_rust_block() {
+    let md = "```rust\nfn main() {\n    println!(\"hi\");\n}\n```";
+    let html = render(md);
+    assert!(html.contains("code-plate"), "missing plate class: {html}");
+    assert!(html.contains("fn"), "missing content: {html}");
+    assert!(!html.contains("highlight.js"), "no hljs references");
+  }
+
+  #[test]
+  fn plain_code_block_uses_text_theme() {
+    let md = "```\nplain text here\n```";
+    let html = render(md);
+    assert!(html.contains("code-plate"));
+    assert!(html.contains("plain text here"));
+  }
+
+  #[test]
+  fn keeps_prose_unchanged() {
+    let md = "# Hello\n\nSome *emphasis* and a [link](https://rust-lang.org).";
+    let html = render(md);
+    assert!(html.contains("<h1>Hello</h1>"));
+    assert!(html.contains("<em>emphasis</em>"));
+    assert!(!html.contains("code-plate"));
+  }
 }

@@ -5,7 +5,7 @@ use leptos_router::hooks::use_params_map;
 use crate::components::PostCard;
 use crate::content::{Post, site};
 use crate::pages::not_found::NotFound;
-use crate::util::{format_date, highlight_code_blocks};
+use crate::util::format_date;
 
 /// Individual post page, rendered from embedded markdown.
 #[component]
@@ -31,13 +31,6 @@ pub fn Post() -> impl IntoView {
         (current, related)
       })
     }
-  });
-
-  // Re-run syntax highlighting whenever the rendered post changes.
-  let slug_effect = slug;
-  Effect::new(move |_| {
-    let _ = slug_effect();
-    highlight_code_blocks();
   });
 
   let data_for_view = data;

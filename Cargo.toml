@@ -11,6 +11,7 @@ leptos = { version = "0.8", features = ["csr"] }
 leptos_router = "0.8"
 leptos_meta = "0.8"
 pulldown-cmark = "0.13"
+syntect = { version = "5.2", default-features = false, features = ["default-fancy"] }
 serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
 include_dir = "0.7"
