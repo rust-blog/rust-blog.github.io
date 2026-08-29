@@ -52,9 +52,9 @@
     --radius-lg: 14px;
 
     --font-sans: system-ui, -apple-system, "Segoe UI", Roboto,
-        "Helvetica Neue", Arial, "Noto Sans Thai", sans-serif;
+        "Helvetica Neue", Arial, "Prompt", "Noto Sans Thai", sans-serif;
     --font-serif: "Iowan Old Style", "Palatino Linotype", Georgia,
-        "Times New Roman", "Noto Serif Thai", serif;
+        "Times New Roman", "Prompt", "Noto Serif Thai", serif;
     --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono",
         "Fira Code", Menlo, Consolas, monospace;
 
