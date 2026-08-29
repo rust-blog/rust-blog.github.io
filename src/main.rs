@@ -1,5 +1,6 @@
 mod components;
 mod content;
+mod frontmatter;
 mod icons;
 mod markdown;
 mod pages;

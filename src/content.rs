@@ -1,6 +1,6 @@
+use crate::frontmatter::{self, Frontmatter};
 use crate::markdown;
 use include_dir::{Dir, File, include_dir};
-use serde::Deserialize;
 
 /// Embedded content directory. Drop a new `content/posts/<slug>.md` file in and
 /// it is picked up automatically at compile time - no code changes required.
@@ -18,28 +18,11 @@ pub mod site {
   pub const SITE_URL: &str = "https://rust-blog.github.io";
 }
 
-/// Frontmatter parsed from the top of each post markdown file.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
-pub struct PostMeta {
-  pub title: String,
-  pub date: String,
-  #[serde(default)]
-  pub description: String,
-  #[serde(default)]
-  pub tags: Vec<String>,
-  #[serde(default)]
-  pub author: Option<String>,
-  #[serde(default)]
-  pub draft: bool,
-  #[serde(default)]
-  pub slug: Option<String>,
-}
-
 /// A fully processed blog post, ready to render.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Post {
   pub slug: String,
-  pub meta: PostMeta,
+  pub meta: Frontmatter,
   /// Raw markdown body (kept for RSS / future use).
   pub body: String,
   /// Rendered HTML body.
@@ -112,35 +95,28 @@ mod tests {
 }
 
 /// Parse a single markdown file into a [`Post`].
+///
+/// Uses the shared [`frontmatter::parse`] so the in-app render and the RSS
+/// feed (built in `build.rs`) can never disagree about a post. Errors cannot
+/// reach runtime: `build.rs` already fails the build on any malformed post.
 fn parse_post(raw: &str, path: &std::path::Path) -> Option<Post> {
-  let trimmed = raw.strip_prefix('\u{feff}').unwrap_or(raw);
-  if !trimmed.starts_with("---\n") && !trimmed.starts_with("---\r\n") {
-    return None;
-  }
+  let parsed = frontmatter::parse(raw).ok()?;
 
-  let rest = &trimmed[3..];
-  let end = rest.find("\n---")?;
-  let frontmatter = &rest[..end];
-  let mut body = rest[end + 4..].to_string();
-  if let Some(stripped) = body.strip_prefix('\n') {
-    body = stripped.to_string();
-  }
-
-  let meta: PostMeta = serde_yaml::from_str(frontmatter).ok()?;
-
-  let slug = meta
+  let slug = parsed
+    .meta
     .slug
     .clone()
     .or_else(|| path.file_stem().map(|s| s.to_string_lossy().to_string()))
     .unwrap_or_default();
 
-  let html = markdown::render(&body);
-  let reading_time = ((body.split_whitespace().count() as f64 / 200.0).ceil() as usize).max(1);
+  let html = markdown::render(&parsed.body);
+  let reading_time =
+    ((parsed.body.split_whitespace().count() as f64 / 200.0).ceil() as usize).max(1);
 
   Some(Post {
     slug,
-    meta,
-    body,
+    meta: parsed.meta,
+    body: parsed.body,
     html,
     reading_time,
   })

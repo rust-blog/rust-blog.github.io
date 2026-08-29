@@ -1,23 +1,11 @@
+#[path = "src/frontmatter.rs"]
+mod frontmatter;
+
 use std::fs;
 use std::path::Path;
 
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use rss::{CategoryBuilder, ChannelBuilder, Guid, ItemBuilder};
-use serde::Deserialize;
-
-#[derive(Debug, Deserialize)]
-struct Frontmatter {
-  title: String,
-  date: String,
-  #[serde(default)]
-  description: String,
-  #[serde(default)]
-  tags: Vec<String>,
-  #[serde(default)]
-  draft: bool,
-  #[serde(default)]
-  slug: Option<String>,
-}
 
 const SITE_URL: &str = "https://rust-blog.github.io";
 const SITE_TITLE: &str = "rust-blog";
@@ -30,32 +18,40 @@ fn main() {
   let manifest = env!("CARGO_MANIFEST_DIR");
   let posts_dir = Path::new(manifest).join("content").join("posts");
 
-  let mut posts: Vec<(Frontmatter, String)> = Vec::new();
-  if let Ok(entries) = fs::read_dir(&posts_dir) {
-    for entry in entries.flatten() {
-      let path = entry.path();
-      if path.extension().and_then(|e| e.to_str()) != Some("md") {
-        continue;
-      }
-      let raw = match fs::read_to_string(&path) {
-        Ok(s) => s,
-        Err(_) => continue,
-      };
-      if let Some((fm, slug)) = parse(&raw, &path)
-        && !fm.draft
-      {
-        posts.push((fm, slug));
-      }
+  let mut posts: Vec<(frontmatter::Frontmatter, String)> = Vec::new();
+  for entry in
+    fs::read_dir(&posts_dir).unwrap_or_else(|e| panic!("cannot read {}: {e}", posts_dir.display()))
+  {
+    let entry =
+      entry.unwrap_or_else(|e| panic!("cannot read entry in {}: {e}", posts_dir.display()));
+    let path = entry.path();
+    if path.extension().and_then(|e| e.to_str()) != Some("md") {
+      continue;
+    }
+    let raw =
+      fs::read_to_string(&path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
+    // Any malformed post fails the build loudly instead of shipping a
+    // silently-broken page or a malformed feed.
+    let parsed = frontmatter::parse(&raw)
+      .unwrap_or_else(|e| panic!("invalid frontmatter in {}: {e}", path.display()));
+    let slug = parsed
+      .meta
+      .slug
+      .clone()
+      .or_else(|| path.file_stem().map(|s| s.to_string_lossy().to_string()))
+      .unwrap_or_default();
+    if !parsed.meta.draft {
+      posts.push((parsed.meta, slug));
     }
   }
 
-  posts.sort_by(|a, b| b.0.date.cmp(&a.0.date));
+  posts.sort_by(|a, b| date(&b.0).cmp(date(&a.0)));
 
   let items: Vec<rss::Item> = posts
     .iter()
     .map(|(fm, slug)| {
       let link = format!("{SITE_URL}/post/{slug}");
-      let pub_date = parse_date(&fm.date).map(|d| d.to_rfc2822());
+      let pub_date = parse_date(date(fm)).to_rfc2822();
       ItemBuilder::default()
         .title(fm.title.clone())
         .link(link.clone())
@@ -89,30 +85,16 @@ fn main() {
   let _ = fs::write(Path::new(manifest).join("rss.xml"), out);
 }
 
-/// Split a post file into its frontmatter and derived slug.
-fn parse(raw: &str, path: &Path) -> Option<(Frontmatter, String)> {
-  let trimmed = raw.strip_prefix('\u{feff}').unwrap_or(raw);
-  if !trimmed.starts_with("---\n") && !trimmed.starts_with("---\r\n") {
-    return None;
-  }
-  let rest = &trimmed[3..];
-  let end = rest.find("\n---")?;
-  let fm_text = &rest[..end];
-  let fm: Frontmatter = serde_yaml::from_str(fm_text).ok()?;
-
-  let slug = fm
-    .slug
-    .clone()
-    .or_else(|| path.file_stem().map(|s| s.to_string_lossy().to_string()))
-    .unwrap_or_default();
-
-  Some((fm, slug))
+/// The validated `YYYY-MM-DD` date, guaranteed present by `frontmatter::parse`.
+fn date(fm: &frontmatter::Frontmatter) -> &str {
+  fm.date.as_str()
 }
 
-/// Parse `YYYY-MM-DD` into a UTC datetime at midnight.
-fn parse_date(date: &str) -> Option<DateTime<Utc>> {
-  let combined = format!("{date} 00:00:00");
-  NaiveDateTime::parse_from_str(&combined, "%Y-%m-%d %H:%M:%S")
-    .ok()
-    .map(|naive| naive.and_utc())
+/// Format a validated `YYYY-MM-DD` date as an RFC 2822 pubDate.
+fn parse_date(date: &str) -> DateTime<Utc> {
+  NaiveDate::parse_from_str(date, "%Y-%m-%d")
+    .unwrap_or_else(|e| panic!("date {date:?} failed calendar check: {e}"))
+    .and_hms_opt(0, 0, 0)
+    .expect("midnight always exists")
+    .and_utc()
 }

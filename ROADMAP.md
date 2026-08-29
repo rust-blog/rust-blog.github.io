@@ -40,7 +40,7 @@ acceptance is checked against it.
 | Syndication       | `rss.xml` built by `build.rs`, copied to `dist/`                |
 | Search / filter   | In-memory substring scan + tag chips on the home page           |
 | Hosting / CI      | GitHub Pages via `deploy.yml` (fmt + clippy + test + trunk gates); Renovate on deps |
-| Tests             | 5 unit tests (content load + markdown render/demo)                         |
+| Tests             | 16 unit tests (content load + markdown render/demo + frontmatter parser/date) |
 | Third-party JS    | None - zero runtime network requests (highlight.js and Google Fonts removed, syntect at build, system Thai font stack) |
 | License           | MIT                                                             |
 
@@ -49,10 +49,13 @@ acceptance is checked against it.
 1. ~~CI is build-only.~~ **Resolved:** `deploy.yml` now runs `cargo fmt
    --check`, `cargo clippy -D warnings` (wasm target), and `cargo test` as
    required build steps before `trunk build --release`. (Phase 9.)
-2. **Frontmatter is parsed in two places** (`build.rs::parse` and
+2. ~~Frontmatter is parsed in two places~~ (`build.rs::parse` and
    `content.rs::parse_post`) with slightly different body handling. They agree
    today but can drift - the RSS feed and the in-app render could disagree
-   about a post's title, date, or slug. (Phase 8.)
+   about a post's title, date, or slug.
+   **Resolved:** one shared parser (`src/frontmatter.rs`) is used by both
+   `build.rs` and `content.rs`; typed errors, strict `YYYY-MM-DD` calendar
+   validation, and a malformed post now fails the build loudly. (Phase 8.)
 3. ~~`<html lang="en">` hardcoded.~~ **Resolved:** root `lang="th"` set in
    `index.html`; matches the primarily-Thai content. (Phase 5.)
 4. ~~The only runtime network dependency is highlight.js from cdnjs.~~
@@ -115,9 +118,11 @@ browser.
 - [x] `rss.xml` written by `build.rs`, copied to `dist/` via Trunk post-build hook
 - [x] Items carry title/link/GUID/description/pubDate/categories; drafts excluded
 
-- [ ] **Open (closes gap 6):** RSS `pubDate` relies on implicit `chrono` date
+- [x] **Closed (closes gap 6):** RSS `pubDate` relies on implicit `chrono` date
   validation with no explicit test. A bad date must fail the build loudly, not
-  emit a malformed feed.
+  emit a malformed feed. — Done: `src/frontmatter.rs` validates
+  `YYYY-MM-DD` calendar dates with typed errors (11 tests); `build.rs` panics
+  with the file path on any malformed post (verified: `2024-02-30` → exit 101).
 
 **Acceptance:** feed item count == published post count; all dates valid
 calendar dates; build fails on any invalid date.
@@ -167,10 +172,13 @@ shows drafts without publishing.
 - [ ] `tests/golden_content`: exact rendered-HTML assertions for a sample post
   (headings, code fence, footnote, table). A markdown change that alters
   output breaks the test.
-- [ ] Date-validation tests: `2024-02-30`, `2024-13-01`, empty, non-`YYYY-MM-DD`
-  all rejected at parse time with a typed error.
+- [x] Date-validation tests: `2024-02-30`, `2024-13-01`, empty, non-`YYYY-MM-DD`
+  all rejected at parse time with a typed error. — covered by
+  `frontmatter.rs` tests (`rejects_invalid_calendar_dates`,
+  `missing_date_is_an_error`).
 - [ ] Frontmatter schema tests: missing `title`/`date`, unknown keys (warn),
-  duplicate tags (dedupe) behave deterministically.
+  duplicate tags (dedupe) behave deterministically. (missing `date` is
+  covered; missing `title`, unknown-key warning, tag dedupe remain.)
 - [ ] Proptest: any string pulldown-cmark accepts renders without panicking.
 - [ ] RSS round-trip: parse `rss.xml` back, assert count == published posts.
 
@@ -179,8 +187,10 @@ shows drafts without publishing.
 
 ### Phase 8 - Correctness & performance hardening (open, closes gaps 2, 4, 5)
 
-- [ ] **(gap 2)** Extract a **single shared parser** used by `build.rs` and
-  `content.rs`; RSS and in-app render become impossible to disagree.
+- [x] **(gap 2)** Extract a **single shared parser** used by `build.rs` and
+  `content.rs`; RSS and in-app render become impossible to disagree. — Done:
+  `src/frontmatter.rs` with typed errors + strict date validation; both sides
+  call the same `parse()`.
 - [ ] **(gap 3-adjacent)** Set `lang="th"` (or dynamic per-post).
 - [ ] **(gap 5)** Search scaling: prebuilt embed-time inverted index when
   justified; naive path stays correct for small N. No premature `tantivy`/
