@@ -3,7 +3,7 @@ use leptos::prelude::*;
 use leptos_router::components::A;
 
 use crate::content::{Post, site};
-use crate::icons::{HeartIcon, MoonIcon, RustLogo, SunIcon};
+use crate::icons::{MoonIcon, SunIcon};
 use crate::util::{Theme, apply_theme, load_theme, save_theme};
 
 /// Shared theme state, provided near the root of the app.
@@ -91,32 +91,27 @@ pub fn Nav() -> impl IntoView {
 pub fn Footer() -> impl IntoView {
   let year = js_sys::Date::new_0().get_full_year();
   view! {
-      <footer class="site-footer">
-          <div class="container footer-inner">
-              <p class="footer-copy">
-                  "Built with "
-                  <HeartIcon/>
-                  " and "
-                  <span class="rust-logo"><RustLogo/></span>
-                  " — "
-                  {site::AUTHOR}
-                  " · © "
-                  {year}
-              </p>
-              <div class="footer-links">
-                  <a href=site::GITHUB_URL target="_blank" rel="noreferrer">
-                      "GitHub"
-                  </a>
-                  <A href="/about">
-                      <span class="footer-link">"About"</span>
-                  </A>
-                  <a href="/rss.xml" target="_blank" rel="noreferrer">
-                      "RSS"
-                  </a>
-              </div>
-          </div>
-      </footer>
-  }
+        <footer class="site-footer">
+            <div class="container footer-inner">
+  <p class="footer-copy">
+                      {site::AUTHOR}
+                      " · © "
+                      {year}
+                  </p>
+                <div class="footer-links">
+                    <a href=site::GITHUB_URL target="_blank" rel="noreferrer">
+                        "GitHub"
+                    </a>
+                    <A href="/about">
+                        <span class="footer-link">"About"</span>
+                    </A>
+                    <a href="/rss.xml" target="_blank" rel="noreferrer">
+                        "RSS"
+                    </a>
+                </div>
+            </div>
+        </footer>
+    }
 }
 
 /// A clickable tag used for filtering on the home page.
