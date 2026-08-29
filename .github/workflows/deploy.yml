@@ -39,6 +39,17 @@ jobs:
       - name: Test
         run: cargo test --workspace
 
+      - name: Install cargo-audit + cargo-deny
+        uses: taiki-e/install-action@742a3317eac7bd62f91cd888b4eead5e784ba833 # v2.87.1
+        with:
+          tool: cargo-audit, cargo-deny
+
+      - name: Audit dependencies (RustSec advisory DB)
+        run: cargo audit
+
+      - name: Deny check (advisories, licenses, bans)
+        run: cargo deny check
+
       - name: Install Trunk
         uses: jetli/trunk-action@1346cc09eace4beb84e403e199a471346d4684c9 # v0.5.1
         with:

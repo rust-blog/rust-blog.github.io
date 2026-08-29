@@ -1,0 +1,13 @@
+# cargo-audit configuration: advisories that are accepted with a reason.
+# Mirrors `deny.toml`; `cargo audit` runs in CI (deploy.yml) and must stay
+# free of unignored warnings.
+#
+# All four crates are at their latest published version; nothing newer
+# exists to move to.
+[advisories]
+ignore = [
+  "RUSTSEC-2024-0436", # paste: proc-macro helper via leptos, build-time only
+  "RUSTSEC-2026-0173", # proc-macro-error2: build-time only, via leptos_macro
+  "RUSTSEC-2025-0141", # bincode via syntect: on-disk dump feature, never invoked
+  "RUSTSEC-2024-0320", # yaml-rust via syntect: latest version, maintained fork unused
+]

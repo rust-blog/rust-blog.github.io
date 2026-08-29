@@ -1,8 +1,9 @@
 #[path = "src/frontmatter.rs"]
 mod frontmatter;
 
+use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, NaiveDate, Utc};
 use rss::{CategoryBuilder, ChannelBuilder, Guid, ItemBuilder};
@@ -18,7 +19,7 @@ fn main() {
   let manifest = env!("CARGO_MANIFEST_DIR");
   let posts_dir = Path::new(manifest).join("content").join("posts");
 
-  let mut posts: Vec<(frontmatter::Frontmatter, String)> = Vec::new();
+  let mut posts: Vec<(PathBuf, frontmatter::Frontmatter, String)> = Vec::new();
   for entry in
     fs::read_dir(&posts_dir).unwrap_or_else(|e| panic!("cannot read {}: {e}", posts_dir.display()))
   {
@@ -37,22 +38,31 @@ fn main() {
     for warning in &parsed.warnings {
       eprintln!("warning: {}: {warning}", path.display());
     }
-    let slug = parsed
-      .meta
-      .slug
-      .clone()
-      .or_else(|| path.file_stem().map(|s| s.to_string_lossy().to_string()))
-      .unwrap_or_default();
+    let slug = slug_from(&parsed.meta, &path);
     if !parsed.meta.draft {
-      posts.push((parsed.meta, slug));
+      posts.push((path, parsed.meta, slug));
     }
   }
 
-  posts.sort_by(|a, b| date(&b.0).cmp(date(&a.0)));
+  // Advisory linter (missing description, future date, single-use tags).
+  let today = Utc::now().date_naive().format("%Y-%m-%d").to_string();
+  let mut tag_counts: HashMap<String, usize> = HashMap::new();
+  for (_, fm, _) in &posts {
+    for tag in &fm.tags {
+      *tag_counts.entry(tag.clone()).or_default() += 1;
+    }
+  }
+  for (path, fm, _) in &posts {
+    for warning in frontmatter::lint_post(fm, &today, &tag_counts) {
+      eprintln!("warning: {}: {warning}", path.display());
+    }
+  }
+
+  posts.sort_by(|a, b| date(&b.1).cmp(date(&a.1)));
 
   let items: Vec<rss::Item> = posts
     .iter()
-    .map(|(fm, slug)| {
+    .map(|(_, fm, slug)| {
       let link = format!("{SITE_URL}/post/{slug}");
       let pub_date = parse_date(date(fm)).to_rfc2822();
       ItemBuilder::default()
@@ -91,6 +101,14 @@ fn main() {
 /// The validated `YYYY-MM-DD` date, guaranteed present by `frontmatter::parse`.
 fn date(fm: &frontmatter::Frontmatter) -> &str {
   fm.date.as_str()
+}
+
+/// A post's URL slug: the frontmatter `slug` override, else the file stem.
+fn slug_from(fm: &frontmatter::Frontmatter, path: &Path) -> String {
+  fm.slug
+    .clone()
+    .or_else(|| path.file_stem().map(|s| s.to_string_lossy().to_string()))
+    .unwrap_or_default()
 }
 
 /// Format a validated `YYYY-MM-DD` date as an RFC 2822 pubDate.

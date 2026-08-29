@@ -131,9 +131,13 @@ calendar dates; build fails on any invalid date.
 
 - [x] "Drop a `.md` → appears" model; documented frontmatter contract; `draft`, `slug`, `author`
 
+- [x] **Frontmatter linter in CI** (advisory warnings, not build failures):
+  `lint_post` in `frontmatter.rs` flags missing `description`, future
+  `date` (with a "use `draft: true`" hint), and single-use tags (possible
+  typos); drafts are exempt by contract. `build.rs` prints the warnings
+  with the file path; malformed posts still fail the build hard.
 - [ ] **Open:** no post template / `cargo xtask new` - authors copy by hand.
 - [ ] **Open:** no `content/assets/` handling (images un-fingerprinted).
-- [ ] **Open:** no frontmatter linter (missing description, unknown tag, future date).
 
 **Acceptance:** `cargo xtask new "<title>"` scaffolds a valid post; assets
 fingerprint into `dist/`; linter rejects malformed frontmatter in CI.
@@ -227,7 +231,15 @@ runtime network requests; a11y lint clean.
   `persist-credentials: false` set; `pages`/`id-token` write scopes limited to
   the deploy job only.
 
-- [ ] **Open:** `cargo audit` + `cargo deny` (license + advisory) as CI steps.
+- [x] **`cargo audit` + `cargo deny` (license + advisory) as CI steps.**
+  Both gates run in `deploy.yml` via pinned `taiki-e/install-action`.
+  `deny.toml` allows only permissive licenses (MIT/Apache/BSD/BSL/ISC/
+  Unlicense/Unicode-3.0/Zlib/CC0); four unavoidable "unmaintained"
+  advisories (paste, proc-macro-error2, bincode, yaml-rust - all at their
+  latest versions, all build-time or syntect-pinned) are recorded with
+  reasons in `deny.toml` + `.cargo/audit.toml`. Security advisories are
+  fixed, not ignored: `bytes` 1.11→1.12 (RUSTSEC-2026-0007), `anyhow`
+  →1.0.104, `event-listener` →5.4.2 were upgraded.
 - [ ] **Open:** Branch protection on `main`: strict required checks, no
   force-push, no deletion (GitHub repo setting, not a file change).
 - [ ] **Open:** Preview deploys from PRs to a non-prod environment.

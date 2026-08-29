@@ -203,6 +203,41 @@ fn is_valid_iso_date(s: &str) -> bool {
   day <= days_in_month[(month - 1) as usize]
 }
 
+/// Advisory checks beyond the hard parse errors, in the same order every
+/// time. Drafts are work-in-progress by contract, so they are not linted
+/// (a future date or missing description is expected mid-writing).
+///
+/// `today_iso` is an ISO `YYYY-MM-DD` string; ISO dates compare correctly
+/// as strings, so no calendar dependency is needed in the WASM binary.
+/// `tag_counts` maps every tag to how many published posts use it.
+pub fn lint_post(
+  meta: &Frontmatter,
+  today_iso: &str,
+  tag_counts: &std::collections::HashMap<String, usize>,
+) -> Vec<String> {
+  if meta.draft {
+    return Vec::new();
+  }
+  let mut out = Vec::new();
+  if meta.description.is_empty() {
+    out.push("missing `description` (used by post cards, RSS, and OG meta)".to_string());
+  }
+  if meta.date.as_str() > today_iso {
+    out.push(format!(
+      "`date` ({}) is in the future - set `draft: true` until it is published",
+      meta.date
+    ));
+  }
+  for tag in &meta.tags {
+    if tag_counts.get(tag).copied().unwrap_or(0) <= 1 {
+      out.push(format!(
+        "tag `{tag}` is used by no other post - possible typo?"
+      ));
+    }
+  }
+  out
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -331,5 +366,76 @@ mod tests {
   fn duplicate_tags_are_deduplicated() {
     let raw = "---\ntitle: \"Hello\"\ndate: \"2026-08-29\"\ntags: [rust, wasm, rust]\n---\nBody";
     assert_eq!(parse(raw).unwrap().meta.tags, vec!["rust", "wasm"]);
+  }
+
+  fn counts(entries: &[(&str, usize)]) -> std::collections::HashMap<String, usize> {
+    entries.iter().map(|(k, v)| (k.to_string(), *v)).collect()
+  }
+
+  fn meta(date: &str, tags: &[&str], draft: bool) -> Frontmatter {
+    Frontmatter {
+      title: "Hello".to_string(),
+      date: date.to_string(),
+      description: "A description".to_string(),
+      tags: tags.iter().map(|t| t.to_string()).collect(),
+      author: None,
+      draft,
+      slug: None,
+    }
+  }
+
+  #[test]
+  fn lint_warns_on_missing_description_and_future_date() {
+    let today = "2026-08-29";
+    let mut post = meta("2027-01-01", &["rust"], false);
+    post.description = String::new();
+    let warnings = lint_post(&post, today, &counts(&[("rust", 2)]));
+    assert_eq!(
+      warnings,
+      vec![
+        "missing `description` (used by post cards, RSS, and OG meta)".to_string(),
+        "`date` (2027-01-01) is in the future - set `draft: true` until it is published"
+          .to_string()
+      ]
+    );
+  }
+
+  #[test]
+  fn lint_warns_on_single_use_tag() {
+    let warnings = lint_post(
+      &meta("2026-08-29", &["ruts"], false),
+      "2026-08-29",
+      &counts(&[("ruts", 1)]),
+    );
+    assert_eq!(
+      warnings,
+      vec!["tag `ruts` is used by no other post - possible typo?"]
+    );
+  }
+
+  #[test]
+  fn lint_skips_drafts() {
+    let warnings = lint_post(
+      &meta("2027-01-01", &["ruts"], true),
+      "2026-08-29",
+      &counts(&[("ruts", 1)]),
+    );
+    assert!(
+      warnings.is_empty(),
+      "drafts are work-in-progress: {warnings:?}"
+    );
+  }
+
+  #[test]
+  fn lint_is_quiet_for_clean_posts() {
+    let warnings = lint_post(
+      &meta("2026-08-29", &["rust", "wasm"], false),
+      "2026-08-29",
+      &counts(&[("rust", 2), ("wasm", 2)]),
+    );
+    assert!(
+      warnings.is_empty(),
+      "clean post must lint clean: {warnings:?}"
+    );
   }
 }
