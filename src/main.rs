@@ -18,33 +18,33 @@ use pages::{about::About, home::Home, not_found::NotFound, post::Post};
 use util::detect_base;
 
 pub fn main() {
-    console_error_panic_hook::set_once();
-    mount_to_body(App);
+  console_error_panic_hook::set_once();
+  mount_to_body(App);
 }
 
 /// Root component: meta context, theme provider, router and layout.
 #[component]
 fn App() -> impl IntoView {
-    provide_meta_context();
+  provide_meta_context();
 
-    let posts = load_posts();
-    provide_context(posts);
+  let posts = load_posts();
+  provide_context(posts);
 
-    let base = detect_base();
+  let base = detect_base();
 
-    view! {
-        <ThemeProvider>
-            <Router base=Cow::Owned(base)>
-                <Nav/>
-                <main class="main">
-                    <Routes fallback=|| view! { <NotFound/> }>
-                        <Route path=path!("/") view=Home/>
-                        <Route path=path!("/about") view=About/>
-                        <Route path=path!("/post/:slug") view=Post/>
-                    </Routes>
-                </main>
-                <Footer/>
-            </Router>
-        </ThemeProvider>
-    }
+  view! {
+      <ThemeProvider>
+          <Router base=Cow::Owned(base)>
+              <Nav/>
+              <main class="main">
+                  <Routes fallback=|| view! { <NotFound/> }>
+                      <Route path=path!("/") view=Home/>
+                      <Route path=path!("/about") view=About/>
+                      <Route path=path!("/post/:slug") view=Post/>
+                  </Routes>
+              </main>
+              <Footer/>
+          </Router>
+      </ThemeProvider>
+  }
 }
