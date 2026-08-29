@@ -203,6 +203,9 @@ runtime network requests; a11y lint clean.
   + rustfmt/clippy components) so CI == local.
 - [x] Confirmed **zero hand-written `unsafe`** in `src/` (only `wasm-bindgen`/
   `js-sys` FFI); keep it that way.
+- [x] All workflow actions pinned to full commit SHAs (zizmor-clean);
+  `persist-credentials: false` set; `pages`/`id-token` write scopes limited to
+  the deploy job only.
 
 - [ ] **Open:** `cargo audit` + `cargo deny` (license + advisory) as CI steps.
 - [ ] **Open:** Branch protection on `main`: strict required checks, no
