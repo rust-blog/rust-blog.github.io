@@ -164,9 +164,9 @@ generated; no a11y lint failures.
 ### Phase 6 - Asset pipeline & multi-format (open)
 
 - [ ] Fingerprint `content/assets/**` into `dist/` (Trunk already fingerprints CSS/JS).
-- [x] Code-fence language label (mono, uppercase, top-right of the plate) -
-  shown only when syntect knows the language; unknown fences render plain,
-  unlabelled.
+- [ ] **Deliberately skipped:** Code-fence language label - implemented and
+  then removed on design review: the plate speaks for itself and the label
+  added furniture. (Highlighting for known languages stays, as always.)
 - [ ] **Deliberately skipped:** TOC from `##`/`###` headings - implemented
   once (heading ids, `Rendered { html, toc }`, sticky sidebar + mobile
   `<details>`) and then removed on design review: the single quiet column

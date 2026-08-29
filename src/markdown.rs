@@ -65,14 +65,9 @@ pub fn render(md: &str) -> String {
         ));
         events.drain((i + 1)..=j.min(events.len() - 1));
       } else {
-        let (highlighted, known) = highlight_code(&lang, &code);
-        let label = if known {
-          format!("<span class=\"code-lang\">{}</span>", escape_html(&lang))
-        } else {
-          String::new()
-        };
+        let highlighted = highlight_code(&lang, &code);
         events[i] = Event::Html(pulldown_cmark::CowStr::Boxed(
-          format!("<pre class=\"code-plate\">{label}{highlighted}</pre>").into_boxed_str(),
+          format!("<pre class=\"code-plate\">{highlighted}</pre>").into_boxed_str(),
         ));
         events.drain((i + 1)..=j.min(events.len() - 1));
       }
@@ -85,20 +80,12 @@ pub fn render(md: &str) -> String {
 }
 
 /// Highlight a code block body with syntect, keeping the background out so
-/// the design system's `--code-bg` plate shows through. Returns the
-/// highlighted inner HTML and whether syntect knew the language.
-fn highlight_code(lang: &str, code: &str) -> (String, bool) {
-  let known = !lang.is_empty()
-    && (syntax_set().find_syntax_by_token(lang).is_some()
-      || syntax_set().find_syntax_by_extension(lang).is_some());
-  let syntax = if known {
-    syntax_set()
-      .find_syntax_by_token(lang)
-      .or_else(|| syntax_set().find_syntax_by_extension(lang))
-      .unwrap_or_else(|| syntax_set().find_syntax_plain_text())
-  } else {
-    syntax_set().find_syntax_plain_text()
-  };
+/// the design system's `--code-bg` plate shows through.
+fn highlight_code(lang: &str, code: &str) -> String {
+  let syntax = syntax_set()
+    .find_syntax_by_token(lang)
+    .or_else(|| syntax_set().find_syntax_by_extension(lang))
+    .unwrap_or_else(|| syntax_set().find_syntax_plain_text());
   let html = highlighted_html_for_string(code, syntax_set(), syntax, theme()).unwrap_or_default();
   // syntect wraps the output in a <pre> with an inline background; we already
   // own the <pre> plate, so keep only the highlighted <code> content.
@@ -108,7 +95,7 @@ fn highlight_code(lang: &str, code: &str) -> (String, bool) {
     .trim_start_matches('>')
     .trim_end();
   let inner = trimmed.strip_suffix("</pre>").unwrap_or(trimmed);
-  (scrub_backgrounds(inner), known)
+  scrub_backgrounds(inner)
 }
 
 /// Remove `background-color:#…;` declarations from syntect's inline styles so
@@ -127,14 +114,6 @@ fn scrub_backgrounds(html: &str) -> String {
   out
 }
 
-/// Escape the language label for safe embedding in HTML.
-fn escape_html(s: &str) -> String {
-  s.replace('&', "&amp;")
-    .replace('<', "&lt;")
-    .replace('>', "&gt;")
-    .replace('"', "&quot;")
-}
-
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -149,33 +128,11 @@ mod tests {
   }
 
   #[test]
-  fn known_language_gets_a_label() {
-    let md = "```rust\nfn main() {}\n```";
-    let html = render(md);
-    assert!(
-      html.contains("<span class=\"code-lang\">rust</span>"),
-      "known languages must be labelled: {html}"
-    );
-  }
-
-  #[test]
-  fn unknown_language_gets_no_label() {
-    let md = "```not-a-real-language\nwhatever\n```";
-    let html = render(md);
-    assert!(
-      !html.contains("code-lang"),
-      "unknown languages are unlabelled: {html}"
-    );
-    assert!(html.contains("code-plate"));
-  }
-
-  #[test]
   fn plain_code_block_uses_text_theme() {
     let md = "```\nplain text here\n```";
     let html = render(md);
     assert!(html.contains("code-plate"));
     assert!(html.contains("plain text here"));
-    assert!(!html.contains("code-lang"));
   }
 
   #[test]

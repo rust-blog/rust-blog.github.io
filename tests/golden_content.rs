@@ -8,7 +8,7 @@ use rust_blog::markdown;
 const GOLDEN_HTML: &str = r##"<h1>Golden fixture</h1>
 <p>A paragraph with <em>emphasis</em>, <strong>strong</strong>, and a <a href="https://rust-lang.org">link</a>.</p>
 <h2>Heading two</h2>
-<pre class="code-plate"><span class="code-lang">rust</span>
+<pre class="code-plate">
 <span style="color:#cc99cc;">fn </span><span style="color:#6699cc;">main</span><span style="color:#d3d0c8;">() {
 </span><span style="color:#d3d0c8;">    println!(&quot;</span><span style="color:#99cc99;">hi</span><span style="color:#d3d0c8;">&quot;);
 </span><span style="color:#d3d0c8;">}
