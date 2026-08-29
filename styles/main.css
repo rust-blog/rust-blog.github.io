@@ -189,15 +189,11 @@ button {
     width: 28px;
     height: 28px;
     border-radius: var(--radius-sm);
-    background: var(--ink-900);
+    border: 1.5px solid var(--accent-strong);
     color: var(--accent-strong);
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
     font-size: 0.95rem;
     font-weight: 700;
-}
-
-[data-theme="dark"] .brand-mark {
-    background: var(--surface-2);
 }
 
 .nav-links {
