@@ -1,4 +1,3 @@
-use leptos::html;
 use leptos::prelude::*;
 use leptos_meta::{Meta, Title};
 use leptos_router::hooks::use_params_map;
@@ -41,14 +40,19 @@ pub fn Post() -> impl IntoView {
     data.get().map(|(p, _)| p.html).unwrap_or_default()
   });
 
-  let prose_ref = NodeRef::<html::Div>::new();
-
   // After the post HTML is injected, mount any live demos it references.
+  // We defer a frame and query the document so we never race the `inner_html`
+  // mutation or the node-ref attachment.
   Effect::new(move |_| {
     let _ = html.get();
-    if let Some(el) = prose_ref.get_untracked() {
-      mount_demos(&el);
-    }
+    let window = web_sys::window().expect("no window");
+    let cb = wasm_bindgen::prelude::Closure::once(
+      Box::new(move |_t: f64| {
+        mount_demos();
+      }) as Box<dyn FnMut(f64)>,
+    );
+    let _ = window.request_animation_frame(cb.as_ref().unchecked_ref());
+    cb.forget();
   });
 
   let data_for_view = data;
@@ -109,7 +113,6 @@ pub fn Post() -> impl IntoView {
 
                               <div
                                   class="prose"
-                                  node_ref=prose_ref
                                   inner_html=Signal::derive(move || html.get())
                               ></div>
                           </article>
@@ -136,8 +139,14 @@ pub fn Post() -> impl IntoView {
 
 /// Mount live demo components into any `.demo-slot` elements left by the
 /// markdown `demo` directive.
-fn mount_demos(root: &web_sys::HtmlElement) {
-  let slots = root.get_elements_by_class_name("demo-slot");
+fn mount_demos() {
+  let Some(document) = web_sys::window().and_then(|w| w.document()) else {
+    return;
+  };
+  let slots = document.get_elements_by_class_name("demo-slot");
+  web_sys::console::log_1(
+    &format!("demo: found {} slot(s)", slots.length()).into(),
+  );
   for i in 0..slots.length() {
     if let Some(slot) = slots
       .item(i)
