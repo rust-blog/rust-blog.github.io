@@ -56,7 +56,6 @@ pub fn Home() -> impl IntoView {
                       <span class="banner-letter"><span>" ██████╗"</span><span>"██╔════╝"</span><span>"██║  ███╗"</span><span>"██║   ██║"</span><span>"╚██████╔╝"</span><span>" ╚═════╝"</span></span>
                   </div>
                   <h1 class="hero-tagline">"⟫ "{site::TAGLINE}</h1>
-                  <p class="hero-sub">{site::DESCRIPTION}</p>
               </section>
 
             <div class="post-toolbar">
