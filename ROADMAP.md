@@ -41,7 +41,7 @@ acceptance is checked against it.
 | Search / filter   | In-memory substring scan + tag chips on the home page           |
 | Hosting / CI      | GitHub Pages via `deploy.yml` (fmt + clippy + test + trunk gates); Renovate on deps |
 | Tests             | 5 unit tests (content load + markdown render/demo)                         |
-| Third-party JS    | None - zero runtime network requests (highlight.js removed, syntect at build) |
+| Third-party JS    | None - zero runtime network requests (highlight.js and Google Fonts removed, syntect at build, system Thai font stack) |
 | License           | MIT                                                             |
 
 ### Gaps found while reading the repo (these shape the phases below)
@@ -57,7 +57,9 @@ acceptance is checked against it.
    `index.html`; matches the primarily-Thai content. (Phase 5.)
 4. ~~The only runtime network dependency is highlight.js from cdnjs.~~
    **Resolved:** highlight.js was removed entirely; `syntect` now highlights
-   code at render time, so the app makes **zero runtime network requests** and
+   code at render time. The Google Fonts `<link>` (Bai Jamjuree/Sarabun) was
+   also removed - the design system now uses the system Thai font stack
+   (`styles/main.css`), so the app makes **zero runtime network requests** and
    ships no third-party JavaScript. (Closed - no Phase 8 work needed.)
 5. **Search is an O(n) substring scan.** Correct at the current scale (~2
    posts) but unmeasured and unbounded as content grows. (Phase 8.)
@@ -98,7 +100,7 @@ Pages from a clean checkout.
 - [x] Routes `/`, `/about`, `/post/:slug`, fallback `NotFound`
 - [x] Theme: OS detection + `localStorage` persistence; `util.rs` (base, Thai date)
 - [x] Home search (title/description/tags substring) + tag filtering; Post page with OG meta + related
-- [x] Thai typography (Bai Jamjuree/Sarabun), hairline monogram logo, equal home/article content widths
+- [x] Thai typography (system font stack, no webfonts), hairline monogram logo, equal home/article content widths
 - [x] Live in-post demos: markdown `demo` directive mounts interactive Rust/WASM components (e.g. Leptos-signal counter)
 
 **Acceptance (met):** routing, theme toggle, and basic search work in a real
@@ -183,8 +185,9 @@ shows drafts without publishing.
 - [ ] **(gap 5)** Search scaling: prebuilt embed-time inverted index when
   justified; naive path stays correct for small N. No premature `tantivy`/
   `fuzzy` dependency.
-- [x] **(gap 4)** highlight.js removed; `syntect` highlights at render time →
-  zero external runtime requests, no third-party JS. (Closed.)
+- [x] **(gap 4)** highlight.js removed; `syntect` highlights at render time;
+  Google Fonts dropped for the system Thai font stack → **zero runtime network
+  requests, no third-party JS**. (Closed.)
 - [ ] First-paint budget: document TTI on a throttled link; WASM gzip ceiling
   (e.g. `< 300KB`) verified in CI, not claimed.
 - [ ] a11y audit: focus rings, `prefers-reduced-motion`, skip-to-content.

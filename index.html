@@ -15,18 +15,9 @@
             rel="icon"
             href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='8' width='48' height='48' rx='13' fill='none' stroke='%23f97316' stroke-width='3.5'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='ui-monospace,SFMono-Regular,Menlo,Consolas,monospace' font-size='34' font-weight='700' fill='%23f97316'%3Er%3C/text%3E%3C/svg%3E"
         />
-        <!-- Thai typefaces: Bai Jamjuree (UI) + Sarabun (prose) -->
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-            rel="preconnect"
-            href="https://fonts.gstatic.com"
-            crossorigin
-        />
-        <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap"
-        />
-
+        <!-- No external fonts: the design system uses the system Thai font
+             stack (see styles/main.css), so the page makes zero third-party
+             requests. -->
         <!-- Main design-system stylesheet (processed & fingerprinted by Trunk) -->
         <link data-trunk rel="css" href="styles/main.css" />
 
