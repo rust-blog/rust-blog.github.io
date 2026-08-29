@@ -35,12 +35,13 @@ acceptance is checked against it.
 | Language / stack  | Rust edition 2024, Leptos 0.8 (CSR), Trunk, `wasm32-unknown-unknown` |
 | Rendering         | Client-side in the browser (WASM), no SSR                       |
 | Content           | 2 Markdown posts in `content/posts/` (`welcome`, `rust-variables`) |
+| Interactive demos | markdown `demo` directive mounts live Rust/WASM components (e.g. counter) |
 | Styling           | Hand-written CSS design system, light/dark, no framework        |
 | Syndication       | `rss.xml` built by `build.rs`, copied to `dist/`                |
 | Search / filter   | In-memory substring scan + tag chips on the home page           |
 | Hosting / CI      | GitHub Pages via `deploy.yml`; Renovate on deps                 |
-| Tests             | 1 unit test (`loads_embedded_posts`)                            |
-| Third-party JS    | 1 script: highlight.js 11.11.1 from cdnjs (no SRI)              |
+| Tests             | 5 unit tests (content load + markdown render/demo)                         |
+| Third-party JS    | None - zero runtime network requests (highlight.js removed, syntect at build) |
 | License           | MIT                                                             |
 
 ### Gaps found while reading the repo (these shape the phases below)
@@ -55,9 +56,10 @@ acceptance is checked against it.
    about a post's title, date, or slug. (Phase 8.)
 3. **`<html lang="en">` is hardcoded** but the content is Thai - a real
    a11y/SEO defect for screen readers and search engines. (Phase 5.)
-4. **The only runtime network dependency is highlight.js** from cdnjs, loaded
-   without `integrity` (SRI) and without `crossorigin`. If cdnjs is down or
-   compromised, code blocks silently lose highlighting. (Phase 8.)
+4. ~~The only runtime network dependency is highlight.js from cdnjs.~~
+   **Resolved:** highlight.js was removed entirely; `syntect` now highlights
+   code at render time, so the app makes **zero runtime network requests** and
+   ships no third-party JavaScript. (Closed - no Phase 8 work needed.)
 5. **Search is an O(n) substring scan.** Correct at the current scale (~2
    posts) but unmeasured and unbounded as content grows. (Phase 8.)
 6. **No content safety net.** A malformed post, a broken markdown edge case,
@@ -95,8 +97,10 @@ Pages from a clean checkout.
 
 - [x] `main.rs`: meta + theme provider + router (base-path detection) + post context
 - [x] Routes `/`, `/about`, `/post/:slug`, fallback `NotFound`
-- [x] Theme: OS detection + `localStorage` persistence; `util.rs` (base, hljs, Thai date)
+- [x] Theme: OS detection + `localStorage` persistence; `util.rs` (base, Thai date)
 - [x] Home search (title/description/tags substring) + tag filtering; Post page with OG meta + related
+- [x] Thai typography (Bai Jamjuree/Sarabun), hairline monogram logo, equal home/article content widths
+- [x] Live in-post demos: markdown `demo` directive mounts interactive Rust/WASM components (e.g. Leptos-signal counter)
 
 **Acceptance (met):** routing, theme toggle, and basic search work in a real
 browser.
@@ -143,7 +147,7 @@ generated; no a11y lint failures.
 ### Phase 6 - Asset pipeline & multi-format (open)
 
 - [ ] Fingerprint `content/assets/**` into `dist/` (Trunk already fingerprints CSS/JS).
-- [ ] Code-fence language label; invoke hljs only for known languages.
+- [ ] Code-fence language label; highlight only for known languages (syntect).
 - [ ] TOC from `##`/`###` headings (ids already generated) in the Post sidebar.
 - [ ] **Deliberately skipped:** KaTeX - heavy runtime dep for content that does
   not need it yet. Revisit on demand.
@@ -179,8 +183,8 @@ shows drafts without publishing.
 - [ ] **(gap 5)** Search scaling: prebuilt embed-time inverted index when
   justified; naive path stays correct for small N. No premature `tantivy`/
   `fuzzy` dependency.
-- [ ] **(gap 4)** highlight.js: add SRI `integrity`+`crossorigin`, or **vendor
-  as WASM** → zero external runtime requests.
+- [x] **(gap 4)** highlight.js removed; `syntect` highlights at render time →
+  zero external runtime requests, no third-party JS. (Closed.)
 - [ ] First-paint budget: document TTI on a throttled link; WASM gzip ceiling
   (e.g. `< 300KB`) verified in CI, not claimed.
 - [ ] a11y audit: focus rings, `prefers-reduced-motion`, skip-to-content.
@@ -230,7 +234,7 @@ validate a post locally; site verifiable against the tag.
   offer an optional build-time HTML snapshot for SEO/no-JS fallback, from the
   same `build.rs` content pass.
 - [ ] **Offline / PWA** - service worker caching WASM + assets; natural fit for
-  a zero-server static site (enabled by the Phase 8 WASM-vendored hljs).
+   a zero-server static site (hljs already removed in Phase 8).
 - [ ] **Series/collection** - a `series` field grouping posts into an ordered
   reading list ("Part N of M").
 - [ ] **Privacy-respecting comments** (Webmention or external service, never a
@@ -251,7 +255,7 @@ Phase 3-6 (content correctness,         │ foundation - the blog
         ▼
 Phase 7 (content safety tests)  ──┐
 Phase 8 (hardening: parser,        ├─► Quality - verify, then prove
-           lang, search, hljs)     │
+            lang, search, highlighting) │
 Phase 9 (CI gates, audit/deny)  ──┘
         │
         ▼
