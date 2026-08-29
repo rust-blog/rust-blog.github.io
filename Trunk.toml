@@ -16,5 +16,5 @@ open = false
 # Copy the generated RSS feed into the dist output so it is served alongside the app.
 [[hooks]]
 stage = "post_build"
-command = "cp"
+command = "scripts/copy-rss"
 command_arguments = ["rss.xml", "dist/rss.xml"]
