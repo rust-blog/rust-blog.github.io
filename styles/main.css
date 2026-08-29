@@ -1,5 +1,5 @@
 /* =========================================================================
-   rust-blog — "The Artifact" design system
+   rust-blog - "The Artifact" design system
    Editorial, type-first, restrained. Hairlines over shadows, serif over
    sans, mono for the labels that tell the truth.
    ========================================================================= */
@@ -147,7 +147,7 @@ button {
 }
 
 /* =========================================================================
-   Header / Nav — quiet, hairline, mono brand
+   Header / Nav - quiet, hairline, mono brand
    ========================================================================= */
 
 .site-header {
@@ -242,7 +242,7 @@ button {
 }
 
 /* =========================================================================
-   Hero — ASCII banner with per-letter hover, mono tagline
+   Hero - ASCII banner with per-letter hover, mono tagline
    ========================================================================= */
 
 .hero {
@@ -293,7 +293,7 @@ button {
 }
 
 /* =========================================================================
-   Toolbar — hairline search, mono tag chips
+   Toolbar - hairline search, mono tag chips
    ========================================================================= */
 
 .post-toolbar {
@@ -389,7 +389,7 @@ button {
 }
 
 /* =========================================================================
-   Post index — editorial rows, hairlines, no cards
+   Post index - editorial rows, hairlines, no cards
    ========================================================================= */
 
 .post-index {
@@ -459,7 +459,7 @@ a:hover .post-row-title {
 }
 
 /* =========================================================================
-   Article — serif prose, mono meta
+   Article - serif prose, mono meta
    ========================================================================= */
 
 .post-page,
@@ -611,7 +611,7 @@ a:hover .back-link,
     color: var(--accent-text);
 }
 
-/* code blocks — a dark plate in both themes, highlighted by syntect */
+/* code blocks - a dark plate in both themes, highlighted by syntect */
 .prose pre {
     margin: 2rem 0;
     padding: 1.25rem 1.4rem;
@@ -736,7 +736,7 @@ a:hover .back-link,
 }
 
 /* =========================================================================
-   Footer — quiet, hairline, mono
+   Footer - quiet, hairline, mono
    ========================================================================= */
 
 .site-footer {

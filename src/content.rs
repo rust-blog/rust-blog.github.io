@@ -3,7 +3,7 @@ use include_dir::{Dir, File, include_dir};
 use serde::Deserialize;
 
 /// Embedded content directory. Drop a new `content/posts/<slug>.md` file in and
-/// it is picked up automatically at compile time — no code changes required.
+/// it is picked up automatically at compile time - no code changes required.
 static CONTENT_DIR: Dir = include_dir!("content");
 
 /// Site-wide constants used across the UI and the RSS feed.

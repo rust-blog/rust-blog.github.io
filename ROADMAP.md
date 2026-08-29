@@ -1,11 +1,11 @@
 # rust-blog Roadmap
 
-This roadmap describes what rust-blog is, honestly, from reading its own code —
+This roadmap describes what rust-blog is, honestly, from reading its own code -
 and where it should end up. It follows the conventions in
 [README.md](README.md) and the documentation discipline of recording not just
 *what* will be built but *why*, *what the tradeoffs were*, and *where each known
 gap gets closed*: verify directly, record the decision, name the phase that
-closes it. Nothing here is called "done" on intent alone — the repo already has
+closes it. Nothing here is called "done" on intent alone - the repo already has
 a real CI (`.github/workflows/deploy.yml`: checkout → Rust + `wasm32` target →
 pinned Trunk → `trunk build --release` → GitHub Pages), and every phase's
 acceptance is checked against it.
@@ -14,7 +14,7 @@ acceptance is checked against it.
 > compiled *to* WebAssembly. The app is a [Leptos](https://leptos.dev/) 0.8
 > client-side-rendered (CSR) SPA, built with [Trunk](https://trunkrs.dev/) and
 > published to GitHub Pages (`https://rust-blog.github.io/`). Posts
-> are plain Markdown files in `content/posts/` — no database, no server, no
+> are plain Markdown files in `content/posts/` - no database, no server, no
 > JavaScript authored by hand. The site is primarily Thai-language. Drop a
 > `.md` file in and it appears, indexed, searchable, and syndicated, with zero
 > per-post code changes.
@@ -51,9 +51,9 @@ acceptance is checked against it.
    (Phase 9.)
 2. **Frontmatter is parsed in two places** (`build.rs::parse` and
    `content.rs::parse_post`) with slightly different body handling. They agree
-   today but can drift — the RSS feed and the in-app render could disagree
+   today but can drift - the RSS feed and the in-app render could disagree
    about a post's title, date, or slug. (Phase 8.)
-3. **`<html lang="en">` is hardcoded** but the content is Thai — a real
+3. **`<html lang="en">` is hardcoded** but the content is Thai - a real
    a11y/SEO defect for screen readers and search engines. (Phase 5.)
 4. **The only runtime network dependency is highlight.js** from cdnjs, loaded
    without `integrity` (SRI) and without `crossorigin`. If cdnjs is down or
@@ -62,7 +62,7 @@ acceptance is checked against it.
    posts) but unmeasured and unbounded as content grows. (Phase 8.)
 6. **No content safety net.** A malformed post, a broken markdown edge case,
    or an invalid date is neither tested nor guaranteed to fail the build
-   loudly — it could ship a silent blank page or a malformed RSS feed. (Phase 7.)
+   loudly - it could ship a silent blank page or a malformed RSS feed. (Phase 7.)
 7. **No release provenance.** The deployed `dist/` has no checksum or
    verifiable artifact tying it back to the tagged source. (Phase 10.)
 
@@ -70,7 +70,7 @@ acceptance is checked against it.
 
 ## Foundation
 
-### Phase 0 — Scaffold (done)
+### Phase 0 - Scaffold (done)
 
 - [x] Cargo package (edition 2024), single WASM binary via Leptos 0.8 CSR
 - [x] Trunk 0.21.14 pinned in CI; `wasm32-unknown-unknown` target
@@ -82,7 +82,7 @@ acceptance is checked against it.
 **Acceptance (met):** `trunk build --release` deploys a working SPA to GitHub
 Pages from a clean checkout.
 
-### Phase 1 — Content model & markdown (done)
+### Phase 1 - Content model & markdown (done)
 
 - [x] `PostMeta` / `Post` models; embedded `include_dir!` content (no runtime fetch)
 - [x] Recursive post collection; `pulldown-cmark` with `Options::all()`
@@ -91,7 +91,7 @@ Pages from a clean checkout.
 
 **Acceptance (met):** at least two posts render and sort correctly.
 
-### Phase 2 — App shell, routing, theme (done)
+### Phase 2 - App shell, routing, theme (done)
 
 - [x] `main.rs`: meta + theme provider + router (base-path detection) + post context
 - [x] Routes `/`, `/about`, `/post/:slug`, fallback `NotFound`
@@ -105,7 +105,7 @@ browser.
 
 ## Content
 
-### Phase 3 — Build reproducibility & RSS (done, one open)
+### Phase 3 - Build reproducibility & RSS (done, one open)
 
 - [x] `rss.xml` written by `build.rs`, copied to `dist/` via Trunk post-build hook
 - [x] Items carry title/link/GUID/description/pubDate/categories; drafts excluded
@@ -117,18 +117,18 @@ browser.
 **Acceptance:** feed item count == published post count; all dates valid
 calendar dates; build fails on any invalid date.
 
-### Phase 4 — Authoring experience (done, growth open)
+### Phase 4 - Authoring experience (done, growth open)
 
 - [x] "Drop a `.md` → appears" model; documented frontmatter contract; `draft`, `slug`, `author`
 
-- [ ] **Open:** no post template / `cargo xtask new` — authors copy by hand.
+- [ ] **Open:** no post template / `cargo xtask new` - authors copy by hand.
 - [ ] **Open:** no `content/assets/` handling (images un-fingerprinted).
 - [ ] **Open:** no frontmatter linter (missing description, unknown tag, future date).
 
 **Acceptance:** `cargo xtask new "<title>"` scaffolds a valid post; assets
 fingerprint into `dist/`; linter rejects malformed frontmatter in CI.
 
-### Phase 5 — Accessibility & SEO (partial)
+### Phase 5 - Accessibility & SEO (partial)
 
 - [x] Per-page `<title>`, post description + OG tags, `color-scheme`, inline SVG favicon, semantic landmarks, `aria-label`s
 
@@ -140,12 +140,12 @@ fingerprint into `dist/`; linter rejects malformed frontmatter in CI.
 **Acceptance:** valid `lang`; visible focus rings; `robots.txt` + `sitemap.xml`
 generated; no a11y lint failures.
 
-### Phase 6 — Asset pipeline & multi-format (open)
+### Phase 6 - Asset pipeline & multi-format (open)
 
 - [ ] Fingerprint `content/assets/**` into `dist/` (Trunk already fingerprints CSS/JS).
 - [ ] Code-fence language label; invoke hljs only for known languages.
 - [ ] TOC from `##`/`###` headings (ids already generated) in the Post sidebar.
-- [ ] **Deliberately skipped:** KaTeX — heavy runtime dep for content that does
+- [ ] **Deliberately skipped:** KaTeX - heavy runtime dep for content that does
   not need it yet. Revisit on demand.
 - [ ] Local draft preview (`?preview=1` includes drafts).
 
@@ -156,7 +156,7 @@ shows drafts without publishing.
 
 ## Quality
 
-### Phase 7 — Content safety test suite (open, closes gap 6)
+### Phase 7 - Content safety test suite (open, closes gap 6)
 
 - [ ] `tests/golden_content`: exact rendered-HTML assertions for a sample post
   (headings, code fence, footnote, table). A markdown change that alters
@@ -171,7 +171,7 @@ shows drafts without publishing.
 **Acceptance:** every item above has a passing test; a bad post fails
 `cargo test`, not production.
 
-### Phase 8 — Correctness & performance hardening (open, closes gaps 2, 4, 5)
+### Phase 8 - Correctness & performance hardening (open, closes gaps 2, 4, 5)
 
 - [ ] **(gap 2)** Extract a **single shared parser** used by `build.rs` and
   `content.rs`; RSS and in-app render become impossible to disagree.
@@ -188,7 +188,7 @@ shows drafts without publishing.
 **Acceptance:** one parser; `lang` correct; WASM under budget in CI; zero
 runtime network requests; a11y lint clean.
 
-### Phase 9 — CI hardening & supply chain (open, closes gap 1)
+### Phase 9 - CI hardening & supply chain (open, closes gap 1)
 
 - [ ] **(gap 1)** Required status checks before merge to `main`: `fmt --check`,
   `clippy -D warnings`, `cargo test --workspace`, `trunk build --release`.
@@ -206,7 +206,7 @@ protection enforced; preview URL per PR.
 
 ## Release
 
-### Phase 10 — First public v1.0.0 (open, closes gap 7)
+### Phase 10 - First public v1.0.0 (open, closes gap 7)
 
 - [ ] `v1.0.0` tag + documented release process.
 - [ ] `robots.txt` + `sitemap.xml` generated at build time (closes Phase 5).
@@ -224,14 +224,14 @@ validate a post locally; site verifiable against the tag.
 ## Future / Ecosystem
 
 - [ ] **Multi-locale** (Thai + English) via a `lang` frontmatter field + locale
-  switcher — the Phase 5 `lang` bug becomes the seed of this feature.
+  switcher - the Phase 5 `lang` bug becomes the seed of this feature.
 - [ ] **Archive pages** `/tag/:tag`, `/author/:name` reusing Home filtering.
-- [ ] **SSG option** — keep CSR as default (the project's whole point), but
+- [ ] **SSG option** - keep CSR as default (the project's whole point), but
   offer an optional build-time HTML snapshot for SEO/no-JS fallback, from the
   same `build.rs` content pass.
-- [ ] **Offline / PWA** — service worker caching WASM + assets; natural fit for
+- [ ] **Offline / PWA** - service worker caching WASM + assets; natural fit for
   a zero-server static site (enabled by the Phase 8 WASM-vendored hljs).
-- [ ] **Series/collection** — a `series` field grouping posts into an ordered
+- [ ] **Series/collection** - a `series` field grouping posts into an ordered
   reading list ("Part N of M").
 - [ ] **Privacy-respecting comments** (Webmention or external service, never a
   tracking script).
@@ -243,14 +243,14 @@ validate a post locally; site verifiable against the tag.
 ## How the phases relate
 
 ```
-Phase 0–2 (scaffold, content, shell)  ─┐
-Phase 3–6 (content correctness,         │ foundation — the blog
+Phase 0-2 (scaffold, content, shell)  ─┐
+Phase 3-6 (content correctness,         │ foundation - the blog
            authoring, a11y, assets)     │ must be correct
                                         ┘ before it can be trusted
         │
         ▼
 Phase 7 (content safety tests)  ──┐
-Phase 8 (hardening: parser,        ├─► Quality — verify, then prove
+Phase 8 (hardening: parser,        ├─► Quality - verify, then prove
            lang, search, hljs)     │
 Phase 9 (CI gates, audit/deny)  ──┘
         │
@@ -261,10 +261,10 @@ Phase 10 (v1.0.0: checksums, docs, tag)
 Future (multi-locale, SSG, PWA, series)
 ```
 
-Phase 0–2 are the running scaffold; Phase 3–6 make content correct and
-comfortable; Phase 7–9 earn trust with tests, a single parser, and CI gates
+Phase 0-2 are the running scaffold; Phase 3-6 make content correct and
+comfortable; Phase 7-9 earn trust with tests, a single parser, and CI gates
 that can't be bypassed; Phase 10 is the first verifiable release. The Future
-section only extends the one engine Tome-style calm tools keep — it never adds
+section only extends the one engine Tome-style calm tools keep - it never adds
 a second product.
 
 ---
@@ -274,19 +274,19 @@ a second product.
 Each of these is valuable *for a different product*. rust-blog stays small,
 static, and single-reader on purpose:
 
-- **CMS / admin panel / accounts** — rust-blog is a static site; there is no
+- **CMS / admin panel / accounts** - rust-blog is a static site; there is no
   server, no auth, and no notion of a user. It stays that way.
-- **Server-side comments / community** — deferred indefinitely; adds a backend
+- **Server-side comments / community** - deferred indefinitely; adds a backend
   and a moderation surface a static, reader-respecting blog shouldn't carry.
   (Privacy-respecting Webmention in Future is the only tolerated exception, and
   is explicitly non-tracking.)
-- **Multi-author / team publishing** — out of scope; conflicts with the
+- **Multi-author / team publishing** - out of scope; conflicts with the
   single-content-owner, no-accounts shape.
-- **A full web framework / SSR** — rust-blog is CSR-by-design to demonstrate
+- **A full web framework / SSR** - rust-blog is CSR-by-design to demonstrate
   Rust→WASM; an SSG *option* (Future) is the most it will ever bend here.
-- **Telemetry / analytics on reader behavior** — explicitly never; the project
+- **Telemetry / analytics on reader behavior** - explicitly never; the project
   ships no tracker and no third-party analytics.
-- **A hosted SaaS version** — out of scope; the engine is MIT so anyone can
+- **A hosted SaaS version** - out of scope; the engine is MIT so anyone can
   fork and self-host, but there is no hosted service.
 
 ---
@@ -300,5 +300,5 @@ static, and single-reader on purpose:
 - **Acceptance** states the measurable bar each phase must clear before it is
   marked done.
 - The destination (v1.0.0) is a content engine that is **safe by construction,
-  verified by tests, reproducible by build, and maintainable by CI** — not
+  verified by tests, reproducible by build, and maintainable by CI** - not
   merely a Leptos SPA that renders two Thai Markdown posts today.

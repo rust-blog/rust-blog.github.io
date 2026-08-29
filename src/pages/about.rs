@@ -19,7 +19,7 @@ pub fn About() -> impl IntoView {
                   <p>
                       "Welcome to "
                       <strong>{site::TITLE}</strong>
-                      " — a collection of notes and writing about "
+                      " - a collection of notes and writing about "
                       <strong>"Rust"</strong>
                       ", "
                       <strong>"WebAssembly"</strong>
@@ -48,7 +48,7 @@ pub fn About() -> impl IntoView {
                       "Every post is a plain Markdown file in "
                       <code>"content/posts/"</code>
                       ". Create a file with frontmatter (title, date, tags), write "
-                      "the content, and the blog shows it automatically — no "
+                      "the content, and the blog shows it automatically - no "
                       "database, no build step per post."
                   </p>
                   <p>

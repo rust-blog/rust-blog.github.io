@@ -48,7 +48,7 @@ fn main() {
 และกำลังทำงานอยู่บนเบราว์เซอร์ของคุณผ่าน WebAssembly โดยใช้เฟรมเวิร์ก Leptos
 
 ลองนึกภาพว่า Counter ด้านล่างนี้คือ Rust Signal ที่มีสถานะ (state)
-ทำงานจริงบนเครื่องคุณ — ไม่ใช่ JavaScript!
+ทำงานจริงบนเครื่องคุณ - ไม่ใช่ JavaScript!
 
 ```rust
 use leptos::prelude::*;

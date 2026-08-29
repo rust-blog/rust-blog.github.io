@@ -15,7 +15,7 @@ pub fn Post() -> impl IntoView {
 
   let slug = { move || params.get().get("slug").unwrap_or_default() };
 
-  // (current post, related posts) — recomputed when the slug changes.
+  // (current post, related posts) - recomputed when the slug changes.
   let data = Memo::new({
     let posts = posts.clone();
     move |_| {
