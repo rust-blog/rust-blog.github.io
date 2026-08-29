@@ -59,9 +59,9 @@
         "Fira Code", Menlo, Consolas, monospace;
 
     --maxw: 960px;
-    --maxw-prose: 720px;
-    --maxw-index: 680px;
+    --maxw-prose: 680px;
 
+    --maxw-index: 680px;
     color-scheme: light;
 }
 
