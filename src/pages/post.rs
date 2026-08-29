@@ -145,7 +145,6 @@ pub fn Post() -> impl IntoView {
 
                               <Show when=move || has_toc>
                                   <aside class="toc" aria-label="Table of contents">
-                                      <p class="toc-title">"On this page"</p>
                                       {toc_desktop.clone()}
                                   </aside>
                               </Show>

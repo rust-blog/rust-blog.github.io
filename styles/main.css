@@ -810,15 +810,6 @@ a:hover .back-link,
         padding-left: 1.25rem;
     }
 
-    .toc-title {
-        margin: 0 0 0.75rem;
-        font-family: var(--font-mono);
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--text-muted);
-    }
-
     .toc li a {
         font-size: 0.85rem;
         line-height: 1.5;
