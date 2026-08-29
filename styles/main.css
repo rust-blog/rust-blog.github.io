@@ -242,7 +242,7 @@ button {
 }
 
 /* =========================================================================
-   Hero — left-aligned, serif display, mono eyebrow
+   Hero — ASCII banner with per-letter hover, mono tagline
    ========================================================================= */
 
 .hero {
@@ -250,23 +250,37 @@ button {
     padding-block: clamp(3rem, 9vw, 5.5rem) clamp(2.5rem, 7vw, 4rem);
 }
 
-.hero-eyebrow {
-    margin: 0 0 1.4rem;
+.hero-banner {
+    display: flex;
+    margin-bottom: 1.9rem;
     font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--accent-text);
+    line-height: 1;
+    user-select: none;
 }
 
-.hero-title {
+.banner-letter {
+    display: inline-flex;
+    flex-direction: column;
+}
+
+.banner-letter > span {
+    display: block;
+    white-space: pre;
+    font-size: clamp(0.45rem, 1.9vw, 0.8rem);
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+}
+
+.banner-letter:hover > span {
+    color: var(--accent);
+}
+
+.hero-tagline {
     margin: 0 0 1.2rem;
-    font-family: var(--font-serif);
-    font-size: clamp(2rem, 5.5vw, 3.1rem);
-    line-height: 1.12;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
     color: var(--text-strong);
 }
 

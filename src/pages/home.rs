@@ -42,80 +42,89 @@ pub fn Home() -> impl IntoView {
   let filtered_show = filtered;
 
   view! {
-      <div class="container home">
-          <Title text=format!("{} · A Rust Blog", site::TITLE)/>
-          <section class="hero">
-              <p class="hero-eyebrow">"A blog written in Rust"</p>
-              <h1 class="hero-title">{site::TAGLINE}</h1>
-              <p class="hero-sub">{site::DESCRIPTION}</p>
-          </section>
+        <div class="container home">
+            <Title text=format!("{} · A Rust Blog", site::TITLE)/>
+  <section class="hero">
+                  <div class="hero-banner" aria-hidden="true">
+                      <span class="banner-letter"><span>"██████╗ "</span><span>"██╔══██╗"</span><span>"██████╔╝"</span><span>"██╔══██╗"</span><span>"██║  ██║"</span><span>"╚═╝  ╚═╝"</span></span>
+                      <span class="banner-letter"><span>"██╗   ██╗"</span><span>"██║   ██║"</span><span>"██║   ██║"</span><span>"██║   ██║"</span><span>"╚██████╔╝"</span><span>" ╚═════╝ "</span></span>
+                      <span class="banner-letter"><span>" ██████╗"</span><span>"██╔════╝"</span><span>"███████╗"</span><span>"╚════██║"</span><span>"██████╔╝"</span><span>"╚═════╝"</span></span>
+                      <span class="banner-letter"><span>"████████╗"</span><span>"╚══██╔══╝"</span><span>"   ██║   "</span><span>"   ██║   "</span><span>"   ██║   "</span><span>"   ╚═╝"</span></span>
+                      <span class="banner-letter"><span>"██████╗ "</span><span>"██╔══██╗"</span><span>"██████╔╝"</span><span>"██╔══██╗"</span><span>"██████╔╝"</span><span>"╚═════╝"</span></span>
+                      <span class="banner-letter"><span>"██╗     "</span><span>"██║     "</span><span>"██║     "</span><span>"██║     "</span><span>"███████╗"</span><span>"╚══════╝"</span></span>
+                      <span class="banner-letter"><span>" ██████╗ "</span><span>"██╔═══██╗"</span><span>"██║   ██║"</span><span>"██║   ██║"</span><span>"╚██████╔╝"</span><span>" ╚═════╝ "</span></span>
+                      <span class="banner-letter"><span>" ██████╗"</span><span>"██╔════╝"</span><span>"██║  ███╗"</span><span>"██║   ██║"</span><span>"╚██████╔╝"</span><span>" ╚═════╝"</span></span>
+                  </div>
+                  <h1 class="hero-tagline">"⟫ "{site::TAGLINE}</h1>
+                  <p class="hero-sub">{site::DESCRIPTION}</p>
+              </section>
 
-          <div class="post-toolbar">
-              <div class="search-box">
-                  <span class="search-icon"><SearchIcon/></span>
-                  <input
-                      type="search"
-                      class="search-input"
-                      placeholder="Search articles…"
-                      prop:value=move || query.get()
-                      on:input=move |ev| set_query.set(event_target_value(&ev))
-                  />
-              </div>
+            <div class="post-toolbar">
+                <div class="search-box">
+                    <span class="search-icon"><SearchIcon/></span>
+                    <input
+                        type="search"
+                        class="search-input"
+                        placeholder="Search articles…"
+                        prop:value=move || query.get()
+                        on:input=move |ev| set_query.set(event_target_value(&ev))
+                    />
+                </div>
 
-              <div class="tag-filters">
-                  {move || {
-                      let active_tag = active_tag;
-                      let set_active_tag = set_active_tag;
-                      let mut chips = vec![
-                          view! {
-                              <TagChip
-                                  tag="all".to_string()
-                                  active=active_tag.get().is_none()
-                                  on_click=Callback::new({
-                                      let set = set_active_tag;
-                                      move |_| set.set(None)
-                                  })
-                              />
-                          },
-                      ];
-                      for t in &tags {
-                          let t2 = t.clone();
-                          let set = set_active_tag;
-                          chips.push(
-                              view! {
-                                  <TagChip
-                                      tag=t2.clone()
-                                      active=active_tag.get().as_ref() == Some(&t2)
-                                      on_click=Callback::new(move |_| set.set(Some(t2.clone())))
-                                  />
-                              },
-                          );
-                      }
-                      chips
-                  }}
-              </div>
-          </div>
+                <div class="tag-filters">
+                    {move || {
+                        let active_tag = active_tag;
+                        let set_active_tag = set_active_tag;
+                        let mut chips = vec![
+                            view! {
+                                <TagChip
+                                    tag="all".to_string()
+                                    active=active_tag.get().is_none()
+                                    on_click=Callback::new({
+                                        let set = set_active_tag;
+                                        move |_| set.set(None)
+                                    })
+                                />
+                            },
+                        ];
+                        for t in &tags {
+                            let t2 = t.clone();
+                            let set = set_active_tag;
+                            chips.push(
+                                view! {
+                                    <TagChip
+                                        tag=t2.clone()
+                                        active=active_tag.get().as_ref() == Some(&t2)
+                                        on_click=Callback::new(move |_| set.set(Some(t2.clone())))
+                                    />
+                                },
+                            );
+                        }
+                        chips
+                    }}
+                </div>
+            </div>
 
-          <p class="result-count">
-              {move || {
-                  let n = filtered_count.get().len();
-                  format!("{n} / {total} articles")
-              }}
-          </p>
+            <p class="result-count">
+                {move || {
+                    let n = filtered_count.get().len();
+                    format!("{n} / {total} articles")
+                }}
+            </p>
 
-          <div class="post-index">
-              {move || {
-                  filtered_grid
-                      .get()
-                      .into_iter()
-                      .map(|p| view! { <PostCard post=p/> })
-                      .collect::<Vec<_>>()
-              }}
-          </div>
+            <div class="post-index">
+                {move || {
+                    filtered_grid
+                        .get()
+                        .into_iter()
+                        .map(|p| view! { <PostCard post=p/> })
+                        .collect::<Vec<_>>()
+                }}
+            </div>
 
-          <Show when=move || filtered_show.get().is_empty()>
-              <p class="empty-state">"No articles match your search."</p>
-          </Show>
-      </div>
-  }
+            <Show when=move || filtered_show.get().is_empty()>
+                <p class="empty-state">"No articles match your search."</p>
+            </Show>
+        </div>
+    }
 }
