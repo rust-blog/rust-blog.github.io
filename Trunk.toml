@@ -13,8 +13,14 @@ open = false
 # Pin the trunk auto-install version used by the build if desired.
 # version = "0.21.14"
 
-# Copy the generated RSS feed into the dist output so it is served alongside the app.
+# Copy the build-time artifacts (RSS, sitemap, robots) into the dist output
+# so they are served alongside the app.
 [[hooks]]
 stage = "post_build"
 command = "python3"
-command_arguments = ["scripts/copy-rss.py", "rss.xml", "dist/rss.xml"]
+command_arguments = [
+  "scripts/copy-build-artifacts.py",
+  "rss.xml", "dist/rss.xml",
+  "sitemap.xml", "dist/sitemap.xml",
+  "robots.txt", "dist/robots.txt",
+]

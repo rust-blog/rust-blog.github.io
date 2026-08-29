@@ -3,3 +3,5 @@
 # Build output
 /dist
 /rss.xml
+/sitemap.xml
+/robots.txt

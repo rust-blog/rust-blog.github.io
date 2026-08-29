@@ -96,6 +96,32 @@ fn main() {
 
   let out = channel.to_string();
   let _ = fs::write(Path::new(manifest).join("rss.xml"), out);
+
+  write_sitemap(manifest, &posts);
+  write_robots(manifest);
+}
+
+/// `sitemap.xml`: home, about, and every published post with its date.
+fn write_sitemap(manifest: &str, posts: &[(PathBuf, frontmatter::Frontmatter, String)]) {
+  let mut xml = String::from(
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n",
+  );
+  xml.push_str(&format!("  <url><loc>{SITE_URL}/</loc></url>\n"));
+  xml.push_str(&format!("  <url><loc>{SITE_URL}/about</loc></url>\n"));
+  for (_, fm, slug) in posts {
+    xml.push_str(&format!(
+      "  <url><loc>{SITE_URL}/post/{slug}</loc><lastmod>{}</lastmod></url>\n",
+      fm.date
+    ));
+  }
+  xml.push_str("</urlset>\n");
+  let _ = fs::write(Path::new(manifest).join("sitemap.xml"), xml);
+}
+
+/// `robots.txt`: everything is crawlable; point crawlers at the sitemap.
+fn write_robots(manifest: &str) {
+  let robots = format!("User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}/sitemap.xml\n");
+  let _ = fs::write(Path::new(manifest).join("robots.txt"), robots);
 }
 
 /// The validated `YYYY-MM-DD` date, guaranteed present by `frontmatter::parse`.

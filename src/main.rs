@@ -34,7 +34,7 @@ fn App() -> impl IntoView {
       <ThemeProvider>
           <Router base=Cow::Owned(base)>
               <Nav/>
-              <main class="main">
+              <main id="main" class="main">
                   <Routes fallback=|| view! { <NotFound/> }>
                       <Route path=path!("/") view=Home/>
                       <Route path=path!("/about") view=About/>

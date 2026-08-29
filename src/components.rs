@@ -62,6 +62,7 @@ pub fn ThemeToggle() -> impl IntoView {
 pub fn Nav() -> impl IntoView {
   view! {
       <header class="site-header">
+          <a class="skip-link" href="#main">"Skip to content"</a>
           <div class="container nav-inner">
               <A href="/">
                   <span class="brand">

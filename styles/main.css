@@ -119,6 +119,30 @@ a {
     text-decoration: none;
 }
 
+/* Visible focus ring for keyboard users (mouse clicks don't show it). */
+:focus-visible {
+    outline: 2px solid var(--accent-strong);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Skip-to-content link: hidden until focused by keyboard. */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    z-index: 100;
+    padding: 0.5rem 0.9rem;
+    background: var(--accent-strong);
+    color: var(--bg);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+}
+
+.skip-link:focus-visible {
+    top: 0.75rem;
+}
+
 img {
     max-width: 100%;
     height: auto;
