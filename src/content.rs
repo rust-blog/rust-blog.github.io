@@ -6,18 +6,6 @@ use include_dir::{Dir, File, include_dir};
 /// it is picked up automatically at compile time - no code changes required.
 static CONTENT_DIR: Dir = include_dir!("content");
 
-/// Site-wide constants used across the UI and the RSS feed.
-#[allow(dead_code)]
-pub mod site {
-  pub const TITLE: &str = "rust-blog";
-  pub const TAGLINE: &str = "Notes on Rust, WebAssembly, and building the web";
-  pub const DESCRIPTION: &str =
-    "A blog written in Rust and Leptos, running in your browser as WebAssembly";
-  pub const AUTHOR: &str = "rust-blog";
-  pub const GITHUB_URL: &str = "https://github.com/rust-blog/rust-blog.github.io";
-  pub const SITE_URL: &str = "https://rust-blog.github.io";
-}
-
 /// A fully processed blog post, ready to render.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Post {
@@ -102,12 +90,8 @@ mod tests {
 fn parse_post(raw: &str, path: &std::path::Path) -> Option<Post> {
   let parsed = frontmatter::parse(raw).ok()?;
 
-  let slug = parsed
-    .meta
-    .slug
-    .clone()
-    .or_else(|| path.file_stem().map(|s| s.to_string_lossy().to_string()))
-    .unwrap_or_default();
+  let stem = path.file_stem().map(|s| s.to_string_lossy());
+  let slug = frontmatter::derive_slug(&parsed.meta, stem.as_deref());
 
   let html = markdown::render(&parsed.body);
   let reading_time =

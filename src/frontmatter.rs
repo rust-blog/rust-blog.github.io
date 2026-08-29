@@ -203,6 +203,16 @@ fn is_valid_iso_date(s: &str) -> bool {
   day <= days_in_month[(month - 1) as usize]
 }
 
+/// A post's URL slug: the frontmatter `slug` override, else the file stem.
+/// Shared by `build.rs` (RSS/sitemap) and `content.rs` (routing).
+pub fn derive_slug(meta: &Frontmatter, file_stem: Option<&str>) -> String {
+  meta
+    .slug
+    .clone()
+    .or_else(|| file_stem.map(str::to_string))
+    .unwrap_or_default()
+}
+
 /// Advisory checks beyond the hard parse errors, in the same order every
 /// time. Drafts are work-in-progress by contract, so they are not linted
 /// (a future date or missing description is expected mid-writing).

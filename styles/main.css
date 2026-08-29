@@ -121,11 +121,12 @@ a {
     text-decoration: none;
 }
 
-/* Visible focus ring for keyboard users (mouse clicks don't show it). */
+/* Visible focus ring for keyboard users (mouse clicks don't show it).
+   No border-radius override: the outline follows the element's own
+   radius in modern browsers. */
 :focus-visible {
     outline: 2px solid var(--accent-strong);
     outline-offset: 2px;
-    border-radius: 2px;
 }
 
 /* Skip-to-content link: hidden until focused by keyboard. */

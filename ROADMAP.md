@@ -40,7 +40,7 @@ acceptance is checked against it.
 | Syndication       | `rss.xml` built by `build.rs`, copied to `dist/`                |
 | Search / filter   | In-memory substring scan + tag chips on the home page           |
 | Hosting / CI      | GitHub Pages via `deploy.yml` (fmt + clippy + test + trunk gates); Renovate on deps |
-| Tests             | 19 unit + 9 integration (golden HTML, RSS round-trip, render fuzzing) |
+| Tests             | 23 unit + 12 integration (golden HTML, RSS round-trip, sitemap, render fuzzing) |
 | Third-party JS    | None - zero runtime network requests (highlight.js and Google Fonts removed, syntect at build, system Thai font stack) |
 | License           | MIT                                                             |
 
@@ -115,7 +115,9 @@ browser.
 
 ### Phase 3 - Build reproducibility & RSS (done, one open)
 
-- [x] `rss.xml` written by `build.rs`, copied to `dist/` via Trunk post-build hook
+- [x] `rss.xml` written by `build.rs`, copied to `dist/` as a Trunk
+  `copy-file` asset (see below; the original post-build hook was wiped by
+  Trunk's final dist assembly and has been removed).
 - [x] Items carry title/link/GUID/description/pubDate/categories; drafts excluded
 
 - [x] **Closed (closes gap 6):** RSS `pubDate` relies on implicit `chrono` date

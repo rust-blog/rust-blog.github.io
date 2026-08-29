@@ -74,9 +74,9 @@ One folder, one binary, a quiet set of honest services.
   (light and dark, no framework) carries the look.
 - **Searches** - the home page filters in memory by substring and tag
   chips - no index to maintain, no backend to ask.
-- **Syndicates** - `build.rs` generates `rss.xml` at build time and
-  the post-build hook copies it into `dist/` - the feed is born with
-  the site.
+- **Syndicates** - `build.rs` generates `rss.xml` (plus `sitemap.xml` and
+  `robots.txt`) and Trunk `copy-file` assets carry them into `dist/` - the
+  feed is born with the site.
 - **Ships** - pushing to `main` triggers the deploy workflow: install,
   build, copy `index.html` to `404.html` for SPA routing, publish
   `dist/` to GitHub Pages.

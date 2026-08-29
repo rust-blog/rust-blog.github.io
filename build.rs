@@ -1,6 +1,10 @@
 #[path = "src/frontmatter.rs"]
 mod frontmatter;
 
+#[path = "src/site.rs"]
+#[allow(dead_code)]
+mod site;
+
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -8,10 +12,12 @@ use std::path::{Path, PathBuf};
 use chrono::{DateTime, NaiveDate, Utc};
 use rss::{CategoryBuilder, ChannelBuilder, Guid, ItemBuilder};
 
-const SITE_URL: &str = "https://rust-blog.github.io";
-const SITE_TITLE: &str = "rust-blog";
-const SITE_DESCRIPTION: &str =
-  "A blog written in Rust and Leptos, running in your browser as WebAssembly";
+/// A published post ready to feed the RSS feed, the sitemap, and the linter.
+struct Published {
+  path: PathBuf,
+  meta: frontmatter::Frontmatter,
+  slug: String,
+}
 
 fn main() {
   println!("cargo:rerun-if-changed=content");
@@ -19,7 +25,7 @@ fn main() {
   let manifest = env!("CARGO_MANIFEST_DIR");
   let posts_dir = Path::new(manifest).join("content").join("posts");
 
-  let mut posts: Vec<(PathBuf, frontmatter::Frontmatter, String)> = Vec::new();
+  let mut posts: Vec<Published> = Vec::new();
   for entry in
     fs::read_dir(&posts_dir).unwrap_or_else(|e| panic!("cannot read {}: {e}", posts_dir.display()))
   {
@@ -38,44 +44,51 @@ fn main() {
     for warning in &parsed.warnings {
       eprintln!("warning: {}: {warning}", path.display());
     }
-    let slug = slug_from(&parsed.meta, &path);
+    let stem = path.file_stem().map(|s| s.to_string_lossy());
+    let slug = frontmatter::derive_slug(&parsed.meta, stem.as_deref());
     if !parsed.meta.draft {
-      posts.push((path, parsed.meta, slug));
+      posts.push(Published {
+        path,
+        meta: parsed.meta,
+        slug,
+      });
     }
   }
 
   // Advisory linter (missing description, future date, single-use tags).
   let today = Utc::now().date_naive().format("%Y-%m-%d").to_string();
   let mut tag_counts: HashMap<String, usize> = HashMap::new();
-  for (_, fm, _) in &posts {
-    for tag in &fm.tags {
+  for post in &posts {
+    for tag in &post.meta.tags {
       *tag_counts.entry(tag.clone()).or_default() += 1;
     }
   }
-  for (path, fm, _) in &posts {
-    for warning in frontmatter::lint_post(fm, &today, &tag_counts) {
-      eprintln!("warning: {}: {warning}", path.display());
+  for post in &posts {
+    for warning in frontmatter::lint_post(&post.meta, &today, &tag_counts) {
+      eprintln!("warning: {}: {warning}", post.path.display());
     }
   }
 
-  posts.sort_by(|a, b| date(&b.1).cmp(date(&a.1)));
+  posts.sort_by(|a, b| date(&b.meta).cmp(date(&a.meta)));
 
   let items: Vec<rss::Item> = posts
     .iter()
-    .map(|(_, fm, slug)| {
-      let link = format!("{SITE_URL}/post/{slug}");
-      let pub_date = parse_date(date(fm)).to_rfc2822();
+    .map(|post| {
+      let link = format!("{}/post/{}", site::SITE_URL, post.slug);
+      let pub_date = parse_date(date(&post.meta)).to_rfc2822();
       ItemBuilder::default()
-        .title(fm.title.clone())
+        .title(post.meta.title.clone())
         .link(link.clone())
         .guid(Guid {
           value: link,
           permalink: true,
         })
-        .description(fm.description.clone())
+        .description(post.meta.description.clone())
         .pub_date(pub_date)
         .categories(
-          fm.tags
+          post
+            .meta
+            .tags
             .iter()
             .cloned()
             .map(|t| CategoryBuilder::default().name(t).build())
@@ -86,55 +99,60 @@ fn main() {
     .collect();
 
   let channel = ChannelBuilder::default()
-    .title(SITE_TITLE)
-    .link(SITE_URL)
-    .description(SITE_DESCRIPTION)
+    .title(site::TITLE)
+    .link(site::SITE_URL)
+    .description(site::DESCRIPTION)
     .language(Some("th".to_string()))
     .generator(Some("rust-blog (Leptos + Trunk)".to_string()))
     .items(items)
     .build();
 
-  let out = channel.to_string();
-  let _ = fs::write(Path::new(manifest).join("rss.xml"), out);
-
+  write(manifest, "rss.xml", &channel.to_string());
   write_sitemap(manifest, &posts);
   write_robots(manifest);
 }
 
+/// Write a build artifact, failing the build loudly on any error - a
+/// silently-missing file is exactly what the rest of this file refuses to ship.
+fn write(manifest: &str, name: &str, contents: &str) {
+  let path = Path::new(manifest).join(name);
+  fs::write(&path, contents).unwrap_or_else(|e| panic!("cannot write {}: {e}", path.display()));
+}
+
 /// `sitemap.xml`: home, about, and every published post with its date.
-fn write_sitemap(manifest: &str, posts: &[(PathBuf, frontmatter::Frontmatter, String)]) {
+fn write_sitemap(manifest: &str, posts: &[Published]) {
   let mut xml = String::from(
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n",
   );
-  xml.push_str(&format!("  <url><loc>{SITE_URL}/</loc></url>\n"));
-  xml.push_str(&format!("  <url><loc>{SITE_URL}/about</loc></url>\n"));
-  for (_, fm, slug) in posts {
+  xml.push_str(&format!("  <url><loc>{}/</loc></url>\n", site::SITE_URL));
+  xml.push_str(&format!(
+    "  <url><loc>{}/about</loc></url>\n",
+    site::SITE_URL
+  ));
+  for post in posts {
     xml.push_str(&format!(
-      "  <url><loc>{SITE_URL}/post/{slug}</loc><lastmod>{}</lastmod></url>\n",
-      fm.date
+      "  <url><loc>{}/post/{}</loc><lastmod>{}</lastmod></url>\n",
+      site::SITE_URL,
+      post.slug,
+      post.meta.date
     ));
   }
   xml.push_str("</urlset>\n");
-  let _ = fs::write(Path::new(manifest).join("sitemap.xml"), xml);
+  write(manifest, "sitemap.xml", &xml);
 }
 
 /// `robots.txt`: everything is crawlable; point crawlers at the sitemap.
 fn write_robots(manifest: &str) {
-  let robots = format!("User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}/sitemap.xml\n");
-  let _ = fs::write(Path::new(manifest).join("robots.txt"), robots);
+  let robots = format!(
+    "User-agent: *\nAllow: /\n\nSitemap: {}/sitemap.xml\n",
+    site::SITE_URL
+  );
+  write(manifest, "robots.txt", &robots);
 }
 
 /// The validated `YYYY-MM-DD` date, guaranteed present by `frontmatter::parse`.
 fn date(fm: &frontmatter::Frontmatter) -> &str {
   fm.date.as_str()
-}
-
-/// A post's URL slug: the frontmatter `slug` override, else the file stem.
-fn slug_from(fm: &frontmatter::Frontmatter, path: &Path) -> String {
-  fm.slug
-    .clone()
-    .or_else(|| path.file_stem().map(|s| s.to_string_lossy().to_string()))
-    .unwrap_or_default()
 }
 
 /// Format a validated `YYYY-MM-DD` date as an RFC 2822 pubDate.

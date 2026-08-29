@@ -65,7 +65,10 @@ pub fn render(md: &str) -> String {
         ));
         events.drain((i + 1)..=j.min(events.len() - 1));
       } else {
-        let highlighted = highlight_code(&lang, &code);
+        // Info strings often carry attributes after a comma (rust,ignore);
+        // use the first token syntect actually knows so highlighting works.
+        let known = resolve_lang(&lang);
+        let highlighted = highlight_code(known, &code);
         events[i] = Event::Html(pulldown_cmark::CowStr::Boxed(
           format!("<pre class=\"code-plate\">{highlighted}</pre>").into_boxed_str(),
         ));
@@ -77,6 +80,19 @@ pub fn render(md: &str) -> String {
 
   html::push_html(&mut out, events.into_iter());
   out
+}
+
+/// The first comma/space-separated token of a fence info string that syntect
+/// knows (by token or extension), or "" for plain text.
+fn resolve_lang(info: &str) -> &str {
+  info
+    .split(|c: char| c == ',' || c.is_ascii_whitespace())
+    .find(|t| {
+      !t.is_empty()
+        && (syntax_set().find_syntax_by_token(t).is_some()
+          || syntax_set().find_syntax_by_extension(t).is_some())
+    })
+    .unwrap_or("")
 }
 
 /// Highlight a code block body with syntect, keeping the background out so
@@ -133,6 +149,16 @@ mod tests {
     let html = render(md);
     assert!(html.contains("code-plate"));
     assert!(html.contains("plain text here"));
+  }
+
+  #[test]
+  fn fence_attributes_after_comma_still_highlight() {
+    let md = "```rust,ignore\nfn main() {}\n```";
+    let html = render(md);
+    assert!(
+      html.contains("<span style=\"color:#"),
+      "rust,ignore must still be highlighted: {html}"
+    );
   }
 
   #[test]

@@ -13,14 +13,19 @@ open = false
 # Pin the trunk auto-install version used by the build if desired.
 # version = "0.21.14"
 
-# Copy the build-time artifacts (RSS, sitemap, robots) into the dist output
-# so they are served alongside the app.
+# Build-time artifacts (rss.xml, sitemap.xml, robots.txt) are declared as
+# copy-file assets in index.html - Trunk copies them into its staging dir,
+# so they survive the final dist assembly (a post_build hook writing to
+# dist/ gets wiped by it).
+#
+# copy-file assets run concurrently with the rust pipeline, so on a clean
+# checkout the files would not exist yet. This hook makes sure they do:
+# when any artifact is missing it forces build.rs to run (touch build.rs,
+# then cargo build). When they exist the hook is a no-op.
 [[hooks]]
-stage = "post_build"
-command = "python3"
+stage = "pre_build"
+command = "sh"
 command_arguments = [
-  "scripts/copy-build-artifacts.py",
-  "rss.xml", "dist/rss.xml",
-  "sitemap.xml", "dist/sitemap.xml",
-  "robots.txt", "dist/robots.txt",
+  "-c",
+  "test -f rss.xml -a -f sitemap.xml -a -f robots.txt || (touch build.rs && cargo build -q)",
 ]

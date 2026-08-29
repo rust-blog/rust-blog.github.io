@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos_meta::Title;
 use leptos_router::components::A;
 
-use rust_blog::content::site;
+use rust_blog::site;
 
 /// 404 / post-not-found fallback.
 #[component]

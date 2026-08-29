@@ -7,7 +7,8 @@ use wasm_bindgen::prelude::Closure;
 use crate::components::PostCard;
 use crate::pages::not_found::NotFound;
 use crate::util::format_date;
-use rust_blog::content::{Post, site};
+use rust_blog::content::Post;
+use rust_blog::site;
 
 /// Individual post page, rendered from embedded markdown.
 #[component]
@@ -139,7 +140,6 @@ fn mount_demos() {
     return;
   };
   let slots = document.get_elements_by_class_name("demo-slot");
-  web_sys::console::log_1(&format!("demo: found {} slot(s)", slots.length()).into());
   for i in 0..slots.length() {
     if let Some(slot) = slots
       .item(i)
