@@ -29,3 +29,11 @@ command_arguments = [
   "-c",
   "test -f rss.xml -a -f sitemap.xml -a -f robots.txt || (touch build.rs && cargo build -q)",
 ]
+
+# After Trunk assembles dist/, emit one static index.html per post so that
+# /post/<slug> resolves to a real 200 page on GitHub Pages (and Facebook's
+# crawler gets per-post Open Graph tags instead of a 404).
+[[hooks]]
+stage = "post_build"
+command = "python3"
+command_arguments = ["scripts/post_build.py"]

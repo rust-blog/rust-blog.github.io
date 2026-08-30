@@ -291,9 +291,14 @@ validate a post locally; site verifiable against the tag.
 - [ ] **Multi-locale** (Thai + English) via a `lang` frontmatter field + locale
   switcher - the Phase 5 `lang` bug becomes the seed of this feature.
 - [ ] **Archive pages** `/tag/:tag`, `/author/:name` reusing Home filtering.
-- [ ] **SSG option** - keep CSR as default (the project's whole point), but
-  offer an optional build-time HTML snapshot for SEO/no-JS fallback, from the
-  same `build.rs` content pass.
+- [x] **Lightweight SSG for posts** - `build.rs` emits `posts-manifest.json`
+  and a `post_build` Trunk hook (`scripts/post_build.py`) writes one static
+  `dist/post/<slug>/index.html` per published post (the built SPA, with
+  per-post OG/Twitter/`<title>` swapped in). GitHub Pages now serves
+  `/post/<slug>` as a real 200 (with a correct share card) instead of the
+  generic `404.html` fallback - fixes Facebook 404 + gives direct links that
+  survive a refresh. Full no-JS/SSR snapshot for every route stays a future
+  option; CSR remains the default.
 - [ ] **Offline / PWA** - service worker caching WASM + assets; natural fit for
    a zero-server static site (hljs already removed in Phase 8).
 - [ ] **Series/collection** - a `series` field grouping posts into an ordered
