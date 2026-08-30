@@ -36,13 +36,6 @@ pub fn About() -> impl IntoView {
                       <RustLogo/>
                       "."
                   </p>
-                  <h2>"The stack"</h2>
-                  <ul>
-                      <li>"Language: Rust (edition 2024)"</li>
-                      <li>"Framework: Leptos 0.8 (CSR)"</li>
-                      <li>"Bundler: Trunk"</li>
-                      <li>"Hosting: GitHub Pages"</li>
-                  </ul>
                   <h2>"How articles are published"</h2>
                   <p>
                       "Every post is a plain Markdown file in "
