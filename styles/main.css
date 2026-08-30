@@ -223,6 +223,13 @@ button {
     font-weight: 700;
 }
 
+.brand-mark svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    fill: var(--rust-400);
+}
+
 .nav-links {
     display: flex;
     align-items: center;

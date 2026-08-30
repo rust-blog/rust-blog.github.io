@@ -2,7 +2,7 @@ use leptos::either::Either;
 use leptos::prelude::*;
 use leptos_router::components::A;
 
-use crate::icons::{MoonIcon, SunIcon};
+use crate::icons::{MoonIcon, RustLogo, SunIcon};
 use crate::util::{Theme, apply_theme, load_theme, save_theme};
 use rust_blog::content::Post;
 use rust_blog::site;
@@ -67,7 +67,7 @@ pub fn Nav() -> impl IntoView {
           <div class="container nav-inner">
               <A href="/">
                   <span class="brand">
-                      <span class="brand-mark">"r"</span>
+                      <span class="brand-mark"><RustLogo/></span>
                       <span class="brand-name">{site::TITLE}</span>
                   </span>
               </A>
