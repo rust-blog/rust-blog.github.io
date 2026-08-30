@@ -1,0 +1,6 @@
+[
+
+  {"slug":"cargo-deny", "title":"cargo-deny เครื่องมือตรวจ Dependency และความปลอดภัยสำหรับโปรเจกต์ Rust", "description":"รู้จัก cargo-deny เครื่องมือ Lint Dependency จาก Embark Studios ที่ช่วยตรวจจับช่องโหว่ความปลอดภัย (Advisory)"},
+  {"slug":"rust-variables", "title":"Rust Variables: The Interactive Demo", "description":"ทำความเข้าใจ Immutability by default และคีย์เวิร์ด mut ใน Rust ผ่านบทความที่เรนเดอร์ด้วย WebAssembly"},
+  {"slug":"welcome", "title":"ยินดีต้อนรับสู่ rust-blog", "description":"บล็อกที่สร้างด้วย Rust และ Leptos พร้อมทำงานบนเบราว์เซอร์ผ่าน WebAssembly"}
+]

@@ -110,48 +110,6 @@ fn main() {
   write(manifest, "rss.xml", &channel.to_string());
   write_sitemap(manifest, &posts);
   write_robots(manifest);
-  write_manifest(manifest, &posts);
-}
-
-/// `posts-manifest.json`: a tiny sidecar consumed by the Trunk `post_build`
-/// hook (`scripts/post_build.py`) so it can emit one static `index.html` per
-/// post. That gives GitHub Pages (and Facebook's crawler) a real 200 page at
-/// `/post/<slug>` instead of a 404, with per-post Open Graph tags.
-fn write_manifest(manifest: &str, posts: &[Published]) {
-  let mut buf = String::from("[\n");
-  for (i, post) in posts.iter().enumerate() {
-    if i > 0 {
-      buf.push(',');
-    }
-    buf.push('\n');
-    buf.push_str(&format!(
-      "  {{\"slug\":{s}, \"title\":{t}, \"description\":{d}}}",
-      s = json_str(&post.slug),
-      t = json_str(&post.meta.title),
-      d = json_str(&post.meta.description),
-    ));
-  }
-  buf.push_str("\n]\n");
-  write(manifest, "posts-manifest.json", &buf);
-}
-
-/// Minimal JSON string escaper - no external dependency needed.
-fn json_str(s: &str) -> String {
-  let mut o = String::with_capacity(s.len() + 2);
-  o.push('"');
-  for c in s.chars() {
-    match c {
-      '"' => o.push_str("\\\""),
-      '\\' => o.push_str("\\\\"),
-      '\n' => o.push_str("\\n"),
-      '\r' => o.push_str("\\r"),
-      '\t' => o.push_str("\\t"),
-      c if (c as u32) < 0x20 => o.push_str(&format!("\\u{:04x}", c as u32)),
-      c => o.push(c),
-    }
-  }
-  o.push('"');
-  o
 }
 
 /// Write a build artifact, failing the build loudly on any error - a

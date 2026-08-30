@@ -61,9 +61,10 @@ jobs:
 
       - name: Generate static per-post pages
         # Emit dist/post/<slug>/index.html for each post (from the built
-        # index.html + posts-manifest.json) so /post/<slug> is a real 200 page
-        # with per-post Open Graph tags instead of the 404.html fallback.
-        run: python3 scripts/post_build.py
+        # index.html + the same Rust content loader the app uses) so
+        # /post/<slug> is a real 200 page with per-post Open Graph tags
+        # instead of the 404.html fallback.
+        run: cargo run --quiet --bin post_build
 
       - name: Prepare SPA fallback (404.html)
         # Serve the app shell for unknown paths so client-side routing works.
