@@ -89,9 +89,7 @@
     color-scheme: dark;
 }
 
-/*
-   Reset & base
-*/
+/* Reset & base */
 
 *,
 *::before,
@@ -178,9 +176,7 @@ button {
     padding-block: 0 5rem;
 }
 
-/*
-   Header / Nav - quiet, hairline, mono brand
-*/
+/* Header / Nav - quiet, hairline, mono brand */
 
 .site-header {
     position: sticky;
@@ -276,9 +272,7 @@ button {
     line-height: 1;
 }
 
-/*
-   Hero - ASCII banner with per-letter hover, mono tagline
-*/
+/* Hero - ASCII banner with per-letter hover, mono tagline */
 
 .hero {
     max-width: var(--maxw-index);
@@ -327,9 +321,7 @@ button {
     line-height: 1.75;
 }
 
-/*
-   Toolbar - hairline search, mono tag chips
-*/
+/* Toolbar - hairline search, mono tag chips */
 
 .post-toolbar {
     max-width: var(--maxw-index);
@@ -423,9 +415,7 @@ button {
     text-transform: uppercase;
 }
 
-/*
-   Post index - editorial rows, hairlines, no cards
-*/
+/* Post index - editorial rows, hairlines, no cards */
 
 .post-index {
     max-width: var(--maxw-index);
@@ -493,9 +483,7 @@ a:hover .post-row-title {
     font-size: 1.05rem;
 }
 
-/*
-   Article - serif prose, mono meta
-*/
+/* Article - serif prose, mono meta */
 
 .post-page,
 .about-page {
@@ -753,9 +741,7 @@ a:hover .back-link,
     box-shadow: var(--shadow-xs);
 }
 
-/*
-   Related / about / 404
-*/
+/* Related / about / 404 */
 
 .related {
     max-width: var(--maxw-prose);
@@ -832,9 +818,7 @@ a:hover .back-link,
     border-color: var(--text-strong);
 }
 
-/*
-   Footer - quiet, hairline, mono
-*/
+/* Footer - quiet, hairline, mono */
 
 .site-footer {
     margin-top: 4rem;
@@ -876,9 +860,7 @@ a:hover .back-link,
     color: var(--accent-text);
 }
 
-/*
-   Responsive
-*/
+/* Responsive */
 
 @media (max-width: 640px) {
     .footer-inner {
