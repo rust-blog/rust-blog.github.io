@@ -122,7 +122,7 @@ browser.
 
 - [x] **Closed (closes gap 6):** RSS `pubDate` relies on implicit `chrono` date
   validation with no explicit test. A bad date must fail the build loudly, not
-  emit a malformed feed. — Done: `src/frontmatter.rs` validates
+  emit a malformed feed. - Done: `src/frontmatter.rs` validates
   `YYYY-MM-DD` calendar dates with typed errors (11 tests); `build.rs` panics
   with the file path on any malformed post (verified: `2024-02-30` → exit 101).
 
@@ -192,22 +192,22 @@ shows drafts without publishing.
 
 - [x] `tests/golden_content`: exact rendered-HTML assertions for a sample post
   (headings, code fence, footnote, table). A markdown change that alters
-  output breaks the test. — Caught and fixed a real bug: syntect's trailing
+  output breaks the test. - Caught and fixed a real bug: syntect's trailing
   `</pre>` survived the trim, so every code block shipped a stray closing
   tag (`markdown.rs` now trims and strips it; pinned by the golden).
 - [x] Date-validation tests: `2024-02-30`, `2024-13-01`, empty, non-`YYYY-MM-DD`
-  all rejected at parse time with a typed error. — covered by
+  all rejected at parse time with a typed error. - covered by
   `frontmatter.rs` tests (`rejects_invalid_calendar_dates`,
   `missing_date_is_an_error`).
 - [x] Frontmatter schema tests: missing `title`/`date`, unknown keys (warn),
-  duplicate tags (dedupe) behave deterministically. — `parse` returns
+  duplicate tags (dedupe) behave deterministically. - `parse` returns
   sorted `warnings` for unknown keys (printed by `build.rs`), tags are
   deduplicated, missing `title`/`date` are typed errors.
 - [x] Proptest: any string pulldown-cmark accepts renders without panicking.
-  — `tests/render_never_panics` (512 cases × 3 strategies: arbitrary
+  - `tests/render_never_panics` (512 cases × 3 strategies: arbitrary
   markdown, arbitrary frontmatter, head+body).
 - [x] RSS round-trip: parse `rss.xml` back, assert count == published posts.
-  — `tests/rss_round_trip`: item count == published posts, every item
+  - `tests/rss_round_trip`: item count == published posts, every item
   matches a post by slug/title with a pubDate, channel fields sane.
 
 **Acceptance (met):** every item above has a passing test; a bad post fails
@@ -216,7 +216,7 @@ shows drafts without publishing.
 ### Phase 8 - Correctness & performance hardening (open, closes gaps 2, 4, 5)
 
 - [x] **(gap 2)** Extract a **single shared parser** used by `build.rs` and
-  `content.rs`; RSS and in-app render become impossible to disagree. — Done:
+  `content.rs`; RSS and in-app render become impossible to disagree. - Done:
   `src/frontmatter.rs` with typed errors + strict date validation; both sides
   call the same `parse()`.
 - [ ] **(gap 3-adjacent)** Set `lang="th"` (or dynamic per-post).
@@ -273,7 +273,7 @@ protection enforced; preview URL per PR.
 
 - [ ] `v1.0.0` tag + documented release process.
 - [x] `robots.txt` + `sitemap.xml` generated at build time (closes Phase 5).
-  — done early with the Phase 5 work; only `og:image`/Twitter cards remain
+  - done early with the Phase 5 work; only `og:image`/Twitter cards remain
   open there.
 - [ ] **(gap 7)** Deploy provenance: publish `dist/` as a release artifact with
   `SHA256SUMS.txt` so readers can verify the served site matches the tag.
