@@ -709,8 +709,8 @@ a:hover .back-link,
 
 .prose pre code {
     font-family: var(--font-mono);
-    font-size: 0.88rem;
-    line-height: 1.75;
+    font-size: 0.8rem;
+    line-height: 1.6;
     background: transparent;
     padding: 0;
 }
