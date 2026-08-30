@@ -1,45 +1,45 @@
 ---
-title: "ยินดีต้อนรับสู่ rust-blog"
+title: "Welcome to rust-blog"
 date: "2026-08-29"
-description: "บล็อกที่สร้างด้วย Rust และ Leptos พร้อมทำงานบนเบราว์เซอร์ผ่าน WebAssembly"
+description: "A blog written in Rust and Leptos, running in your browser as WebAssembly"
 tags: [announcement, rust, leptos]
 author: "suradet-ps"
 ---
 
-สวัสดีครับ ยินดีต้อนรับสู่บทความแรกบน **rust-blog** บล็อกนี้ไม่ได้เป็นเพียงแค่พื้นที่พูดคุยเกี่ยวกับภาษา Rust เท่านั้น แต่เป็นบล็อกที่ถูกสร้างและรันด้วยภาษา Rust จริง ๆ
+Hello, and welcome to the first post on **rust-blog**. This blog isn't just about the Rust language — it's built with, and runs on, Rust itself.
 
-## ขับเคลื่อนด้วย Rust 100%
+## Powered by Rust 100%
 
-สิ่งที่ทำให้บล็อกนี้แตกต่างจากเว็บทั่วไป คือฝั่ง Frontend แทบไม่ได้พึ่งพา JavaScript เลยแม้แต่บรรทัดเดียว แต่ทุกอย่างทำงานบนพื้นฐานของ
+What sets this blog apart from most websites is that the frontend relies on almost no JavaScript at all. Everything runs on:
 
 - **Rust** (Edition 2024)
-- **Leptos 0.8** ในโหมด Client-Side Rendering (CSR)
-- **Trunk** เป็น Build Tool สำหรับจัดการโปรเจกต์
-- คอมไพล์ออกมาเป็น **WebAssembly (Wasm)** เพื่อรันบนเบราว์เซอร์โดยตรง
+- **Leptos 0.8** in Client-Side Rendering (CSR) mode
+- **Trunk** as the build tool
+- Compiled to **WebAssembly (Wasm)** and running directly in the browser
 
-แม้แต่ระบบไฮไลต์โค้ด (Syntax Highlighting) ในบทความก็ประมวลผลผ่าน `syntect` ตอน Render ทันที โดยไม่ต้องดึงไลบรารีจาก CDN ภายนอก และไม่มีไฟล์ JavaScript ฝังอยู่ในเว็บนี้เลย
+Even the syntax highlighting in posts is processed by `syntect` at render time — no external CDN libraries, and not a single JavaScript file embedded anywhere on this site.
 
-## เพิ่มบทความใหม่ได้ง่ายๆ
+## Adding a new post is easy
 
-โครงสร้างของระบบถูกออกแบบมาให้จัดการเนื้อหาได้สะดวก เพียงแค่เขียนไฟล์ Markdown ธรรมดา
+The system is designed so content is easy to manage: just write a plain Markdown file.
 
 ```bash
-# สร้างบทความใหม่ในโฟลเดอร์ content/posts/
-echo '---\ntitle: "บทความใหม่"\ndate: "2024-07-01"\ntags: [rust]\n---\n\nเนื้อหาบทความ...' > content/posts/my-post.md
+# Create a new post in content/posts/
+echo '---\ntitle: "A new post"\ndate: "2026-08-30"\ntags: [rust]\n---\n\nPost body...' > content/posts/my-post.md
 ```
 
-เพียงเท่านี้ ระบบก็จะดึงบทความขึ้นแสดงบนหน้าเว็บให้อัตโนมัติ โดยไม่ต้องเข้าไปแก้โค้ดส่วนอื่นให้ยุ่งยาก
+That's it — the blog picks the post up automatically and shows it on the site, no other code changes needed.
 
-## ฟีเจอร์เด่นของ rust-blog
+## What rust-blog has to offer
 
-- **Dark Mode / Light Mode** เปลี่ยนธีมได้ตามใจชอบ พร้อมระบบจดจำค่าที่เลือกไว้
-- **ระบบแท็ก (Tag Filtering)** ค้นหาและคัดกรองบทความที่สนใจได้รวดเร็ว
-- **Syntax Highlighting** แสดงผลโค้ดตัวอย่างได้อย่างสวยงาม คมชัด ด้วย `syntect`
-- **RSS Feed** มี `/rss.xml` พร้อมใช้งาน สร้างขึ้นอัตโนมัติตอน Build
-- **Responsive & Editorial Design** หน้าตาสะอาดตา อ่านง่าย สบายตา และรองรับการแสดงผลบนทุกขนาดหน้าจอ
+- **Dark Mode / Light Mode** — switch themes to your liking, with your choice remembered
+- **Tag Filtering** — search and filter posts by the tags you care about
+- **Syntax Highlighting** — crisp, beautiful code blocks powered by `syntect`
+- **RSS Feed** — `/rss.xml` is generated automatically at build time
+- **Responsive & Editorial Design** — a clean, easy-on-the-eyes layout that works on every screen size
 
-บล็อกนี้เริ่มต้นจากคำถามง่าย ๆ ในใจว่า *"ถ้าคนเขียน Rust อยากทำบล็อกส่วนตัวขึ้นมาสักเว็บ โดยเขียนด้วย Rust ทั้งหมดตั้งแต่ต้นจนจบ มันจะออกมาหน้าตาเป็นอย่างไร?"* 
+This blog started from a simple question: *"If a Rust developer wanted to build a personal blog and write the whole thing in Rust, from start to finish — what would it look like?"*
 
-และเว็บนี้ก็คือคำตอบครับ 
+This website is the answer.
 
-แล้วพบกันใหม่ในบทความถัดไปครับ
+See you in the next post!
