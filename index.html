@@ -10,6 +10,26 @@
             content="Notes on Rust, WebAssembly, and building the web - a blog written in Rust and Leptos"
         />
 
+        <!-- Social/share cards. Facebook and other crawlers do NOT run JS, so
+             these MUST be static in index.html (the SPA sets per-post OG tags
+             at runtime, which crawlers never see). The image is copied to dist/
+             by Trunk via the copy-file link below. -->
+        <meta property="og:title" content="rust-blog - A Rust Blog" />
+        <meta
+            property="og:description"
+            content="Notes on Rust, WebAssembly, and building the web - a blog written in Rust and Leptos"
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://rust-blog.github.io/og-image.png" />
+        <meta property="og:url" content="https://rust-blog.github.io/" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="rust-blog - A Rust Blog" />
+        <meta
+            name="twitter:description"
+            content="Notes on Rust, WebAssembly, and building the web - a blog written in Rust and Leptos"
+        />
+        <meta name="twitter:image" content="https://rust-blog.github.io/og-image.png" />
+
         <!-- Inline SVG favicon: the Rust gear logo, orange -->
         <link
             rel="icon"
@@ -28,6 +48,7 @@
         <link data-trunk rel="copy-file" href="rss.xml" />
         <link data-trunk rel="copy-file" href="sitemap.xml" />
         <link data-trunk rel="copy-file" href="robots.txt" />
+        <link data-trunk rel="copy-file" href="og-image.png" />
 
         <link data-trunk rel="rust" data-wasm-opt="z" />
     </head>
