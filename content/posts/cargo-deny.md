@@ -78,7 +78,7 @@ cargo deny check
 
 โครงสร้างการตั้งค่าหลัก ๆ จะแบ่งตาม 4 ด่านตรวจ (รวมถึงหมวดเสริมอย่าง `[graph]` และ `[output]`)
 
-```toml
+```yaml
 # ด่าน Advisories ห้ามใช้ Crate ที่ถูกดึงออกจากระบบ (Yanked)
 [advisories]
 yanked = "deny"
