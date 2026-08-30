@@ -59,6 +59,12 @@ jobs:
         # public-url is "/" for GitHub Pages org/user sites, or "/<repo>/" for project sites.
         run: trunk build --release --public-url /
 
+      - name: Generate static per-post pages
+        # Emit dist/post/<slug>/index.html for each post (from the built
+        # index.html + posts-manifest.json) so /post/<slug> is a real 200 page
+        # with per-post Open Graph tags instead of the 404.html fallback.
+        run: python3 scripts/post_build.py
+
       - name: Prepare SPA fallback (404.html)
         # Serve the app shell for unknown paths so client-side routing works.
         run: cp dist/index.html dist/404.html
