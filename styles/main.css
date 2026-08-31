@@ -42,8 +42,6 @@
     --code-bg: #17150f;
     --code-text: #e8e4da;
     --code-border: #2c2820;
-    --code-fold: #26221b;
-    --code-seam: #0d0c0a;
 
     --shadow-xs: 0 1px 2px rgba(20, 18, 15, 0.05);
     --shadow-sm: 0 1px 3px rgba(20, 18, 15, 0.07),
@@ -673,10 +671,7 @@ a:hover .back-link,
     color: var(--accent-text);
 }
 
-/* code blocks - a dark plate in both themes, highlighted by syntect.
-   The bottom-right corner carries a paper fold: a lighter flap with a
-   hairline seam, drawn with gradients so the code itself is never
-   clipped. */
+/* code blocks - a dark plate in both themes, highlighted by syntect. */
 .prose pre {
     position: relative;
     margin: 2rem 0;
@@ -686,25 +681,6 @@ a:hover .back-link,
     border: 1px solid var(--code-border);
     overflow-x: auto;
     box-shadow: var(--shadow-sm);
-}
-
-.prose pre::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 22px;
-    height: 22px;
-    pointer-events: none;
-    background:
-        linear-gradient(
-            135deg,
-            transparent calc(50% - 0.75px),
-            var(--code-seam) calc(50% - 0.75px),
-            var(--code-seam) calc(50% + 0.75px),
-            transparent calc(50% + 0.75px)
-        ),
-        linear-gradient(135deg, transparent 50%, var(--code-fold) 50%);
 }
 
 .prose pre code {
