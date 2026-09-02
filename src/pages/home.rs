@@ -49,7 +49,7 @@ pub fn Home() -> impl IntoView {
                   <div class="hero-banner" aria-hidden="true">
                       <span class="banner-letter"><span>"██████╗ "</span><span>"██╔══██╗"</span><span>"██████╔╝"</span><span>"██╔══██╗"</span><span>"██║  ██║"</span><span>"╚═╝  ╚═╝"</span></span>
                       <span class="banner-letter"><span>"██╗   ██╗"</span><span>"██║   ██║"</span><span>"██║   ██║"</span><span>"██║   ██║"</span><span>"╚██████╔╝"</span><span>" ╚═════╝ "</span></span>
-                      <span class="banner-letter"><span>" ██████╗"</span><span>"██╔════╝"</span><span>"███████╗"</span><span>"╚════██║"</span><span>"██████╔╝"</span><span>"╚═════╝"</span></span>
+                      <span class="banner-letter"><span>"███████╗"</span><span>"██╔════╝"</span><span>"███████╗"</span><span>"╚════██║"</span><span>"███████║"</span><span>"╚══════╝"</span></span>
                       <span class="banner-letter"><span>"████████╗"</span><span>"╚══██╔══╝"</span><span>"   ██║   "</span><span>"   ██║   "</span><span>"   ██║   "</span><span>"   ╚═╝"</span></span>
                       <span class="banner-letter"><span>"██████╗ "</span><span>"██╔══██╗"</span><span>"██████╔╝"</span><span>"██╔══██╗"</span><span>"██████╔╝"</span><span>"╚═════╝"</span></span>
                       <span class="banner-letter"><span>"██╗     "</span><span>"██║     "</span><span>"██║     "</span><span>"██║     "</span><span>"███████╗"</span><span>"╚══════╝"</span></span>
