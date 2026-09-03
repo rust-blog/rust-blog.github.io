@@ -6,9 +6,19 @@ use syntect::html::highlighted_html_for_string;
 use syntect::parsing::SyntaxSet;
 
 /// Embedded syntax definitions (fancy-regex backend, wasm32-safe).
+///
+/// TOML is not part of syntect's default set, so the official Sublime Text
+/// TOML syntax is embedded (`assets/TOML.sublime-syntax`) and merged in.
 fn syntax_set() -> &'static SyntaxSet {
   static SS: OnceLock<SyntaxSet> = OnceLock::new();
-  SS.get_or_init(SyntaxSet::load_defaults_newlines)
+  SS.get_or_init(|| {
+    let mut builder = SyntaxSet::load_defaults_newlines().into_builder();
+    let toml = include_str!("../assets/TOML.sublime-syntax");
+    if let Ok(def) = syntect::parsing::SyntaxDefinition::load_from_str(toml, true, None) {
+      builder.add(def);
+    }
+    builder.build()
+  })
 }
 
 /// Embedded theme set; we render with a dark plate in both UI themes.
@@ -159,6 +169,17 @@ mod tests {
       html.contains("<span style=\"color:#"),
       "rust,ignore must still be highlighted: {html}"
     );
+  }
+
+  #[test]
+  fn toml_block_is_highlighted() {
+    let md = "```toml\n[profile.release]\nopt-level = \"z\"\n```";
+    let html = render(md);
+    assert!(
+      html.contains("<span style=\"color:#"),
+      "toml must be highlighted: {html}"
+    );
+    assert!(html.contains("opt-level"), "missing content: {html}");
   }
 
   #[test]
