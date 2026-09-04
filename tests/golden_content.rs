@@ -12,10 +12,10 @@ const GOLDEN_HTML: &str = r##"<h1>Golden fixture</h1>
 <span style="color:#cc99cc;">fn </span><span style="color:#6699cc;">main</span><span style="color:#d3d0c8;">() {
 </span><span style="color:#d3d0c8;">    println!(&quot;</span><span style="color:#99cc99;">hi</span><span style="color:#d3d0c8;">&quot;);
 </span><span style="color:#d3d0c8;">}
-</span></pre><table><thead><tr><th>Name</th><th>Value</th></tr></thead><tbody>
+</span></pre><div class="table-wrap"><table><thead><tr><th>Name</th><th>Value</th></tr></thead><tbody>
 <tr><td>Rust</td><td>wasm</td></tr>
 <tr><td>Thai</td><td>ไทย</td></tr>
-</tbody></table>
+</tbody></table></div>
 <blockquote>
 <p>A blockquote.</p>
 </blockquote>

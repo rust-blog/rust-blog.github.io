@@ -55,7 +55,9 @@ pub fn render(md: &str) -> String {
         "<div class=\"table-wrap\"><table>",
       ));
     } else if let Event::End(TagEnd::Table) = &events[i] {
-      events[i] = Event::Html(pulldown_cmark::CowStr::from("</table></div>"));
+      events[i] = Event::Html(pulldown_cmark::CowStr::from(
+        "</tbody></table></div>\n",
+      ));
     } else if let Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(info))) = &events[i] {
       let lang = info
         .split_whitespace()
