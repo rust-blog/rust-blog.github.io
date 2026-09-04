@@ -48,7 +48,15 @@ pub fn render(md: &str) -> String {
 
   let mut i = 0;
   while i < events.len() {
-    if let Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(info))) = &events[i] {
+    if let Event::Start(Tag::Table(_)) = &events[i] {
+      // Wrap tables so wide ones scroll inside a container instead of
+      // overflowing the page on narrow screens.
+      events[i] = Event::Html(pulldown_cmark::CowStr::from(
+        "<div class=\"table-wrap\"><table>",
+      ));
+    } else if let Event::End(TagEnd::Table) = &events[i] {
+      events[i] = Event::Html(pulldown_cmark::CowStr::from("</table></div>"));
+    } else if let Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(info))) = &events[i] {
       let lang = info
         .split_whitespace()
         .next()
@@ -180,6 +188,20 @@ mod tests {
       "toml must be highlighted: {html}"
     );
     assert!(html.contains("opt-level"), "missing content: {html}");
+  }
+
+  #[test]
+  fn table_is_wrapped_for_mobile_scroll() {
+    let md = "| a | b |\n|---|---|\n| 1 | 2 |";
+    let html = render(md);
+    assert!(
+      html.contains("<div class=\"table-wrap\"><table>"),
+      "missing table wrap open: {html}"
+    );
+    assert!(
+      html.contains("</table></div>"),
+      "missing table wrap close: {html}"
+    );
   }
 
   #[test]

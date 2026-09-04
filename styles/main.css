@@ -582,6 +582,7 @@ a:hover .back-link,
     text-decoration: underline;
     text-underline-offset: 3px;
     text-decoration-thickness: 1px;
+    overflow-wrap: break-word;
 }
 
 .prose a:hover {
@@ -669,6 +670,18 @@ a:hover .back-link,
     background: var(--surface-2);
     border: 1px solid var(--border);
     color: var(--accent-text);
+    overflow-wrap: break-word;
+}
+
+/* wide tables scroll inside their own container on narrow screens. */
+.prose .table-wrap {
+    overflow-x: auto;
+    margin: 1.75rem 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.prose .table-wrap table {
+    margin: 0;
 }
 
 /* code blocks - a dark plate in both themes, highlighted by syntect. */
