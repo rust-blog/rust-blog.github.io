@@ -128,6 +128,8 @@ strip = true
 
 **ขนาด 2.2G คือสิ่งที่นักพัฒนาจะพบเจอจริงในการทำงาน** Cargo จะไม่ลบ artifact ของ configuration ชุดเก่าให้โดยอัตโนมัติ ทุกครั้งที่มีการอัปเดต rustc, toolchain หรือเปลี่ยน flags ตัว Cargo จะสร้างและเก็บไฟล์ชุดใหม่เพิ่มเข้าไปเรื่อยๆ
 
+นอกจากไฟล์ตกค้างแล้ว ยังมีอีกหนึ่งสาเหตุที่ฝังอยู่ในกลไกของ Cargo เอง นั่นคือข้อมูล metadata ของแต่ละ crate ถูกเก็บซ้ำถึงสองที่ เพราะ Cargo ใช้ระบบ [pipelined compilation](https://blog.rust-lang.org/2019/09/26/Rust-1.38.0/#pipelined-compilation) ผลิตไฟล์ `.rmeta` ให้ crate ที่พึ่งพากันเริ่มคอมไพล์ได้เร็วขึ้น และเมื่อคอมไพล์เสร็จ ไฟล์ `.rlib` ก็จะฝัง metadata ชุดเดียวกันนั้นซ้ำอีกชั้น ทางทีม Cargo จึงประกาศเมื่อวันที่ 18 สิงหาคม 2026 ว่าจะทดลองเปิด `-Zembed-metadata=no` เป็นค่าเริ่มต้นบน nightly ([Experiment in reducing target directory size on nightly](https://blog.rust-lang.org/inside-rust/2026/08/18/reducing-target-dir-size-on-nightly/)) เพื่อหยุดการฝัง metadata ลงใน `.rlib` โดยผลวัดของทีมพบว่าโฟลเดอร์ `target/` ลดลง 4.7–10% สำหรับ dev profile ค่าเริ่มต้น และลดลงถึง ~24–33% สำหรับ release profile (กรณีของ cargo เองลดลงเกือบ 300 MiB) ทั้งนี้ ฟีเจอร์นี้ยังเป็น unstable ที่ใช้ได้เฉพาะ nightly ทั้ง cargo และ rustc จึงยังไม่กระทบ stable toolchain ที่โปรเจกต์นี้ใช้งานอยู่
+
 แนวทางการจัดการโฟลเดอร์ target (เรียงจากระดับเบาไปหนัก)
 
 ```sh
@@ -175,11 +177,14 @@ cargo clean
 | เทคนิค | ผลลัพธ์ที่คาดว่าจะได้ | ข้อจำกัด / ต้นทุนที่ต้องแลก |
 |---|---|---|
 | `-Zbuild-std` + `panic_immediate_abort` (Nightly) | native ลดลงอีก ~0.5-1M, wasm ลดลงอีก ~50-100K | ต้องใช้ Rust Nightly toolchain และมีคอนฟิกที่ซับซ้อน |
+| `-Zembed-metadata=no` (Nightly — กำลังทดลองเป็นค่าเริ่มต้น) | พื้นที่ `target/` ลดลง 5–30% ตาม profile (release ~24–33%) แต่ขนาด binary ไม่เปลี่ยน | ต้องใช้ nightly ทั้ง cargo และ rustc, ยังเป็น experiment (tracking issue #15495) และ opt-out ได้ผ่าน `[unstable] embed-metadata = true` ใน `.cargo/config.toml` |
 | Prune features ของ dependencies ที่ไม่ได้ใช้ (เช่น ปิด `tracing-subscriber` env-filter) | ลดลงได้หลายร้อย KB | ต้องแก้ไขโค้ดและทดสอบระบบใหม่อย่างละเอียด |
 | ใช้ `cargo-bloat` หรือ `cargo-llvm-lines` วิเคราะห์จุดที่กินพื้นที่แล้ว refactor | ขึ้นอยู่กับจุดที่พบในโค้ด | ต้องใช้เวลาในการพัฒนาและปรับแก้โค้ด |
 | แยก `[profile.release]` สำหรับ native และ wasm ออกจากกัน (`cargo_profile` ใน trunk) | ปรับแต่งค่าของแต่ละฝั่งได้ละเอียดยิ่งขึ้น | ฟีเจอร์นี้ยังอยู่ในเวอร์ชัน trunk beta |
 
 ข้อมูลอ้างอิงจากโปรเจกต์อื่นระบุว่า การใช้ `-Zbuild-std` ร่วมกับ `panic_immediate_abort` ช่วยลดขนาด wasm ลงได้อีกราว ~10-15% แต่ต้องแลกกับการดูแล nightly toolchain สำหรับ med-recon (wasm 477K) ขนาดในปัจจุบันถือว่าเหมาะสมและเพียงพอต่อการใช้งานจริงแล้ว
+
+สำหรับ `-Zembed-metadata=no` เป็นการลดคนละแกนกับเทคนิคในตารางข้างบน เพราะเป้าหมายคือพื้นที่ `target/` ไม่ใช่ขนาดไฟล์แจกจ่าย จึงเหมาะกับเครื่องที่พื้นที่ดิสก์ตึงมากกว่าการลดขนาด binary
 
 ---
 
