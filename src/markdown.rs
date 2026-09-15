@@ -58,6 +58,21 @@ pub fn render(md: &str) -> String {
       ));
     } else if let Event::End(TagEnd::Table) = &events[i] {
       events[i] = Event::Html(pulldown_cmark::CowStr::from("</tbody></table></div>\n"));
+    } else if let Event::Start(Tag::Paragraph) = &events[i] {
+      // Tag Thai paragraphs so the stylesheet can justify them the way Thai
+      // typesetting does (see `text-justify` in styles/main.css). Paragraphs
+      // don't nest, so the first End(Paragraph) is this one's.
+      if let Some(end) =
+        (i + 1..events.len()).find(|&j| matches!(&events[j], Event::End(TagEnd::Paragraph)))
+      {
+        let thai = events[i + 1..end]
+          .iter()
+          .any(|e| matches!(e, Event::Text(t) if t.chars().any(is_thai)));
+        if thai {
+          events[i] = Event::Html(pulldown_cmark::CowStr::from("<p lang=\"th\">"));
+          events[end] = Event::Html(pulldown_cmark::CowStr::from("</p>\n"));
+        }
+      }
     } else if let Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(info))) = &events[i] {
       let info = info.to_string();
       // The fence language is the first comma/space-separated token, so
@@ -101,6 +116,12 @@ pub fn render(md: &str) -> String {
 
   html::push_html(&mut out, events.into_iter());
   out
+}
+
+/// Thai script block (U+0E00-U+0E7F): the trigger for the Thai
+/// justification rule applied via `lang="th"` in the rendered HTML.
+fn is_thai(c: char) -> bool {
+  matches!(c, '\u{0E00}'..='\u{0E7F}')
 }
 
 /// The first comma/space-separated token of a fence info string that syntect
@@ -362,6 +383,31 @@ mod tests {
     assert!(html.contains("<h1>Hello</h1>"));
     assert!(html.contains("<em>emphasis</em>"));
     assert!(!html.contains("code-plate"));
+  }
+
+  #[test]
+  fn thai_paragraph_is_tagged_with_lang() {
+    let html = render("สวัสดีครับ ยินดีต้อนรับสู่บล็อก");
+    assert!(html.contains("<p lang=\"th\">"), "{html}");
+    assert!(html.contains("</p>"), "{html}");
+  }
+
+  #[test]
+  fn english_paragraph_is_not_tagged() {
+    let html = render("Just an English paragraph.");
+    assert_eq!(html, "<p>Just an English paragraph.</p>\n");
+  }
+
+  #[test]
+  fn mixed_thai_english_paragraph_is_tagged() {
+    let html = render("ใช้ Rust และ wasm ครับ");
+    assert!(html.contains("<p lang=\"th\">"), "{html}");
+  }
+
+  #[test]
+  fn thai_inline_code_alone_does_not_tag_paragraph() {
+    let html = render("The word `ไทย` is in code.");
+    assert!(!html.contains("lang=\"th\""), "{html}");
   }
 
   #[test]

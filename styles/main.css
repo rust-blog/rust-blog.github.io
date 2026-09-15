@@ -587,6 +587,20 @@ a:hover .back-link,
     margin: 1.15rem 0;
 }
 
+/* Thai paragraphs are tagged lang="th" by the markdown renderer. Where the
+   browser supports text-justify (Chrome 145+, Firefox 55+), justify them the
+   way Word's Thai Distributed alignment does: slack is spread between
+   character clusters instead of ballooning the few spaces Thai uses, so
+   every line but the last lands flush. Safari has no text-justify, and
+   plain justify there would tear phrases into lakes, so those readers keep
+   the ragged-left default. */
+@supports (text-justify: inter-character) {
+    .prose p[lang="th"] {
+        text-align: justify;
+        text-justify: inter-character;
+    }
+}
+
 .prose a {
     color: var(--accent-text);
     text-decoration: underline;
