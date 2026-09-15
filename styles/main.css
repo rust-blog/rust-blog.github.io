@@ -1,7 +1,7 @@
 /*
    rust-blog - "The Artifact" design system
-   Editorial, type-first, restrained. Hairlines over shadows, serif over
-   sans, mono for the labels that tell the truth.
+   Editorial, type-first, restrained. Hairlines over shadows, one Thai-first
+   family over webfonts, mono for the labels that tell the truth.
 */
 
 :root {
@@ -56,10 +56,19 @@
 
     --font-sans: system-ui, -apple-system, "Segoe UI", Roboto,
         "Helvetica Neue", Arial, "Noto Sans Thai", sans-serif;
+    /* Content stack: system Thai families that ship Latin too, so Thai and
+       Latin share one design and one apparent size. No system Thai serif
+       exists, so prose runs these instead of pairing a Latin serif with an
+       unrelated Thai fallback (the old two-fonts-on-one-line problem). */
+    --font-content: "Sukhumvit Set", "Leelawadee UI", "Leelawadee",
+        "Noto Sans Thai", Tahoma, "Thonburi", var(--font-sans);
     --font-serif: "Iowan Old Style", "Palatino Linotype", Georgia,
         "Times New Roman", "Noto Serif Thai", serif;
+    /* Thai fonts trail the mono faces: Latin stays monospaced, Thai (search
+       box, inline code, tags) uses a proportional face instead of Thonburi. */
     --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono",
-        "Fira Code", Menlo, Consolas, monospace;
+        "Fira Code", Menlo, Consolas, "Sukhumvit Set", "Leelawadee UI",
+        "Noto Sans Thai", monospace;
 
     --maxw: 960px;
     --maxw-prose: 680px;
@@ -445,11 +454,10 @@ button {
 
 .post-row-title {
     margin: 0 0 0.5rem;
-    font-family: var(--font-serif);
+    font-family: var(--font-content);
     font-size: 1.45rem;
-    line-height: 1.3;
+    line-height: 1.4;
     font-weight: 600;
-    letter-spacing: -0.01em;
     color: var(--text-strong);
     transition: color 0.18s ease;
 }
@@ -460,9 +468,10 @@ a:hover .post-row-title {
 
 .post-row-desc {
     margin: 0 0 0.7rem;
+    font-family: var(--font-content);
     color: var(--text-muted);
     font-size: 0.94rem;
-    line-height: 1.7;
+    line-height: 1.75;
 }
 
 .post-row-tags {
@@ -484,7 +493,7 @@ a:hover .post-row-title {
     font-size: 1.05rem;
 }
 
-/* Article - serif prose, mono meta */
+/* Article - Thai-first prose, mono meta */
 
 .post-page,
 .about-page {
@@ -526,11 +535,10 @@ a:hover .back-link,
 
 .article-title {
     margin: 0 0 1.1rem;
-    font-family: var(--font-serif);
+    font-family: var(--font-content);
     font-size: clamp(1.75rem, 4.5vw, 2.5rem);
-    line-height: 1.22;
+    line-height: 1.35;
     font-weight: 600;
-    letter-spacing: -0.02em;
     color: var(--text-strong);
 }
 
@@ -546,7 +554,7 @@ a:hover .back-link,
 
 /* prose typography */
 .prose {
-    font-family: var(--font-serif);
+    font-family: var(--font-content);
     font-size: 1.1rem;
     line-height: 1.85;
     color: var(--text);
@@ -559,16 +567,15 @@ a:hover .back-link,
 .prose h2,
 .prose h3,
 .prose h4 {
-    font-family: var(--font-serif);
+    font-family: var(--font-content);
     color: var(--text-strong);
-    line-height: 1.3;
-    letter-spacing: -0.01em;
+    line-height: 1.45;
     margin: 2.4rem 0 1rem;
 }
 
 .prose h2 {
     font-size: 1.5rem;
-    font-weight: 650;
+    font-weight: 600;
 }
 
 .prose h3 {
@@ -633,7 +640,7 @@ a:hover .back-link,
 
 .prose strong {
     color: var(--text-strong);
-    font-weight: 650;
+    font-weight: 600;
 }
 
 .prose ul,
@@ -651,7 +658,6 @@ a:hover .back-link,
     padding: 0.1rem 0 0.1rem 1.4rem;
     border-left: 2px solid var(--accent);
     color: var(--text-muted);
-    font-style: italic;
 }
 
 .prose blockquote p {
@@ -841,7 +847,7 @@ a:hover .back-link,
     margin: 1.75rem 0;
     border-collapse: collapse;
     font-size: 0.92rem;
-    font-family: var(--font-sans);
+    font-family: var(--font-content);
 }
 
 .prose th,
@@ -853,7 +859,7 @@ a:hover .back-link,
 
 .prose th {
     background: var(--surface-2);
-    font-weight: 650;
+    font-weight: 600;
 }
 
 .prose img {
@@ -872,7 +878,7 @@ a:hover .back-link,
 }
 
 .related-title {
-    font-family: var(--font-serif);
+    font-family: var(--font-content);
     font-size: 1.35rem;
     font-weight: 600;
     color: var(--text-strong);
@@ -880,7 +886,6 @@ a:hover .back-link,
 }
 
 .about-page .prose {
-    font-family: var(--font-sans);
     font-size: 1rem;
 }
 
@@ -907,7 +912,7 @@ a:hover .back-link,
 }
 
 .notfound-title {
-    font-family: var(--font-serif);
+    font-family: var(--font-content);
     font-size: 1.5rem;
     font-weight: 600;
     margin: 1.2rem 0 0.5rem;
