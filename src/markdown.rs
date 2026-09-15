@@ -21,16 +21,17 @@ fn syntax_set() -> &'static SyntaxSet {
   })
 }
 
-/// Embedded theme set; we render with a dark plate in both UI themes.
+/// Embedded syntax theme: Catppuccin Mocha, the palette the framed code
+/// blocks are designed around (muted pastels over a `#1e1e2e` plate), so the
+/// site keeps the dark code surface in both UI themes. Falls back to syntect's
+/// default dark theme if the asset ever fails to parse - a broken theme must
+/// never take the site down.
 fn theme() -> &'static syntect::highlighting::Theme {
   static TH: OnceLock<syntect::highlighting::Theme> = OnceLock::new();
   TH.get_or_init(|| {
-    let themes = ThemeSet::load_defaults();
-    themes
-      .themes
-      .get("base16-eighties.dark")
-      .unwrap_or(&themes.themes["InspiredGitHub"])
-      .clone()
+    let mut file = std::io::Cursor::new(include_bytes!("../assets/Catppuccin-Mocha.tmTheme"));
+    ThemeSet::load_from_reader(&mut file)
+      .unwrap_or_else(|_| ThemeSet::load_defaults().themes["base16-eighties.dark"].clone())
   })
 }
 
@@ -39,8 +40,9 @@ fn theme() -> &'static syntect::highlighting::Theme {
 /// Enables GitHub-flavoured extensions (tables, strikethrough, task lists,
 /// footnotes, and heading attributes) so authors can write rich posts.
 /// Fenced code blocks are highlighted with `syntect` at render time - no
-/// JavaScript, no CDN - and labelled with their language when syntect knows
-/// it.
+/// JavaScript, no CDN - and wrapped in the framed code block: traffic-light
+/// dots, an optional filename (` ```rust title="src/main.rs" `), the language
+/// badge, and a copy button.
 pub fn render(md: &str) -> String {
   let parser = Parser::new_ext(md, Options::all());
   let mut events = parser.collect::<Vec<_>>();
@@ -57,9 +59,12 @@ pub fn render(md: &str) -> String {
     } else if let Event::End(TagEnd::Table) = &events[i] {
       events[i] = Event::Html(pulldown_cmark::CowStr::from("</tbody></table></div>\n"));
     } else if let Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(info))) = &events[i] {
+      let info = info.to_string();
+      // The fence language is the first comma/space-separated token, so
+      // `rust,ignore` and `rust title="main.rs"` both resolve to `rust`.
       let lang = info
-        .split_whitespace()
-        .next()
+        .split(|c: char| c == ',' || c.is_ascii_whitespace())
+        .find(|t| !t.is_empty())
         .unwrap_or_default()
         .to_string();
       // Gather the code text up to the matching End event.
@@ -85,11 +90,9 @@ pub fn render(md: &str) -> String {
       } else {
         // Info strings often carry attributes after a comma (rust,ignore);
         // use the first token syntect actually knows so highlighting works.
-        let known = resolve_lang(&lang);
-        let highlighted = highlight_code(known, &code);
-        events[i] = Event::Html(pulldown_cmark::CowStr::Boxed(
-          format!("<pre class=\"code-plate\">{highlighted}</pre>").into_boxed_str(),
-        ));
+        let highlighted = highlight_code(resolve_lang(&lang), &code);
+        let frame = code_frame(&lang, fence_title(&info), &highlighted);
+        events[i] = Event::Html(pulldown_cmark::CowStr::Boxed(frame.into_boxed_str()));
         events.drain((i + 1)..=j.min(events.len() - 1));
       }
     }
@@ -113,6 +116,99 @@ fn resolve_lang(info: &str) -> &str {
     .unwrap_or("")
 }
 
+/// Languages that read as shell sessions: without an explicit title their
+/// frame is labelled "Terminal", mirroring the reference blog.
+const TERMINAL_LANGUAGES: [&str; 9] = [
+  "ansi",
+  "bash",
+  "console",
+  "fish",
+  "powershell",
+  "sh",
+  "shell",
+  "shellsession",
+  "zsh",
+];
+
+/// The copy button that sits at the right of every code frame. The label and
+/// the clipboard wiring are handled by the post page (see `pages/post.rs`).
+const COPY_BUTTON: &str = concat!(
+  r#"<button type="button" class="code-copy" data-copy-code aria-label="Copy code">"#,
+  r#"<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">"#,
+  r#"<rect x="8" y="8" width="11" height="11" rx="2"/>"#,
+  r#"<path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>"#,
+  r#"</svg>"#,
+  r#"<span data-copy-label aria-live="polite">Copy</span>"#,
+  r#"</button>"#,
+);
+
+/// Wrap highlighted code in the framed block: a header bar with traffic-light
+/// dots, an optional title (filename or "Terminal"), the language badge, and
+/// the copy button - then the code plate itself.
+fn code_frame(lang: &str, title: Option<&str>, highlighted: &str) -> String {
+  let badge = if lang.is_empty() { "text" } else { lang };
+  let label = title.map(str::to_string).or_else(|| {
+    TERMINAL_LANGUAGES
+      .contains(&lang)
+      .then(|| "Terminal".to_string())
+  });
+
+  let mut out = String::with_capacity(highlighted.len() + 512);
+  out.push_str("<figure class=\"code-frame\"><figcaption class=\"code-frame-bar\">");
+  out.push_str("<span class=\"code-frame-dots\" aria-hidden=\"true\"><i></i><i></i><i></i></span>");
+  if let Some(label) = label {
+    out.push_str("<span class=\"code-frame-title\">");
+    out.push_str(&escape_html(&label));
+    out.push_str("</span>");
+  }
+  out.push_str("<span class=\"code-frame-lang\">");
+  out.push_str(&escape_html(badge));
+  out.push_str("</span>");
+  out.push_str(COPY_BUTTON);
+  out.push_str("</figcaption><pre class=\"code-plate\"><code>");
+  out.push_str(highlighted);
+  out.push_str("</code></pre></figure>");
+  out
+}
+
+/// Extract an optional `title="..."` from a fence info string (single quotes
+/// and bare tokens also work) - the authoring convention for naming the file
+/// shown in a code frame.
+fn fence_title(info: &str) -> Option<&str> {
+  let rest = info.split_once("title=")?.1.trim_start();
+  let title = match rest
+    .chars()
+    .next()
+    .filter(|c| matches!(c, '"' | '\'' | '`'))
+  {
+    Some(quote) => rest[quote.len_utf8()..]
+      .split(quote)
+      .next()
+      .unwrap_or_default(),
+    None => {
+      let end = rest.find(char::is_whitespace).unwrap_or(rest.len());
+      &rest[..end]
+    }
+  };
+  (!title.is_empty()).then_some(title)
+}
+
+/// Minimal HTML escaping for fence metadata (titles and language tokens).
+fn escape_html(s: &str) -> String {
+  let mut out = String::with_capacity(s.len());
+  for c in s.chars() {
+    match c {
+      '&' => out.push_str("&amp;"),
+      '<' => out.push_str("&lt;"),
+      '>' => out.push_str("&gt;"),
+      '"' => out.push_str("&quot;"),
+      '\'' => out.push_str("&#39;"),
+      _ => out.push(c),
+    }
+  }
+  out
+}
+
 /// Highlight a code block body with syntect, keeping the background out so
 /// the design system's `--code-bg` plate shows through.
 fn highlight_code(lang: &str, code: &str) -> String {
@@ -128,8 +224,11 @@ fn highlight_code(lang: &str, code: &str) -> String {
     .trim_start_matches(|c| c != '>')
     .trim_start_matches('>')
     .trim_end();
-  let inner = trimmed.strip_suffix("</pre>").unwrap_or(trimmed);
-  scrub_backgrounds(inner)
+  // syntect opens with `<pre …>\n`; that cosmetic newline is ignored only when
+  // it follows a `<pre>` start tag, so drop it - otherwise it becomes a real
+  // blank first line inside our `<code>` and pushes the code down.
+  let visible = trimmed.strip_suffix("</pre>").unwrap_or(trimmed);
+  scrub_backgrounds(visible.strip_prefix('\n').unwrap_or(visible))
 }
 
 /// Remove `background-color:#…;` declarations from syntect's inline styles so
@@ -167,6 +266,58 @@ mod tests {
     let html = render(md);
     assert!(html.contains("code-plate"));
     assert!(html.contains("plain text here"));
+  }
+
+  #[test]
+  fn code_frame_carries_dots_title_language_and_copy() {
+    let md = "```rust title=\"src/main.rs\"\nfn main() {}\n```";
+    let html = render(md);
+    assert!(html.contains("<figure class=\"code-frame\">"), "{html}");
+    assert!(html.contains("code-frame-dots"), "{html}");
+    assert!(
+      html.contains("<span class=\"code-frame-title\">src/main.rs</span>"),
+      "{html}"
+    );
+    assert!(
+      html.contains("<span class=\"code-frame-lang\">rust</span>"),
+      "{html}"
+    );
+    assert!(html.contains("data-copy-code"), "{html}");
+    assert!(html.contains("<code>"), "{html}");
+    assert!(!html.contains("<code>\n"), "no blank first line: {html}");
+  }
+
+  #[test]
+  fn shell_frame_is_labelled_terminal_when_untitled() {
+    let html = render("```bash\ncargo test\n```");
+    assert!(html.contains(">Terminal</span>"), "{html}");
+  }
+
+  #[test]
+  fn plain_fence_is_badged_text() {
+    let html = render("```\nplain\n```");
+    assert!(html.contains(">text</span>"), "{html}");
+  }
+
+  #[test]
+  fn fence_title_is_html_escaped() {
+    let html = render("```rust title=\"a<b>&c\"\nfn main() {}\n```");
+    assert!(html.contains("a&lt;b&gt;&amp;c"), "{html}");
+  }
+
+  #[test]
+  fn embedded_theme_is_catppuccin_mocha() {
+    // Mauve (`#cba6f7`) is a signature Mocha colour; the previous base16
+    // theme coloured keywords `#cc99cc`.
+    let html = render("```rust\nfn main() {}\n```");
+    assert!(
+      html.contains("#cba6f7"),
+      "catppuccin mocha not loaded: {html}"
+    );
+    assert!(
+      !html.contains("#cc99cc"),
+      "old base16 theme still active: {html}"
+    );
   }
 
   #[test]

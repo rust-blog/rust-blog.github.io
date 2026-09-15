@@ -38,10 +38,13 @@
     --accent-soft: var(--rust-soft);
     --tag-text: var(--ink-700);
 
-    /* code keeps a dark surface in both themes */
-    --code-bg: #17150f;
-    --code-text: #e8e4da;
-    --code-border: #2c2820;
+    /* code keeps a dark surface in both themes - Catppuccin Mocha, so the
+       framed blocks carry the same palette as the reference blog */
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+    --code-border: #313244;
+    --code-bar-text: #a6adc8;
+    --code-line: rgba(205, 214, 244, 0.1);
 
     --shadow-xs: 0 1px 2px rgba(20, 18, 15, 0.05);
     --shadow-sm: 0 1px 3px rgba(20, 18, 15, 0.07),
@@ -664,7 +667,7 @@ a:hover .back-link,
 /* inline code */
 .prose :not(pre) > code {
     font-family: var(--font-mono);
-    font-size: 0.86em;
+    font-size: 0.88em;
     padding: 0.12em 0.38em;
     border-radius: var(--radius-sm);
     background: var(--surface-2);
@@ -705,10 +708,132 @@ a:hover .back-link,
 
 .prose pre code {
     font-family: var(--font-mono);
-    font-size: 0.8rem;
-    line-height: 1.6;
+    font-size: 0.84rem;
+    line-height: 1.7;
     background: transparent;
     padding: 0;
+}
+
+/* Keep the code/body ratio of the reference blog: a small step up on
+   desktop, so code and article text stay in the same visual key. */
+@media (min-width: 640px) {
+    .prose pre code {
+        font-size: 0.875rem;
+    }
+}
+
+/* framed code blocks - traffic-light dots, filename, language badge, copy
+   button. The header bar sits on the same plate the code is highlighted on. */
+.prose .code-frame {
+    margin: 2rem 0;
+    border: 1px solid var(--code-border);
+    border-radius: var(--radius-md);
+    background: var(--code-bg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.prose .code-frame pre {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.prose .code-frame-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: 2.75rem;
+    padding-inline: 0.9rem;
+    border-bottom: 1px solid var(--code-line);
+}
+
+.prose .code-frame-dots {
+    display: inline-flex;
+    flex-shrink: 0;
+    gap: 0.375rem;
+}
+
+.prose .code-frame-dots i {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+}
+
+.prose .code-frame-dots i:nth-child(1) {
+    background: #f38ba8;
+}
+
+.prose .code-frame-dots i:nth-child(2) {
+    background: #f9e2af;
+}
+
+.prose .code-frame-dots i:nth-child(3) {
+    background: #a6e3a1;
+}
+
+.prose .code-frame-title {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--code-bar-text);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.prose .code-frame-lang {
+    margin-left: auto;
+    color: var(--code-bar-text);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.prose .code-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--code-bar-text);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.prose .code-copy:hover {
+    background: rgba(205, 214, 244, 0.1);
+    color: var(--code-text);
+}
+
+.prose .code-copy svg {
+    width: 0.875rem;
+    height: 0.875rem;
+}
+
+.prose .code-frame pre ::selection {
+    background: rgba(137, 180, 250, 0.3);
+    color: var(--code-text);
+}
+
+.prose .code-frame pre::-webkit-scrollbar {
+    height: 0.65rem;
+}
+
+.prose .code-frame pre::-webkit-scrollbar-thumb {
+    border: 0.2rem solid var(--code-bg);
+    border-radius: 999px;
+    background: #6c7086;
 }
 
 .prose table {

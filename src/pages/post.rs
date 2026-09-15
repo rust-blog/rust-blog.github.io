@@ -1,8 +1,9 @@
 use leptos::prelude::*;
 use leptos_meta::{Meta, Title};
 use leptos_router::hooks::use_params_map;
-use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::Closure;
+use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen_futures::{JsFuture, spawn_local};
 
 use crate::components::PostCard;
 use crate::pages::not_found::NotFound;
@@ -110,6 +111,7 @@ pub fn Post() -> impl IntoView {
                               <div
                                   class="prose"
                                   inner_html=Signal::derive(move || html.get())
+                                  on:click=on_prose_click
                               ></div>
                           </article>
 
@@ -200,4 +202,68 @@ fn build_counter(slot: &web_sys::HtmlElement) {
   // Keep the demo's reactive owner alive for the page lifetime so the
   // display-sync effect keeps tracking the signal.
   std::mem::forget(owner);
+}
+
+/// Delegate clicks inside the rendered post body to the framed code blocks'
+/// copy buttons. The body is injected as raw HTML, so listening on the stable
+/// `.prose` container is safer than wiring each button after injection.
+fn on_prose_click(ev: web_sys::MouseEvent) {
+  let Some(target) = ev
+    .target()
+    .and_then(|t| t.dyn_into::<web_sys::Element>().ok())
+  else {
+    return;
+  };
+  let Ok(Some(button)) = target.closest("[data-copy-code]") else {
+    return;
+  };
+  copy_code(&button);
+}
+
+/// Copy the framed block's code to the clipboard and flash the button label.
+fn copy_code(button: &web_sys::Element) {
+  let Some(frame) = button.closest(".code-frame").ok().flatten() else {
+    return;
+  };
+  let Some(code) = frame.query_selector("code").ok().flatten() else {
+    return;
+  };
+  let label = button.query_selector("[data-copy-label]").ok().flatten();
+  let text = code.text_content().unwrap_or_default();
+
+  let Some(window) = web_sys::window() else {
+    return;
+  };
+  // `navigator.clipboard` is absent outside secure contexts; read it
+  // reflectively so a missing API degrades to a message instead of a panic.
+  let clipboard =
+    js_sys::Reflect::get(window.navigator().as_ref(), &JsValue::from_str("clipboard"))
+      .ok()
+      .filter(|value| !value.is_undefined() && !value.is_null());
+  let Some(clipboard) = clipboard.map(|value| value.unchecked_into::<web_sys::Clipboard>()) else {
+    flash_label(&window, &label, "Copy failed");
+    return;
+  };
+  let promise = clipboard.write_text(&text);
+
+  let window_for_task = window.clone();
+  spawn_local(async move {
+    let message = match JsFuture::from(promise).await {
+      Ok(_) => "Copied",
+      Err(_) => "Copy failed",
+    };
+    flash_label(&window_for_task, &label, message);
+  });
+}
+
+/// Show a transient message on a copy button, restoring "Copy" after a beat.
+fn flash_label(window: &web_sys::Window, label: &Option<web_sys::Element>, message: &str) {
+  let Some(label) = label else {
+    return;
+  };
+  label.set_text_content(Some(message));
+  let label = label.clone();
+  let restore = Closure::once_into_js(move || label.set_text_content(Some("Copy")));
+  let _ =
+    window.set_timeout_with_callback_and_timeout_and_arguments_0(restore.unchecked_ref(), 1600);
 }

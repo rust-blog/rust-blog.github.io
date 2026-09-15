@@ -8,11 +8,10 @@ use rust_blog::markdown;
 const GOLDEN_HTML: &str = r##"<h1>Golden fixture</h1>
 <p>A paragraph with <em>emphasis</em>, <strong>strong</strong>, and a <a href="https://rust-lang.org">link</a>.</p>
 <h2>Heading two</h2>
-<pre class="code-plate">
-<span style="color:#cc99cc;">fn </span><span style="color:#6699cc;">main</span><span style="color:#d3d0c8;">() {
-</span><span style="color:#d3d0c8;">    println!(&quot;</span><span style="color:#99cc99;">hi</span><span style="color:#d3d0c8;">&quot;);
-</span><span style="color:#d3d0c8;">}
-</span></pre><div class="table-wrap"><table><thead><tr><th>Name</th><th>Value</th></tr></thead><tbody>
+<figure class="code-frame"><figcaption class="code-frame-bar"><span class="code-frame-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="code-frame-lang">rust</span><button type="button" class="code-copy" data-copy-code aria-label="Copy code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><span data-copy-label aria-live="polite">Copy</span></button></figcaption><pre class="code-plate"><code><span style="color:#cba6f7;">fn </span><span style="font-style:italic;color:#89b4fa;">main</span><span style="color:#9399b2;">() {
+</span><span style="color:#cdd6f4;">    </span><span style="font-style:italic;color:#89b4fa;">println!</span><span style="color:#9399b2;">(</span><span style="color:#a6e3a1;">&quot;hi&quot;</span><span style="color:#9399b2;">);
+</span><span style="color:#9399b2;">}
+</span></code></pre></figure><div class="table-wrap"><table><thead><tr><th>Name</th><th>Value</th></tr></thead><tbody>
 <tr><td>Rust</td><td>wasm</td></tr>
 <tr><td>Thai</td><td>ไทย</td></tr>
 </tbody></table></div>
