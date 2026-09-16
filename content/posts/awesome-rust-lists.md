@@ -26,9 +26,6 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 - [rustcc/awesome-rust](https://github.com/rustcc/awesome-rust) - awesome-rust ฉบับภาษาจีน รวบรวมโดยคอมมูนิตี้ RustCC
 - [unpluggedcoder/awesome-rust-tools](https://github.com/unpluggedcoder/awesome-rust-tools) - รวมเครื่องมือสาย productivity เจ๋ง ๆ ที่พัฒนาด้วย Rust
 - [UgurcanAkkok/AreWeRustYet](https://github.com/UgurcanAkkok/AreWeRustYet) - สารบัญรวบรวมเว็บไซต์ตระกูล "Are we X yet?" ทั้งหมดของวงการ Rust
-- [KernelErr/awesome-rust-zh](https://github.com/KernelErr/awesome-rust-zh) - ลิสต์ฉบับภาษาจีนที่มีการอัปเดตต่อเนื่องทุกสัปดาห์
-- [chinanf-boy/awesome-rust-zh](https://github.com/chinanf-boy/awesome-rust-zh) - ฉบับแปลและเรียบเรียงเป็นภาษาจีนจาก awesome-rust ตัวหลัก
-- [ZhangHanDong/star-rust](https://github.com/ZhangHanDong/star-rust) - คัดสรรและจัดอันดับโปรเจกต์ Rust เด่น ๆ ในมุมมองที่ต่างออกไป
 - [jaywcjlove/awesome-rust-apps](https://github.com/jaywcjlove/awesome-rust-apps) - แหล่งรวมแอปพลิเคชันสำเร็จรูปที่สร้างขึ้นด้วยภาษา Rust
 
 ข้อสังเกตคือมี repo ที่ใช้ชื่อซ้ำกันว่า `awesome-rust` อยู่หลายเจ้าจนอาจทำให้สับสนได้ หากต้องการอ้างอิงข้อมูลมาตรฐาน ให้ยึดคลังของ **rust-unofficial** เป็นหลักครับ เนื่องจากเป็นคลังที่มีคนติดตามมากที่สุดและมีรายการอัปเดตมากกว่าหนึ่งพันรายการ
