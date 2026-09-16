@@ -25,6 +25,7 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 - [unpluggedcoder/awesome-rust-tools](https://github.com/unpluggedcoder/awesome-rust-tools) - รวมเครื่องมือสาย productivity เจ๋ง ๆ ที่พัฒนาด้วย Rust
 - [jaywcjlove/awesome-rust-apps](https://github.com/jaywcjlove/awesome-rust-apps) - แหล่งรวมแอปพลิเคชันสำเร็จรูปที่สร้างขึ้นด้วยภาษา Rust
 - [Correia-jpv/fucking-awesome-rust](https://github.com/Correia-jpv/fucking-awesome-rust) - awesome-rust ฉบับที่กำกับตัวเลขดาวและ fork ของทุกโปรเจกต์ไว้ข้างทุกรายการ พร้อมอัปเดตอัตโนมัติสม่ำเสมอ
+- [amanbolat/awesome-rust-with-stars](https://github.com/amanbolat/awesome-rust-with-stars) - ลิสต์โปรเจกต์ Rust พร้อมจำนวนดาว จัดเรียงให้เห็นโปรเจกต์ยอดนิยมได้ไวขึ้น
 
 ข้อสังเกตคือมี repo ที่ใช้ชื่อซ้ำกันว่า `awesome-rust` อยู่หลายเจ้าจนอาจทำให้สับสนได้ หากต้องการอ้างอิงข้อมูลมาตรฐาน ให้ยึดคลังของ **rust-unofficial** เป็นหลักครับ เนื่องจากเป็นคลังที่มีคนติดตามมากที่สุดและมีรายการอัปเดตมากกว่าหนึ่งพันรายการ
 
@@ -55,6 +56,7 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 - [malisper/awesome-ai-rust-rewrites](https://github.com/malisper/awesome-ai-rust-rewrites) - รวมเคสโปรเจกต์ที่ใช้ AI เข้ามาช่วย rewrite โค้ดใหม่ให้กลายเป็นภาษา Rust
 - [dhilipsiva/awesome-rust-ml](https://github.com/dhilipsiva/awesome-rust-ml) - แหล่งรวม repository ด้าน ML/DL ที่เขียนด้วย Rust
 - [ever-works/awesome-rust-ai-libraries](https://github.com/ever-works/awesome-rust-ai-libraries) - ไดเรกทอรีรวบรวม crate สาย AI พร้อมตัวเลขดาวและลิงก์เอกสาร
+- [adventurewave-labs/awesome-rust-agentics](https://github.com/adventurewave-labs/awesome-rust-agentics) - รวมไลบรารีและเครื่องมือสำหรับ agentic AI ทั้ง agent framework, inference, MCP และ vector store
 
 ## Web, WASM และ cloud
 
