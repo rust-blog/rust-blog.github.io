@@ -49,7 +49,6 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 ## AI, ML และ LLM
 
 - [vaaaaanquish/Awesome-Rust-MachineLearning](https://github.com/vaaaaanquish/Awesome-Rust-MachineLearning) - คลังหลักสาย ML ใน Rust มีทั้งไลบรารี งานวิจัย (paper) และบทความประกอบ
-- [jondot/awesome-rust-llm](https://github.com/jondot/awesome-rust-llm) - รวบรวมเครื่องมือด้าน LLM, GPT และ AI tooling ที่พัฒนาด้วย Rust
 - [e-tornike/best-of-ml-rust](https://github.com/e-tornike/best-of-ml-rust) - จัดอันดับความนิยมและคุณภาพของไลบรารี ML ใน Rust
 - [BurtonQin/Awesome-Rust-Neural-Network](https://github.com/BurtonQin/Awesome-Rust-Neural-Network) - รวบรวมโปรเจกต์ที่เกี่ยวข้องกับ neural network ใน Rust
 - [malisper/awesome-ai-rust-rewrites](https://github.com/malisper/awesome-ai-rust-rewrites) - รวมเคสโปรเจกต์ที่ใช้ AI เข้ามาช่วย rewrite โค้ดใหม่ให้กลายเป็นภาษา Rust
