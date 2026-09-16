@@ -47,6 +47,7 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 - [chalex-eth/awesome-ethers-rs](https://github.com/chalex-eth/awesome-ethers-rs) - แหล่งรวม ethers-rs และเครื่องมือที่เกี่ยวข้อง
 - [BitcoinDevelopersAcademy/awesome-rust-bitcoin](https://github.com/BitcoinDevelopersAcademy/awesome-rust-bitcoin) - รวมไลบรารีและโปรเจกต์เกี่ยวกับ Bitcoin ในภาษา Rust
 - [2nd-Layer/awesome-cardano-rust](https://github.com/2nd-Layer/awesome-cardano-rust) - แหล่งข้อมูลและการพัฒนาบน Cardano ด้วย Rust
+- [paulveillard/cybersecurity-cryptography-rust](https://github.com/paulveillard/cybersecurity-cryptography-rust) - เจาะลึกถึงระดับอัลกอริทึม ตั้งแต่ symmetric, hash, digital signature ไปจนถึง zero-knowledge proof และ MPC
 
 ## AI, ML และ LLM
 
@@ -73,6 +74,7 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 - [edo-zhou/awesome-gpui](https://github.com/edo-zhou/awesome-gpui) - GPUI จากค่าย Zed สำหรับนำมาพัฒนาแอปพลิเคชันบนเดสก์ท็อป
 - [vonnieda/awesome-egui](https://github.com/vonnieda/awesome-egui) - รวบรวมโค้ดตัวอย่างและทรัพยากรสำหรับใช้งานร่วมกับ egui
 - [nmoutschen/awesome-serverless-rust](https://github.com/nmoutschen/awesome-serverless-rust) - การพัฒนาระบบ serverless และ FaaS ด้วยภาษา Rust
+- [naranyala/awesome-rust-desktop-app](https://github.com/naranyala/awesome-rust-desktop-app) - แคตตาล็อกการพัฒนาเดสก์ท็อปแอปด้วย Rust แบ่งตามชั้นสถาปัตยกรรม ตั้งแต่ GUI framework ไปจนถึง packaging และ cross-compilation
 
 ## Game, graphics และ audio
 
@@ -106,6 +108,7 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 - [keller-mark/awesome-rust-vis](https://github.com/keller-mark/awesome-rust-vis) - รวม crate สำหรับการทำ data visualization
 - [BabarZKhan/awesome-Rust-compilers](https://github.com/BabarZKhan/awesome-Rust-compilers) - รวมโครงสร้างพื้นฐานคอมไพเลอร์ Rust, IR แบบ SSA และ codegen backend ตั้งแต่ rustc internals ไปจนถึง MLIR/LLVM และ GPU
 - [rp-libs/awesome-rust-python](https://github.com/rp-libs/awesome-rust-python) - รวมไลบรารีและเครื่องมือฝั่ง Python ที่ขับเคลื่อนด้วย Rust ตั้งแต่ PyO3, maturin ไปจนถึง polars และ ruff
+- [drtychai/awesome-functional-rust](https://github.com/drtychai/awesome-functional-rust) - รวมภาษาและโปรเจกต์สาย functional programming ที่เขียนด้วย Rust ตั้งแต่ lambda calculus ไปจนถึงภาษา FP เต็มรูปแบบ
 
 > คลังในกลุ่มนี้เป็นหัวข้อที่เฉพาะทางสูงมาก จึงอาจมีคนรู้จักไม่มากนัก แต่นั่นไม่ได้แปลว่าเนื้อหาข้างในจะด้อยคุณภาพ แนะนำให้ลองกดเข้าไปสำรวจดูเนื้อหาก่อนตัดสินใจครับ
 
@@ -122,11 +125,12 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 
 ## ไม่ใช่ awesome list แต่ควรรู้จัก
 
-แม้ 3 แหล่งข้อมูลนี้จะไม่เข้าข่าย awesome list แบบคลังอื่น ๆ แต่ก็จัดว่าเป็นแหล่งความรู้ชั้นยอดที่คนเขียน Rust ทุกคนควรเปิดอ่านและเซฟเก็บไว้
+แม้ 4 แหล่งข้อมูลนี้จะไม่เข้าข่าย awesome list แบบคลังอื่น ๆ แต่ก็จัดว่าเป็นแหล่งความรู้ชั้นยอดที่คนเขียน Rust ทุกคนควรเปิดอ่านและเซฟเก็บไว้
 
 - [rust-unofficial/patterns](https://github.com/rust-unofficial/patterns) - รวบรวม Rust Design Patterns, anti-patterns และสำนวนการเขียนโค้ด (idioms) ที่ถูกต้อง
 - [rust-unofficial/too-many-lists](https://github.com/rust-unofficial/too-many-lists) - เรียนรู้เรื่อง ownership ให้แตกฉานผ่านการลงมือเขียน linked list หลายรูปแบบ (มีฉบับแปลไทย)
 - [nnethercote/perf-book](https://github.com/nnethercote/perf-book) - The Rust Performance Book คู่มือสอนวิธีจูนและ optimize โค้ดอย่างมีหลักการและเป็นระบบ
+- [flosse/rust-web-framework-comparison](https://github.com/flosse/rust-web-framework-comparison) - ตารางเปรียบเทียบเว็บเฟรมเวิร์ก Rust ทั้งฝั่ง frontend (WASM) และ server พร้อมข้อมูล activity, architecture และเวอร์ชันล่าสุด
 
 ## วิธีหา awesome list เพิ่มเติมด้วยตัวเอง
 
