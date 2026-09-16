@@ -32,9 +32,7 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 - [rust-embedded/awesome-embedded-rust](https://github.com/rust-embedded/awesome-embedded-rust) - คลังหลักสาย embedded รวบรวมทั้ง HAL, RTOS และบอร์ดพัฒนาต่าง ๆ ไว้อย่างครบครัน
 - [esp-rs/awesome-esp-rust](https://github.com/esp-rs/awesome-esp-rust) - สำหรับชิป ESP32 โดยเฉพาะ ตั้งแต่เริ่มต้นสั่ง blink ไฟ ไปจนถึงงานระดับ production
 - [aya-rs/awesome-aya](https://github.com/aya-rs/awesome-aya) - การพัฒนา eBPF ด้วย Rust ผ่านเฟรมเวิร์ก aya
-- [avr-rust/awesome-avr-rust](https://github.com/avr-rust/awesome-avr-rust) - ไมโครคอนโทรลเลอร์ฝั่ง AVR (เช่น ตระกูล Arduino Uno เป็นต้น)
 - [AeroRust/awesome-space](https://github.com/AeroRust/awesome-space) - เทคโนโลยีด้านอวกาศและการบิน ตั้งแต่ไดรเวอร์ควบคุมดาวเทียมไปจนถึงระบบ ground station
-- [rustsbi/awesome-rustsbi](https://github.com/rustsbi/awesome-rustsbi) - RISC-V SBI และงานพัฒนาระบบระดับล่าง (system-level)
 - [dfrankland/awesome-rust-keyboard-firmware](https://github.com/dfrankland/awesome-rust-keyboard-firmware) - เฟิร์มแวร์คีย์บอร์ดที่พัฒนาขึ้นด้วย Rust ทั้งหมด
 
 ## Blockchain และ cryptography
