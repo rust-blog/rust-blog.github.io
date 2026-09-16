@@ -104,6 +104,7 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 - [commons-research/awesome-rust-datascience](https://github.com/commons-research/awesome-rust-datascience) - การนำ Rust ไปประยุกต์ใช้กับงานด้าน Data Science
 - [owizdom/awesome-rust-quant](https://github.com/owizdom/awesome-rust-quant) - การเขียนโปรแกรมสำหรับงานสายการเงินเชิงปริมาณ (Quantitative Finance)
 - [keller-mark/awesome-rust-vis](https://github.com/keller-mark/awesome-rust-vis) - รวม crate สำหรับการทำ data visualization
+- [BabarZKhan/awesome-Rust-compilers](https://github.com/BabarZKhan/awesome-Rust-compilers) - รวมโครงสร้างพื้นฐานคอมไพเลอร์ Rust, IR แบบ SSA และ codegen backend ตั้งแต่ rustc internals ไปจนถึง MLIR/LLVM และ GPU
 
 > คลังในกลุ่มนี้เป็นหัวข้อที่เฉพาะทางสูงมาก จึงอาจมีคนรู้จักไม่มากนัก แต่นั่นไม่ได้แปลว่าเนื้อหาข้างในจะด้อยคุณภาพ แนะนำให้ลองกดเข้าไปสำรวจดูเนื้อหาก่อนตัดสินใจครับ
 
