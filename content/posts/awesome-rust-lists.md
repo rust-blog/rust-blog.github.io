@@ -45,7 +45,6 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 - [chalex-eth/awesome-ethers-rs](https://github.com/chalex-eth/awesome-ethers-rs) - แหล่งรวม ethers-rs และเครื่องมือที่เกี่ยวข้อง
 - [BitcoinDevelopersAcademy/awesome-rust-bitcoin](https://github.com/BitcoinDevelopersAcademy/awesome-rust-bitcoin) - รวมไลบรารีและโปรเจกต์เกี่ยวกับ Bitcoin ในภาษา Rust
 - [2nd-Layer/awesome-cardano-rust](https://github.com/2nd-Layer/awesome-cardano-rust) - แหล่งข้อมูลและการพัฒนาบน Cardano ด้วย Rust
-- [DeFiHackLabs/awesome-rust-web3-security](https://github.com/DeFiHackLabs/awesome-rust-web3-security) - ด้านความปลอดภัย (security) ของงานสาย Web3 ที่เขียนด้วย Rust
 
 ## AI, ML และ LLM
 
