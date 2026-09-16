@@ -24,6 +24,7 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 - [awesome-rust-com/awesome-rust](https://github.com/awesome-rust-com/awesome-rust) - อีกหนึ่งคลังในชื่อ awesome-rust ที่มีการจัดหมวดหมู่แตกต่างจากตัวหลัก
 - [unpluggedcoder/awesome-rust-tools](https://github.com/unpluggedcoder/awesome-rust-tools) - รวมเครื่องมือสาย productivity เจ๋ง ๆ ที่พัฒนาด้วย Rust
 - [jaywcjlove/awesome-rust-apps](https://github.com/jaywcjlove/awesome-rust-apps) - แหล่งรวมแอปพลิเคชันสำเร็จรูปที่สร้างขึ้นด้วยภาษา Rust
+- [Correia-jpv/fucking-awesome-rust](https://github.com/Correia-jpv/fucking-awesome-rust) - awesome-rust ฉบับที่กำกับตัวเลขดาวและ fork ของทุกโปรเจกต์ไว้ข้างทุกรายการ พร้อมอัปเดตอัตโนมัติสม่ำเสมอ
 
 ข้อสังเกตคือมี repo ที่ใช้ชื่อซ้ำกันว่า `awesome-rust` อยู่หลายเจ้าจนอาจทำให้สับสนได้ หากต้องการอ้างอิงข้อมูลมาตรฐาน ให้ยึดคลังของ **rust-unofficial** เป็นหลักครับ เนื่องจากเป็นคลังที่มีคนติดตามมากที่สุดและมีรายการอัปเดตมากกว่าหนึ่งพันรายการ
 
@@ -112,6 +113,7 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 - [jamesmunns/awesome-rust-streaming](https://github.com/jamesmunns/awesome-rust-streaming) - รายชื่อสตรีมเมอร์สาย Rust ที่ยังมีผลงานออกมาสม่ำเสมอ
 - [Robert-Steiner/awesome-rust-blog-posts](https://github.com/Robert-Steiner/awesome-rust-blog-posts) - รวมบล็อกโพสต์ที่น่าสนใจและสร้างแรงกระเพื่อมในวงการ
 - [nikitaignatov/awesome-rust-talks](https://github.com/nikitaignatov/awesome-rust-talks) - แหล่งรวม talk และวิดีโอบรรยายจากงานคอนเฟอเรนซ์ต่าง ๆ
+- [Evian-Zhang/awesome-rust-papers](https://github.com/Evian-Zhang/awesome-rust-papers) - รวบรวมงานวิจัยเชิงวิชาการเกี่ยวกับภาษา Rust แบ่งกลุ่มตามหัวข้อ พร้อมเว็บเวอร์ชันอ่านง่ายและ RSS
 
 ## ไม่ใช่ awesome list แต่ควรรู้จัก
 
