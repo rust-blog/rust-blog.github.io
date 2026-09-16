@@ -117,6 +117,7 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 - [Robert-Steiner/awesome-rust-blog-posts](https://github.com/Robert-Steiner/awesome-rust-blog-posts) - รวมบล็อกโพสต์ที่น่าสนใจและสร้างแรงกระเพื่อมในวงการ
 - [nikitaignatov/awesome-rust-talks](https://github.com/nikitaignatov/awesome-rust-talks) - แหล่งรวม talk และวิดีโอบรรยายจากงานคอนเฟอเรนซ์ต่าง ๆ
 - [Evian-Zhang/awesome-rust-papers](https://github.com/Evian-Zhang/awesome-rust-papers) - รวบรวมงานวิจัยเชิงวิชาการเกี่ยวกับภาษา Rust แบ่งกลุ่มตามหัวข้อ พร้อมเว็บเวอร์ชันอ่านง่ายและ RSS
+- [h1trust/awesome-hit-rust](https://github.com/h1trust/awesome-hit-rust) - ลิสต์จากคอมมูนิตี้มหาวิทยาลัย HIT (Harbin Institute of Technology) ทั้งโปรเจกต์ของนักศึกษาและแหล่งเรียนรู้
 
 ## ไม่ใช่ awesome list แต่ควรรู้จัก
 
