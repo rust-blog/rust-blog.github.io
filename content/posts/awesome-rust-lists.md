@@ -98,7 +98,6 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 
 - [pka/awesome-georust](https://github.com/pka/awesome-georust) - ระบบสารสนเทศภูมิศาสตร์ (GIS) และงานภูมิสารสนเทศใน Rust
 - [jespersm/awesome-rust-openapi-support](https://github.com/jespersm/awesome-rust-openapi-support) - เครื่องมือ generate โค้ดฝั่ง OpenAPI ทั้ง server และ client
-- [hoodie/awesome-rust-actor-frameworks](https://github.com/hoodie/awesome-rust-actor-frameworks) - รวบรวม actor framework ทุกตัวที่มีในภาษา Rust
 - [commons-research/awesome-rust-datascience](https://github.com/commons-research/awesome-rust-datascience) - การนำ Rust ไปประยุกต์ใช้กับงานด้าน Data Science
 - [owizdom/awesome-rust-quant](https://github.com/owizdom/awesome-rust-quant) - การเขียนโปรแกรมสำหรับงานสายการเงินเชิงปริมาณ (Quantitative Finance)
 - [keller-mark/awesome-rust-vis](https://github.com/keller-mark/awesome-rust-vis) - รวม crate สำหรับการทำ data visualization
