@@ -110,9 +110,6 @@ awesome list คือคลัง repository บน GitHub ที่ชาว�
 - [sger/RustBooks](https://github.com/sger/RustBooks) - สารบัญรวบรวมหนังสือเกี่ยวกับภาษา Rust แทบทุกเล่มที่มีอยู่ในตลาด
 - [RustBeginners/awesome-rust-mentors](https://github.com/RustBeginners/awesome-rust-mentors) - รวมรายชื่อพี่เลี้ยง (mentor) พร้อมระบุหมวดหมู่ที่แต่ละคนมีความถนัด
 - [jamesmunns/awesome-rust-streaming](https://github.com/jamesmunns/awesome-rust-streaming) - รายชื่อสตรีมเมอร์สาย Rust ที่ยังมีผลงานออกมาสม่ำเสมอ
-- [sunface/new-rusty-book](https://github.com/sunface/new-rusty-book) - รวบรวมสูตร ลายแทง และตัวอย่าง repo สำหรับเริ่มต้นสร้างโปรเจกต์ของตัวเอง
-- [graysonarts/awesome-rustlang-streamers](https://github.com/graysonarts/awesome-rustlang-streamers) - อีกหนึ่งคลังที่รวบรวมรายชื่อสตรีมเมอร์สาย Rust เอาไว้
-- [CPerezz/Awesome-rust-articles](https://github.com/CPerezz/Awesome-rust-articles) - รวมบทความเนื้อหาดี ๆ เกี่ยวกับ Rust ที่ชาวเดฟควรอ่าน
 - [Robert-Steiner/awesome-rust-blog-posts](https://github.com/Robert-Steiner/awesome-rust-blog-posts) - รวมบล็อกโพสต์ที่น่าสนใจและสร้างแรงกระเพื่อมในวงการ
 - [nikitaignatov/awesome-rust-talks](https://github.com/nikitaignatov/awesome-rust-talks) - แหล่งรวม talk และวิดีโอบรรยายจากงานคอนเฟอเรนซ์ต่าง ๆ
 
