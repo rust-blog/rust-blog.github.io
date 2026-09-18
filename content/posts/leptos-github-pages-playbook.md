@@ -33,7 +33,7 @@ Deploy Job จะเริ่มทำงานเมื่อ Build ผ่า�
 * **Pages Source** ต้องเลือกเป็น **GitHub Actions** (Settings → Pages) ไม่งั้นแม้จะอัปโหลด Artifact ได้แต่ตัว Deploy จะไม่ทำงาน
 * **`--public-url`** ต้องตั้งให้ตรงกับประเภท Repo: User/Org Site (`<user>.github.io`) ให้ใช้ `/`, ส่วน Project Site ให้ใช้ `/<repo>/` ถ้าตั้งผิด เบราว์เซอร์จะหาไฟล์ `.wasm` กับ CSS ไม่พบ จนได้หน้าเว็บว่างเปล่า
 * **`rust-toolchain.toml`** ต้องระบุ target `wasm32-unknown-unknown` และ component `rustfmt`, `clippy` ไว้เสมอ
-* **Commit `Cargo.lock**` เข้า Git และระบุ ignore โฟลเดอร์ `dist/` ใน `.gitignore`
+* **Commit `Cargo.lock`** เข้า Git และระบุ ignore โฟลเดอร์ `dist/` ใน `.gitignore`
 
 ก่อน push ควรตั้งค่า Branch Protection ให้ Job `build` เป็น Required Check และหากมีการปรับเปลี่ยน Step ให้เรียงลำดับเป็น `trunk build` → `post_build` → `cp 404.html` → upload เสมอ
 
@@ -48,10 +48,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-
 ```
 
-`workflow_dispatch` มีไว้สั่งรัน Deploy ใหม่เมื่อปรับค่าภายนอก โดยไม่ต้องสร้าง commit หลอก ส่วน `permissions: contents: read` เป็นการจำกัด Token เริ่มต้นให้อ่านได้อย่างเดียว แล้วค่อยให้ Deploy Job ยกระดับสิทธิ์ขึ้นเอง หากลืมเปิดสิทธิ์ให้ Step ใหม่ Job จะฟ้อง Error ทันที ซึ่งช่วยให้ไก่ตื่นและแก้ไขได้เร็วกว่าการเปิดสิทธิ์กว้างทิ้งไว้
+`workflow_dispatch` มีไว้สั่งรัน Deploy ใหม่เมื่อปรับค่าภายนอก โดยไม่ต้องสร้าง commit หลอก ส่วน `permissions: contents: read` เป็นการจำกัด Token เริ่มต้นให้อ่านได้อย่างเดียว แล้วค่อยให้ Deploy Job ยกระดับสิทธิ์ขึ้นเอง หากลืมเปิดสิทธิ์ให้ Step ใหม่ Job จะฟ้อง Error ทันที ซึ่งช่วยให้รู้ตัวและแก้ไขได้เร็วกว่าการเปิดสิทธิ์กว้างทิ้งไว้
 
 ข้อควรรู้คือไฟล์นี้ยังไม่มี trigger สำหรับ PR ดังนั้นด่านคุณภาพจะทำงานหลัง Merge เข้า `main` แล้วเท่านั้น หากทีมใหญ่ขึ้นควรแยก Workflow สำหรับ PR ออกมาต่างหาก
 
@@ -61,7 +60,6 @@ permissions:
 concurrency:
   group: pages
   cancel-in-progress: true
-
 ```
 
 การตั้งกลุ่ม `pages` ช่วยจัดคิว Deploy ทีละรอบ ป้องกัน Run เก่าประมวลผลแซง Run ใหม่ แต่ `cancel-in-progress: true` มีจุดที่ต้องแลก: Starter Workflow ทางการมักใช้ `false` เพราะ Pages ยอมให้มี deployment ค้างได้ทีละหนึ่งต่อ ref หาก Run A กำลัง Deploy แล้วถูกสั่งยกเลิกกลางคัน สถานะอาจค้างจน Run B เริ่มไม่ได้ (actions/deploy-pages#118) repo นี้เลือก `true` เพื่อเน้นให้หน้าเว็บสดใหม่อยู่ตลอด หากเจอ error ทำนอง "cannot start a new deployment while one is in progress" ให้ปรับกลับเป็น `false` หรือสั่ง Re-run ใหม่
@@ -73,7 +71,6 @@ concurrency:
   uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
   with:
     persist-credentials: false
-
 ```
 
 Action ทุกตัวได้รับการ Pin ด้วย Commit SHA แทนการใช้ Tag เพราะ Tag อาจถูกย้ายให้ชี้ไปที่โค้ดอันตรายได้ สิ่งที่ต้องแลกคือต้องพึ่งพา Bot อย่าง Renovate หรือ Dependabot คอยอัปเดต SHA ให้ ส่วน `persist-credentials: false` ช่วยตัดการฝัง Token ลงใน Git Config ซึ่ง Build Job ไม่จำเป็นต้องใช้อยู่แล้ว
@@ -83,7 +80,6 @@ Rust Toolchain ถูกล็อกไว้ใน `rust-toolchain.toml` โด
 ```yaml
 - name: Install Rust toolchain
   uses: dtolnay/rust-toolchain@f8be11a05b1d4f3fcebe6410cc16743212b999b0 # 1.98.0
-
 ```
 
 ```toml
@@ -92,7 +88,6 @@ Rust Toolchain ถูกล็อกไว้ใน `rust-toolchain.toml` โด
 channel = "1.98.0"
 targets = ["wasm32-unknown-unknown"]
 components = ["rustfmt", "clippy"]
-
 ```
 
 `Swatinem/rust-cache` ช่วยย่นเวลาคอมไพล์ซ้ำ หาก Cache รวนจนเกิดอาการ Local ผ่านแต่ CI ไม่ผ่าน สามารถลบ Cache ทิ้งในหน้า Actions หรือสั่ง Bump Key ใหม่ได้
@@ -100,7 +95,6 @@ components = ["rustfmt", "clippy"]
 ```yaml
 - name: Cache cargo
   uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
-
 ```
 
 ### ด่านคุณภาพและ Supply Chain
@@ -120,7 +114,6 @@ components = ["rustfmt", "clippy"]
   run: cargo audit
 - name: Deny check (advisories, licenses, bans)
   run: cargo deny check
-
 ```
 
 Clippy ต้องเจาะจงไปที่ target wasm32 เพราะโค้ด Leptos ส่วนใหญ่ซ่อนอยู่ใน `#[cfg(target_arch = "wasm32")]` หากตรวจแค่ Host จะมองไม่เห็นโค้ดที่ใช้งานจริง ส่วน `cargo audit` และ `cargo deny` มีไว้ตรวจ Advisory, License และ Source ซึ่งหากมีแจ้งเตือนช่องโหว่ใหม่ CI อาจติดสีแดงได้แม้ไม่ได้แก้โค้ด ทางแก้คือระบุ `ignore` พร้อมเหตุผลไว้ใน `deny.toml` และ `.cargo/audit.toml` โดยทั้งสองไฟล์นี้ต้องอัปเดตให้ตรงกันเสมอ
@@ -138,7 +131,6 @@ Clippy ต้องเจาะจงไปที่ target wasm32 เพรา�
   run: cargo run --quiet --bin post_build
 - name: Prepare SPA fallback (404.html)
   run: cp dist/index.html dist/404.html
-
 ```
 
 Trunk ต้องล็อกเวอร์ชันไว้ (`v0.21.14`) เพราะพฤติกรรมการ build และ `wasm-opt` อาจเปลี่ยนได้ในระดับ minor และใน `Trunk.toml` จะมี pre_build hook `cargo build -q` ที่ห้ามลบเด็ดขาด: เนื่องจากฟีเจอร์ `copy-file` ทำงานขนานไปกับ Rust pipeline บน clean checkout หากไม่มี hook นี้บังคับให้ `build.rs` ทำงานเสร็จก่อน ไฟล์อย่าง `rss.xml`, `sitemap.xml`, `robots.txt` จะยังไม่ถูกสร้าง และส่งผลให้ build พังทันที
@@ -148,10 +140,9 @@ Trunk ต้องล็อกเวอร์ชันไว้ (`v0.21.14`) เ
 stage = "pre_build"
 command = "cargo"
 command_arguments = ["build", "-q"]
-
 ```
 
-`post_build` ต้องรันตามหลัง `trunk build` เสมอ มิฉะนั้นจะเกิด panic โดยสคริปต์นี้จะสร้าง `dist/post/<slug>/index.html` ออกมาเป็นไฟล์จริงพร้อม OG tags รายบทความ เพื่อแก้ปัญหาที่ GitHub Pages เสิร์ฟเฉพาะไฟล์ที่มีอยู่จริง และตอบกลับหน้า `404.html`ด้วย HTTP 404 แม้ผู้ใช้จะใช้งานได้ปกติเพราะ SPA บูตขึ้นมาแทน แต่ crawler เช่น Facebook จะไม่รัน JavaScript ทำให้พรีวิวการ์ดแชร์ลิงก์สูญหาย
+`post_build` ต้องรันตามหลัง `trunk build` เสมอ มิฉะนั้นจะเกิด panic โดยสคริปต์นี้จะสร้าง `dist/post/<slug>/index.html` ออกมาเป็นไฟล์จริงพร้อม OG tags รายบทความ เพื่อแก้ปัญหาที่ GitHub Pages เสิร์ฟเฉพาะไฟล์ที่มีอยู่จริง และตอบกลับหน้า `404.html` ด้วย HTTP 404 แม้ผู้ใช้จะใช้งานได้ปกติเพราะ SPA บูตขึ้นมาแทน แต่ crawler เช่น Facebook จะไม่รัน JavaScript ทำให้พรีวิวการ์ดแชร์ลิงก์สูญหาย
 
 ส่วน `404.html` จะทำหน้าที่เป็น fallback ให้ระบบ client-side routing เมื่อผู้ใช้สั่ง Refresh บน deep link แต่หน้าลักษณะนี้ (เช่น `/about`) จะไม่ถูกนำไปจัด indexing บน Search Engine เนื่องจากไม่ได้ทำ prerender ไว้
 
@@ -164,7 +155,6 @@ Artifact ที่จะอัปโหลดต้องมีไฟล์ `ind
   uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
   with:
     path: dist
-
 ```
 
 Deploy Job (`pages: write`, `id-token: write`, `environment: github-pages`) จะไม่แตะต้องโค้ดในโปรเจกต์เลย ความเสี่ยงจาก dependency จึงจำกัดอยู่แค่ใน Build Job การใช้ `id-token` ช่วยให้ยืนยันตัวตนผ่าน OIDC ได้โดยไม่ต้องคอยสลับหรือ rotate PAT ส่วน `environment` ช่วยให้ติดตาม URL ของ deployment ได้ชัดเจนและรองรับการตั้งค่า approval gate
@@ -183,7 +173,6 @@ deploy:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
-
 ```
 
 ## 4. ความเสี่ยงที่ต้องรู้
@@ -200,7 +189,7 @@ deploy:
 
 ## 5. อาการที่เจอบ่อย
 
-* **หน้าเว็บขาว หรือฟ้อง 404 บนไฟล์ `.wasm**` - เกิดจาก `--public-url` ไม่ตรงกับประเภท Repo
+* **หน้าเว็บขาว หรือฟ้อง 404 บนไฟล์ `.wasm`** - เกิดจาก `--public-url` ไม่ตรงกับประเภท Repo
 * **สั่ง Refresh ที่หน้า `/post/...` แล้วขึ้น 404** - ขาดไฟล์ `404.html` หรือกระบวนการ Deploy ยังไม่เสร็จสิ้น
 * **แชร์ลิงก์แล้วภาพการ์ด OG ไม่ขึ้น** - `post_build` ไม่ทำงาน หรือถูกสั่งรันก่อน `trunk build`
 * **Deploy ล้มเหลวพร้อมข้อความ "deployment in progress"** - ปรับเป็น `cancel-in-progress: false` แล้วสั่ง Re-run ใหม่
@@ -270,7 +259,6 @@ jobs:
     steps:
       - uses: actions/deploy-pages@<SHA>
         id: deployment
-
 ```
 
 ## 7. สรุป
