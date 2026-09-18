@@ -6,100 +6,55 @@ tags: [rust, leptos, wasm]
 author: "suradet-ps"
 ---
 
-บทความนี้ผมตั้งใจเขียนขึ้นมาเป็น **Playbook** โดยมีเป้าหมายมีเพียงอย่างเดียวคือ เมื่อเรากลับมาอ่านอีกครั้ง (หรือในวันที่ CI พังขึ้นมากลางคัน) เราจะเข้าใจได้ทันทีว่า `deploy.yml` แต่ละบล็อกทำหน้าที่อะไร **ทำไม** ถึงต้องเขียนแบบนั้น และถ้ามีอะไรพัง สาเหตุเกิดมาจากจุดไหน
+บทความนี้เป็น **Playbook** สำหรับกลับมาอ่านเมื่อ CI พังหรือต้องตั้งค่า Deploy ใหม่ โดยอ้างอิงจาก `.github/workflows/deploy.yml` ของ rust-blog นี้เอง (Leptos 0.8 CSR + Trunk + Wasm) ใช้ได้กับโปรเจกต์ Leptos CSR ที่ build ด้วย Trunk แต่ใช้กับ Leptos SSR ไม่ได้ เพราะ GitHub Pages ไม่มี server runtime
 
-โปรเจกต์ต้นแบบที่ใช้อ้างอิงก็คือบล็อก [rust-blog](https://github.com/rust-blog/rust-blog.github.io) แห่งนี้นี่เอง - ตัวเว็บเป็นสถาปัตยกรรม Leptos 0.8 แบบ CSR (Client-Side Rendering) + Trunk + Wasm ที่จัดการ deploy ทั้งหมดผ่านไฟล์ `.github/workflows/deploy.yml` เพียงไฟล์เดียว โครงสร้างนี้สามารถนำไปปรับใช้กับโปรเจกต์ Leptos CSR ทุกตัวที่ build ด้วย Trunk ได้ทันที แต่**ไม่สามารถใช้กับ Leptos SSR ได้** เนื่องจาก GitHub Pages เป็น Static Hosting ล้วน ไม่มี server runtime ไว้สำหรับรัน server function
+## 1. เกิดอะไรขึ้นเมื่อ push
 
----
+push เข้า `main` แล้ว workflow จะทำงานเป็นสอง Job ต่อกัน โดยมี Artifact ของ `dist/` เป็นตัวส่งต่อ
 
-## 1. Mental model: เกิดอะไรขึ้นเมื่อ push โค้ดหนึ่งครั้ง
+Build Job (`ubuntu-latest`) มีลำดับดังนี้
 
-เมื่อ push เข้า `main` แล้ว workflow จะทำงานเป็นสองช่วงต่อกันคือ **Build Job** (เตรียมสิ่งที่ต้องการเผยแพร่) และ **Deploy Job** (เผยแพร่) โดยมี Artifact ของโฟลเดอร์ `dist/` เป็นตัวส่งต่อระหว่างกัน
+1. **Checkout** - ดึงโค้ด พร้อมตั้ง `persist-credentials: false`
+2. **ติดตั้ง Rust** - ตาม `rust-toolchain.toml` รวม target `wasm32-unknown-unknown`
+3. **Cache cargo** - ลดเวลาคอมไพล์ซ้ำ
+4. **ด่านคุณภาพ** - `fmt` → `clippy` (ยิง target wasm32) → `test`
+5. **ด่าน Supply Chain** - `cargo-audit` → `cargo-deny`
+6. **`trunk build --release --public-url /`** - ได้โฟลเดอร์ `dist/`
+7. **post_build** - สร้างหน้า Static รายบทความพร้อม OG tags
+8. **SPA Fallback** - คัดลอก `index.html` เป็น `404.html`
+9. **Upload Artifact** - ส่ง `dist/` ต่อให้ Deploy Job
 
-### 1.1 Build Job - `runs-on: ubuntu-latest`
+Deploy Job เริ่มเมื่อ Build สำเร็จเท่านั้น (`needs: build`) ถือสิทธิ์ `pages: write` + `id-token: write` เฉพาะตัวเอง ไม่ Checkout และไม่รันโค้ดโปรเจกต์เลย เรียกแค่ `deploy-pages` แล้วเว็บขึ้นที่ `https://rust-blog.github.io`
 
-1. **Checkout** - ดึงโค้ดลงเครื่อง พร้อมตั้ง `persist-credentials: false` เพื่อไม่ให้ Credential ค้างอยู่ในเครื่อง หากขั้นนี้พัง Build จะหยุดทันที
-2. **ติดตั้ง Rust Toolchain** - ใช้ Channel, Target (`wasm32-unknown-unknown`) และ Component ตาม `rust-toolchain.toml` เพื่อให้ CI กับเครื่อง Dev ใช้เวอร์ชันเดียวกัน ถ้าไม่มี Target นี้ จะคอมไพล์ Wasm ไม่ได้
-3. **Cache Cargo** - ดึง Cache ของ Dependency กลับมาใช้ ลดเวลาที่ต้องคอมไพล์ซ้ำหลายนาที ขั้นนี้พังได้แค่ทำให้ Build ช้าลง ไม่ทำให้ Build ล้ม
-4. **ด่านคุณภาพ** - `fmt` → `clippy` (ยิง Target wasm32) → `test` ถ้าไม่ผ่านข้อใดข้อหนึ่ง จะไม่มีการ Deploy
-5. **ด่าน Supply Chain** - `cargo-audit` → `cargo-deny` ถ้าไม่ผ่าน จะไม่มีการ Deploy เช่นกัน
-6. **Trunk Build** - รัน `trunk build --release --public-url /` เพื่อประกอบทุกอย่างออกมาเป็นโฟลเดอร์ `dist/`
-7. **post_build** - สร้างหน้า Static รายโพสต์สำหรับ SEO/OG ถ้าขาดขั้นนี้ ลิงก์ที่แชร์จะไม่มีการ์ดข้อมูล และหน้าโพสต์จะเหลือแค่ 404 Fallback
-8. **SPA Fallback** - คัดลอก `index.html` เป็น `404.html` ไม่งั้นกด Refresh ที่ Deep Link แล้วจะเจอ 404
-9. **Upload Artifact** - ส่งโฟลเดอร์ `dist/` ขึ้นเป็น Artifact เพื่อส่งต่อให้ Deploy Job
+หลักที่ทั้งไฟล์ยึดถือคือ โค้ดที่ควบคุมไม่หมดอยู่ใน Job ที่อ่านได้อย่างเดียว, ใช้ Artifact แทน branch `gh-pages` และไม่มี Secret เลยเพราะใช้ OIDC ขอ token อายุสั้น
 
-### 1.2 Deploy Job - `needs: build`
+## 2. ตั้งค่าครั้งเดียว
 
-Deploy Job จะเริ่มทำงานก็ต่อเมื่อ Build Job สำเร็จเท่านั้น (`needs: build`) ตัว Job นี้ถือสิทธิ์ `pages: write` และ `id-token: write` เป็นการเฉพาะ ไม่ Checkout และไม่รันโค้ดของโปรเจกต์เลย - เรียก `deploy-pages` เพื่อนำ Artifact ไปเผยแพร่ที่ Environment ชื่อ `github-pages` เท่านั้น จากนั้นเว็บจริงจะขึ้นที่ `https://rust-blog.github.io`
+- **Pages Source** ต้องเป็น **GitHub Actions** (Settings → Pages) ไม่งั้น Artifact อัปโหลดได้แต่ Deploy ไม่ทำงาน
+- **`--public-url`** ต้องตรงกับประเภท Repo: User/Org Site (`<user>.github.io`) ใช้ `/`, Project Site ใช้ `/<repo>/` ถ้าผิด เบราว์เซอร์จะหา `.wasm` กับ CSS ไม่เจอ ได้หน้าเปล่า
+- **`rust-toolchain.toml`** ต้องมี target `wasm32-unknown-unknown` และ component `rustfmt`, `clippy`
+- **Commit `Cargo.lock`** และ ignore โฟลเดอร์ `dist/`
 
-หลักการสำคัญ 3 ข้อที่ workflow นี้ยึดถือ:
+ก่อน push ควรเปิด Branch Protection ให้ Job `build` เป็น Required Check และถ้าเพิ่มหรือสลับ Step ให้ลำดับเป็น `trunk build` → `post_build` → `cp 404.html` → upload เสมอ
 
-1. **แยก Build ออกจาก Deploy ชัดเจน** - โค้ดที่เราอาจควบคุมไม่ได้ทั้งหมด (เช่น dependency ภายนอก หรือ build script) จะถูกกักบริเวณให้อยู่ใน Job ที่มีสิทธิ์แค่อ่าน (Read-only) ส่วน Job ที่มีสิทธิ์เขียน (Deploy) มีหน้าที่เพียงแค่นำ Artifact ที่ผ่านการ build แล้วไปเผยแพร่เท่านั้น
-2. **ใช้ Artifact เป็นสะพานเชื่อม** - ไม่ต้องสร้าง branch `gh-pages` มาปะปนกับ source code ใน repo และไม่มี state ใด ๆ ตกค้างข้ามระหว่าง Job
-3. **ไม่พึ่งพา Secret แม้แต่ตัวเดียว** - ระบบยืนยันตัวตนทั้งหมดทำงานผ่าน OIDC (`id-token`) เพื่อขอ Token ชั่วคราวที่มีอายุสั้นมาก จึงไม่มี Personal Access Token (PAT) ให้ต้องคอย rotate หรือกังวลว่าจะรั่วไหล
+## 3. จุดที่ควรรู้ใน deploy.yml
 
----
-
-## 2. ก่อนเริ่ม: Checklist การตั้งค่าครั้งเดียวที่ต้องตรวจ
-
-การตั้งค่าที่ต้องทำก่อน Push ครั้งแรกมีทั้งหมด 5 ข้อ แต่ละข้อมาพร้อมตำแหน่งที่ตั้งค่าและผลกระทบหากลืม
-
-1. **ตั้ง Pages Source เป็น GitHub Actions** - ตั้งค่าที่ Settings → Pages → Build and deployment ถ้าไม่ตั้ง Workflow จะอัปโหลด Artifact สำเร็จแต่ขั้นตอน Deploy ไม่ทำงาน (หรือระบบยังวิ่งไปหาแบบ Deploy from a branch แทน)
-2. **ระบุค่า `--public-url` ให้ตรงกับประเภทของ Repo** - แก้ใน `deploy.yml` ถ้าไม่ตรง เบราว์เซอร์จะหา Asset ไม่เจอ (404) ส่งผลให้หน้าเว็บขาวโพลน
-3. **ใส่ Target `wasm32-unknown-unknown` ใน `rust-toolchain.toml`** - ถ้าไม่มี CI จะพังตั้งแต่ขั้นตอนการรัน Clippy
-4. **Commit ไฟล์ `Cargo.lock` ขึ้น Git เสมอ** - ถ้าไม่ Commit ผลการ Build จะไม่แน่นอน (Non-reproducible) เนื่องจากเวอร์ชัน Dependency อาจขยับไปเอง
-5. **เพิ่ม `dist/` ลงใน `.gitignore`** - ถ้าไม่เพิ่ม อาจเผลอ Commit ไฟล์ผลลัพธ์จากการ Build ปะปนเข้า Git History ทุกครั้ง
-
-### การเลือกค่า `--public-url` ให้ถูกต้อง (จุดที่ผิดพลาดบ่อยที่สุด)
-
-- **User/Org Site** (ชื่อ Repo เป็น `<user>.github.io`) - ตัวเว็บอยู่ที่ `https://<user>.github.io/` จึงต้องใช้ `--public-url /`
-- **Project Site** (ชื่อ Repo ทั่วไป) - ตัวเว็บอยู่ที่ `https://<user>.github.io/<repo>/` จึงต้องใช้ `--public-url /<repo>/`
-
-Trunk จะนำค่านี้ไปเขียนเป็น Base Path สำหรับอ้างอิงไฟล์ `.wasm`, JS Glue code และ CSS ลงใน `index.html` 
-
-หากโปรเจกต์ของคุณเป็นแบบ Project Site ที่โฮสต์อยู่ใต้ `/<repo>/` แต่ดันใส่เป็น `--public-url /` เบราว์เซอร์จะพยายามวิ่งไปดาวน์โหลดไฟล์จาก Root Domain (`https://<user>.github.io/...`) ซึ่งไม่มีไฟล์เหล่านั้นอยู่จริง ผลลัพธ์คือ **หน้าเว็บจะขาวโพลน (Blank page)** โดยไม่มีข้อความ Error เตือนให้เห็นชัดเจนบนหน้าจอ (ต้องเปิดดูใน Browser Console ถึงจะเจอ 404)
-
----
-
-## 3. เจาะลึก deploy.yml ทีละส่วน
-
-### 3.1 `name` / `on` - Trigger และเงื่อนไขการทำงาน
+### `on` และ `permissions`
 
 ```yaml
-name: Deploy to GitHub Pages
-
 on:
   push:
     branches: [main]
   workflow_dispatch:
-```
-
-**ทำหน้าที่อะไร** - สั่งให้ Workflow เริ่มทำงานทุกครั้งที่มีการ Push โค้ดเข้าสู่ Branch `main` และเปิดปุ่มให้เราสามารถกดสั่งรันด้วยตัวเอง (Manual trigger) ผ่านแท็บ Actions ได้ทุกเมื่อ
-
-**ทำไมต้องเขียนแบบนี้** - เรายึดแนวคิดแบบ Trunk-Based Development โดยมองว่า "Branch main คือสายการผลิตหลักเพียงหนึ่งเดียว" ส่วนการเปิดใช้ `workflow_dispatch` ไว้นั้นมีประโยชน์มากเวลาที่เราต้องการสั่ง Deploy ใหม่หลังจากไปปรับแต่งการตั้งค่าภายนอก (เช่น ไปเปลี่ยนการตั้งค่า Pages ในหน้า Settings) โดยไม่จำเป็นต้องสร้าง Commit เปล่า (Dummy commit) ขึ้นมาเพื่อหลอกให้ Workflow ทำงาน
-
-**ความเสี่ยงและข้อควรระวัง**
-
-- **ไม่มี Trigger สำหรับ Pull Request (PR) ในไฟล์นี้**: แปลว่า Quality Gates ทุกด่าน (fmt / clippy / test / audit) จะทำงานก็ต่อเมื่อโค้ดถูก Merge เข้า `main` แล้วเท่านั้น หากมีอะไรพัง เราจะรู้ตัวก็ต่อเมื่อโค้ดขึ้นสายการผลิตหลักไปแล้ว หากทำงานร่วมกันเป็นทีม แนะนำให้แยก Workflow อีกชุดไว้สำหรับตรวจ PR โดยเฉพาะ หรือเปิดใช้งาน Branch Protection Rules ร่วมกับ Required Status Checks
-- **Push เข้า main แปลว่า Deploy ขึ้น Production ทันที**: เนื่องจากไม่มีขั้นตอน Staging คั่นกลาง จึงควรเปิด Branch Protection เพื่อป้องกันไม่ให้สมาชิกเผลอ Push โค้ดตรงเข้า `main` โดยไม่ผ่านการรีวิว
-- **แค่แก้ README ระบบก็สั่ง Deploy ใหม่ (เปลืองเวลา CI)**: หากต้องการประหยัดโควตาเวลา สามารถกำหนด `paths:` หรือ `paths-ignore:` เพิ่มเติมได้ แต่ก็ต้องระวังอย่ากำหนดแคบจนเกินไป เพราะอาจทำให้ระบบไม่ยอม Deploy ในวันที่เราจำเป็นต้องแก้ไฟล์รอบนอก
-
-### 3.2 `permissions` - ยึดหลัก Least Privilege (จำกัดสิทธิ์ให้น้อยที่สุด)
-
-```yaml
 permissions:
   contents: read
 ```
 
-**ทำหน้าที่อะไร** - ล็อกสิทธิ์ของ `GITHUB_TOKEN` ในระดับ Workflow เริ่มต้นให้อ่านโค้ดได้เพียงอย่างเดียว (Read-only) แล้วปล่อยให้ Job ที่มีความจำเป็นจริง ๆ ทำการขอยกระดับสิทธิ์เฉพาะตัวขึ้นมาเอง
+`workflow_dispatch` ไว้สั่ง Deploy ใหม่หลังแก้ค่ารอบนอก โดยไม่ต้องสร้าง commit เปล่า ส่วน `permissions: contents: read` ล็อก Token เริ่มต้นให้อ่านอย่างเดียว แล้ว Deploy Job ค่อยยกระดับเอง ถ้าลืมเปิดสิทธิ์ให้ Step ใหม่ Job จะล้มเหลวทันที ซึ่งรู้ตัวเร็วกว่าเปิดกว้างเผื่อไว้
 
-**ทำไมต้องเขียนแบบนี้** - เพื่อรับมือกับความเสี่ยงเรื่อง Supply Chain Attacks หากเกิดกรณีที่ Dependency หรือ Build Script ภายนอกถูกแทรกแซง สิ่งเลวร้ายที่สุดที่สคริปต์เหล่านั้นจะทำได้คือการอ่านโค้ดและใช้ทรัพยากรบน Runner เท่านั้น ไม่สามารถนำ Token ไป Push โค้ดหรือดัดแปลงข้อมูลใน Repository ได้เลย แม้ว่า Token ของ Actions จะมีอายุจำกัดเพียงแค่จบการรันรอบนั้น ๆ แต่การจำกัด Scope ให้แคบไว้ก่อนถือเป็นแนวป้องกัน (Defense in Depth) ที่คุ้มค่าและไม่มีต้นทุนอะไรเพิ่มเติม
+ข้อควรรู้คือไฟล์นี้ไม่มี trigger แบบ PR ด่านคุณภาพจึงทำงานหลัง Merge เข้า `main` แล้ว ถ้าทีมโตขึ้นควรมี Workflow สำหรับ PR แยก
 
-**ความเสี่ยงและข้อสังเกต** - หากในอนาคตเรามีการเพิ่ม Step ใหม่ที่จำเป็นต้องใช้สิทธิ์เพิ่มเติมแต่ลืมปรับแก้ `permissions` ตัว Job นั้นจะล้มเหลวทันที ทำให้เรารู้ตัวเร็ว ดีกว่าการเปิดสิทธิ์กว้างเผื่อไว้ตั้งแต่แรก
-
-ข้อดีของการวางโครงสร้างนี้คือ ฝั่ง Deploy Job จะประกาศขอสิทธิ์ `pages: write` และ `id-token: write` เฉพาะในขอบเขตของตัวเองเท่านั้น ทำให้ไม่มี Secret ระดับ Repository ให้ต้องมาคอยกังวลเลย
-
-### 3.3 `concurrency` - จัดการคิวและป้องกันการ Deploy ซ้อนกัน
+### `concurrency` จุดที่พลาดง่ายที่สุด
 
 ```yaml
 concurrency:
@@ -107,27 +62,9 @@ concurrency:
   cancel-in-progress: true
 ```
 
-**ทำหน้าที่อะไร** - กำหนดให้ Workflow ภายใต้กลุ่ม `pages` ทำงานได้ทีละ 1 รายการเท่านั้น และเมื่อมี Run ใหม่ถูกส่งเข้ามา ระบบจะยกเลิก Run ก่อนหน้าที่ยังค้างอยู่ทันที
+กลุ่ม `pages` ทำให้ Deploy ทีละรอบ กัน Run เก่าแซง Run ใหม่ แต่ `cancel-in-progress: true` มีราคาที่ต้องรู้: Starter Workflow ทางการใช้ `false` เพราะ Pages มี deploy ค้างได้ทีละหนึ่งต่อ ref ถ้า Run A กำลัง Deploy แล้วถูกยกเลิกกลางคัน สถานะอาจค้างและ Run B เริ่มไม่ได้ (actions/deploy-pages#118) repo นี้เลือก `true` เพื่อให้เว็บสดเสมอ ถ้าเจอ error ทำนอง "cannot start a new deployment while one is in progress" ให้เปลี่ยนเป็น `false` หรือ Re-run
 
-**ทำไมต้องเขียนแบบนี้** - เพื่อป้องกันปัญหา Race Condition เช่น กรณีที่ Run เก่า Build ช้ากว่า Run ใหม่ แล้วกลายเป็นว่า Artifact รุ่นเก่าดันถูก Deploy ไปทับรุ่นใหม่ทีหลัง นอกจากนี้ยังช่วยประหยัดเวลาการใช้งาน Runner (CI Minutes) อีกด้วย
-
-**ความเสี่ยงสำคัญที่ต้องเข้าใจ (Deep Dive)**
-
-สังเกตว่า Starter Workflow ทางการของ GitHub สำหรับ Pages มักจะตั้งค่าเป็น `cancel-in-progress: false` พร้อมระบุเหตุผลว่า *"อย่ายกเลิก Run ที่กำลังดำเนินการอยู่กลางคัน เพื่อให้มั่นใจว่า Production Deployment จะทำงานจนจบสมบูรณ์"*
-
-สาเหตุเบื้องหลังคือ GitHub Pages อนุญาตให้มีสถานะ Deployment ที่ค้างอยู่ได้เพียง 1 รายการต่อหนึ่ง Git Reference หาก Run A กำลังยิง Deploy ขึ้น Pages อยู่ แล้วถูก Run B สั่งยกเลิกระหว่างทาง ตัว Deployment ของ Run A อาจค้างสถานะ "in-progress" ส่งผลให้ Run B ไม่สามารถเริ่มกระบวนการ Deploy ของตัวเองได้ (ดูปัญหาเพิ่มเติมได้ที่ [actions/deploy-pages#118](https://github.com/actions/deploy-pages/issues/118)) และหากไม่มี Run C ตามมา ผลลัพธ์คือโค้ดของ Run B ก็จะไม่ได้ขึ้น Production เลย
-
-สำหรับใน Repository นี้ เราเลือกใช้ `true` เพราะต้องการให้เว็บไซต์แสดงผลโค้ดเวอร์ชันล่าสุดเสมอ ซึ่งก็ต้องยอมรับความเสี่ยงข้างต้นเล็กน้อย **ข้อควรจำเวลาเกิดปัญหา:** หากพบว่าขั้นตอน Deploy ล้มเหลวด้วยข้อความทำนอง *"cannot start a new deployment while one is in progress"* ให้ปรับค่าเป็น `false` (หรือกด Re-run ใหม่อีกครั้ง) ทั้งนี้ สำหรับระบบระดับ Production ทั่วไป การเลือกใช้ `false` แล้วปล่อยให้งานเข้าคิวรอจนเสร็จตามลำดับจะเป็นตัวเลือกที่ปลอดภัยกว่า
-
-**เกร็ดเพิ่มเติม:** การตั้งค่า `concurrency` ไว้ที่ระดับบนสุดของ Workflow จะครอบคลุมทั้งขั้นตอน Build และ Deploy นั่นแปลว่า Run ใหม่อาจยกเลิกขั้นตอน Build เก่าได้ด้วย ซึ่งช่วยประหยัดเวลาได้ดี แต่หากต้องการยกเลิกเฉพาะขั้นตอน Build โดยไม่ให้กระทบขั้นตอน Deploy เลย แนะนำให้ย้ายบล็อก `concurrency` ลงไประบุเฉพาะภายในระดับ Job แทน
-
-### 3.4 `runs-on: ubuntu-latest` - สภาพแวดล้อมของ Runner
-
-**ทำไมต้องเป็นตัวนี้** - เป็นตัวเลือกที่ประหยัดโควตาเวลาและเริ่มต้นทำงานได้เร็วที่สุดในบรรดา GitHub-hosted runners ทั้งหมด
-
-**ความเสี่ยงที่ต้องระวัง** - คำว่า `latest` ถือเป็น Moving target หรือเป้าหมายที่เลื่อนได้ตลอดเวลา ในวันที่ GitHub มีการอัปเดต Environment Image ใหม่ (เช่น มีการปรับเวอร์ชันของ System Libraries หรือ Linker) การ Build ของเราอาจพังได้กะทันหันโดยที่ยังไม่มีใครแตะต้องโค้ดเลยแม้แต่บรรทัดเดียว หากต้องการความเสถียรสูงสุด (Deterministic) แนะนำให้ระบุเวอร์ชันเจาะจงเป็น `ubuntu-24.04`
-
-### 3.5 Checkout - Pin ด้วย Commit SHA และไม่บันทึก Credential ค้างไว้
+### Checkout, Toolchain, Cache
 
 ```yaml
 - name: Checkout
@@ -136,18 +73,13 @@ concurrency:
     persist-credentials: false
 ```
 
-Step นี้ดึง Source Code ลงเครื่อง Runner (ค่าเริ่มต้นจะไม่ดึง Git History ทั้งหมด)
+Action ทุกตัว Pin ด้วย Commit SHA ไม่ใช้ Tag เพราะ Tag ถูกย้ายให้ชี้โค้ดอันตรายได้ ราคาที่จ่ายคือต้องมี Renovate หรือ Dependabot คอยอัปเดต SHA ให้ ส่วน `persist-credentials: false` ตัดการฝัง Token ลง Git Config ซึ่ง Build Job ไม่ต้องใช้อยู่แล้ว
 
-จุดที่ต้องระวังคือการใช้ Tag อย่าง `@v7` หรือ `@main` เพราะ Tag เป็น Pointer ที่เจ้าของ Action ย้ายไปชี้ Commit ไหนก็ได้ ถ้าบัญชีผู้ดูแลถูกแฮก ผู้โจมตีก็แก้ Tag ให้ชี้ไปที่โค้ดอันตรายได้ทันที ส่วน Commit SHA เปลี่ยนแปลงเนื้อหาไม่ได้ จึงเป็นจุดอ้างอิงที่มั่นคงกว่า คอมเมนต์ `# v7.0.1` ที่ใส่ไว้ช่วยให้ยังอ่านออกว่า SHA นี้เทียบเท่าเวอร์ชันใด ราคาที่ต้องจ่ายคือ SHA ไม่มีทางอัปเดตเอง ต้องมี Renovate (Repo นี้ตั้ง `renovate.json` ไว้แล้ว) หรือ Dependabot คอยเปิด PR ให้ ไม่งั้นจะค้างอยู่ที่ SHA เก่าโดยไม่รู้ตัว
-
-`persist-credentials: false` ตัดพฤติกรรมดั้งเดิมของ `actions/checkout` ที่จะฝัง Token ลง Git Config ของ Runner ให้ Step ถัดไปใช้ Push โค้ดได้ Build Job นี้ไม่ต้อง Push อะไรอยู่แล้ว จึงปิดไปเลยเพื่อไม่ให้สคริปต์ในขั้นตอน Build หยิบ Token ไปใช้
-
-### 3.6 Rust Toolchain - กำหนด Single Source of Truth ด้วยไฟล์แยก
+Rust Toolchain ล็อกใน `rust-toolchain.toml` ไม่เขียน `stable` ใน YAML ทำให้ Local กับ CI เหมือนกันเป๊ะ อาการ "เครื่องผมผ่าน แต่ CI พัง" จึงหายไป และ Lint ใหม่จะไม่ทำให้ CI แดงข้ามคืน การอัปเกรด Rust จึงกลายเป็นงานที่ต้องตั้งใจทำ
 
 ```yaml
 - name: Install Rust toolchain
   uses: dtolnay/rust-toolchain@f8be11a05b1d4f3fcebe6410cc16743212b999b0 # 1.98.0
-  # Channel, targets, and components are pinned via rust-toolchain.toml
 ```
 
 ```toml
@@ -158,77 +90,50 @@ targets = ["wasm32-unknown-unknown"]
 components = ["rustfmt", "clippy"]
 ```
 
-ถ้าเขียน `channel: stable` ลงใน YAML ตรง ๆ ทุกครั้งที่ Rust ออกเวอร์ชัน Stable ใหม่ CI จะเปลี่ยนตามเงียบ ๆ การล็อกผ่าน `rust-toolchain.toml` ทำให้ทั้งเครื่อง Developer และ CI ใช้เวอร์ชันเดียวกันแน่นอน อาการ "ในเครื่องผมรันผ่าน แต่บน CI พัง" จึงหมดไป และผลของ Clippy/Rustfmt ก็คาดเดาได้ ไม่เปลี่ยนตามคอมไพเลอร์
-
-ข้อควรระวังคือถ้าลืมระบุ Target `wasm32-unknown-unknown` ในไฟล์นี้ CI จะพังตั้งแต่ขั้น Clippy (fail เร็วและบอกสาเหตุตรง ๆ) และการอัปเกรด Rust จะกลายเป็นงานที่ทีมต้องตั้งใจทำและทดสอบร่วมกัน ไม่ใช่ของแถมจาก `rustup update`
-
-### 3.7 Cache - ย่นเวลา Build ภายใต้ความเสี่ยงที่ควบคุมได้
+`Swatinem/rust-cache` ลดเวลาคอมไพล์ซ้ำ ถ้า Cache เสียจนเกิดอาการ Local ผ่านแต่ CI ไม่ผ่าน ให้ลบ Cache ในหน้า Actions หรือ Bump Key ใหม่
 
 ```yaml
 - name: Cache cargo
   uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
 ```
 
-โปรเจกต์ Leptos + Wasm คอมไพล์ Dependency ค่อนข้างเยอะ การ Cache `~/.cargo` กับ `target/` ลดเวลาคอมไพล์ซ้ำได้หลายนาทีต่อรอบ
-
-Cache ที่ตกค้างหรือเสียหายทำให้เกิดอาการชวนปวดหัวอย่าง "โค้ดเดิมรันใน Local ผ่าน แต่บน CI ไม่ผ่าน" วิธีแก้คือกดลบ Cache ในหน้า Actions หรือ Bump Key ใหม่ ส่วนความเสี่ยง Cache Poisoning จาก PR แปลกปลอม ตัว `Swatinem/rust-cache` แยก Cache Key ตาม Branch และ Ref ให้แล้ว แต่หลักคิดคืออย่าเอา Cache ไปใช้ต่อใน Job ที่มีสิทธิ์เขียน ซึ่ง Deploy Job ของเราไม่ดึง Cache อยู่แล้ว
-
-### 3.8 Quality Gates - ตรวจสอบคุณภาพด้วย fmt / clippy / test
+### ด่านคุณภาพและ Supply Chain
 
 ```yaml
 - name: Check formatting
   run: cargo fmt --all -- --check
-
 - name: Clippy
   run: cargo clippy --workspace --target wasm32-unknown-unknown -- -D warnings
-
 - name: Test
   run: cargo test --workspace
-```
-
-เหตุผลที่รวม Quality Gates ไว้ใน Workflow Deploy คือกฎข้อเดียวที่จำง่าย: ไม่มีโค้ดชุดไหนขึ้น Production ได้ถ้ายังไม่ผ่านเกณฑ์ทั้งหมด ดีกว่าแยก CI กับ Deploy คนละไฟล์แล้วมีช่องให้ deploy โค้ดที่ไม่ได้ทดสอบ
-
-Clippy ต้องระบุ Target เป็น `wasm32` เพราะโค้ด Leptos จำนวนมากถูกครอบด้วย `#[cfg(target_arch = "wasm32")]` ถ้ารัน Clippy บน Host อย่างเดียว โค้ดส่วนนั้นจะไม่ถูกตรวจเลย ส่วน `-D warnings` ยกระดับคำเตือนทั้งหมดเป็น Error ตัดปัญหา "เดี๋ยวค่อยกลับมาแก้ทีหลัง"
-
-ความเสี่ยงที่ป้องกันไว้แล้วคือ Clippy ออกรุ่นใหม่พร้อม Lint ใหม่ แล้ว CI แดงข้ามคืนทั้งที่ไม่ได้แก้โค้ด ซึ่งถูกกันด้วยการ Pin Toolchain ใน `rust-toolchain.toml` นี่คือเหตุผลว่าทำไมไม่ควรถอดการ Pin ออก อีกจุดที่ควรรู้คือ Quality Gates ทั้งหมดรันหลัง Merge เข้า main แล้ว (ตามข้อ 3.1) ถ้าทีมโตขึ้นควรมี Workflow ที่รันบน PR ด้วย ข้อแลกเปลี่ยนที่ยอมรับคือ lint เล็ก ๆ ก็ block การ Deploy ทั้งรอบ แต่เราเลือกแลกเพื่อรักษามาตรฐานโค้ด
-
-### 3.9 Supply Chain Security - สแกนช่องโหว่และ License ด้วย cargo-audit / cargo-deny
-
-```yaml
 - name: Install cargo-audit + cargo-deny
   uses: taiki-e/install-action@742a3317eac7bd62f91cd888b4eead5e784ba833 # v2.87.1
   with:
     tool: cargo-audit, cargo-deny
-
 - name: Audit dependencies (RustSec advisory DB)
   run: cargo audit
-
 - name: Deny check (advisories, licenses, bans)
   run: cargo deny check
 ```
 
-ในฝั่ง WebAssembly Dependency ทุกตัวถูกคอมไพล์รวมเข้าไปในไฟล์ `.wasm` ที่ส่งให้ผู้ใช้ การตรวจ Dependency จึงเท่ากับตรวจความปลอดภัยของตัวผลงานโดยตรง และยังดัก License ที่ขัดกับ MIT ของโปรเจกต์ได้ด้วย
+Clippy ยิง target wasm32 เพราะโค้ด Leptos ส่วนมากอยู่ใน `#[cfg(target_arch = "wasm32")]` ถ้าตรวจแค่ Host จะไม่เห็นโค้ดที่จะ ship จริง ส่วน `cargo audit` และ `cargo deny` ตรวจ Advisory, License และ Source เมื่อมีช่องโหว่ใหม่ CI อาจแดงทั้งที่ไม่ได้แก้โค้ด ทางแก้คือใส่ `ignore` พร้อมเหตุผลใน `deny.toml` และ `.cargo/audit.toml` โดยสองไฟล์นี้ต้องซิงก์กันเสมอ
 
-เมื่อ RustSec Advisory มีรายงานช่องโหว่ใหม่ CI อาจพังทันทีทั้งที่เราไม่ได้แก้โค้ด ทางแก้ชั่วคราวคือใส่ `ignore` พร้อมเหตุผลลงใน `deny.toml` และ `.cargo/audit.toml` จุดที่ต้องระวังคือสองไฟล์นี้ต้องซิงก์กันเสมอ และอย่าปล่อยให้ `ignore` กลายเป็นหลุมถาวรโดยไม่มีใครกลับมาทบทวน แม้แต่ Action ที่ใช้ติดตั้งเครื่องมืออย่าง `taiki-e/install-action` ก็ Pin SHA ไว้เช่นกัน
-
-### 3.10 Trunk Build - หัวใจหลักของ Leptos CSR
+### Trunk build และ 404
 
 ```yaml
 - name: Install Trunk
   uses: jetli/trunk-action@1346cc09eace4beb84e403e199a471346d4684c9 # v0.5.1
   with:
     version: "v0.21.14"
-
 - name: Build (release)
-  # public-url is "/" for GitHub Pages org/user sites, or "/<repo>/" for project sites.
   run: trunk build --release --public-url /
+- name: Generate static per-post pages
+  run: cargo run --quiet --bin post_build
+- name: Prepare SPA fallback (404.html)
+  run: cp dist/index.html dist/404.html
 ```
 
-Trunk เปลี่ยนพฤติกรรมการ Build หรือขั้นตอน `wasm-opt` ได้ข้ามเวอร์ชัน Minor การปัก `v0.21.14` ไว้ทำให้ผลลัพธ์วันนี้เหมือนเดิมทุกวัน
-
-`--public-url` คือสาเหตุอันดับหนึ่งของอาการ "Deploy สำเร็จแต่เปิดมาเจอหน้าขาว" (รายละเอียดอยู่ในข้อ 2) ในไฟล์มีคอมเมนต์เตือนเรื่องนี้กำกับไว้แล้ว ช่วยเตือนสติได้ดีเวลากลับมาแก้ในอนาคต
-
-**Hook สำคัญใน `Trunk.toml` ที่ห้ามลบเด็ดขาด**
+Trunk ปักเวอร์ชันไว้ (`v0.21.14`) เพราะพฤติกรรม build และ `wasm-opt` เปลี่ยนได้ข้าม minor และใน `Trunk.toml` มี pre_build hook `cargo build -q` ที่ห้ามลบ: ฟีเจอร์ `copy-file` ทำงานคู่ขนานกับ Rust pipeline บน clean checkout ไฟล์ `rss.xml`, `sitemap.xml`, `robots.txt` จึงยังไม่มี hook นี้บังคับให้ `build.rs` สร้างเสร็จก่อน ไม่งั้น build พังทันที
 
 ```toml
 [[hooks]]
@@ -237,45 +142,13 @@ command = "cargo"
 command_arguments = ["build", "-q"]
 ```
 
-ฟีเจอร์ `copy-file` (ใช้คัดลอก `rss.xml`, `sitemap.xml`, `robots.txt`) ทำงาน**คู่ขนาน (Parallel)** ไปกับ Rust Pipeline บน Clean Checkout ไฟล์เหล่านี้จึงยังไม่มี ถ้าไม่มี Hook นี้ Build จะล้มเหลวทันทีเพราะคัดลอกไฟล์ที่ไม่มีอยู่จริง Hook บังคับให้ `build.rs` ซึ่งเป็นตัวเขียนไฟล์เหล่านั้น ทำงานเสร็จก่อน
+`post_build` ต้องรันหลัง `trunk build` เสมอ ถ้าสลับลำดับจะ panic มันสร้าง `dist/post/<slug>/index.html` เป็นไฟล์จริงพร้อม OG tags รายบทความ เพราะ GitHub Pages เสิร์ฟแต่ไฟล์ที่มีอยู่ และ `404.html` ถูกตอบด้วย HTTP 404 จริง เบราว์เซอร์รอดเพราะ SPA boot ขึ้นมา แต่ crawler อย่าง Facebook ไม่รัน JavaScript แชร์ลิงก์แล้วการ์ดพรีวิวจะหาย
 
-ข้อควรระวังอีกอย่างคือ `wasm-opt` ของ Trunk ล้มเหลวแบบเงียบได้ (เคยเจอในโปรเจกต์ Tauri + Leptos ที่เล่าไว้ในบทความ `med-recon`) ขนาด `.wasm` อาจดูเรียบร้อยทั้งที่ยังไม่ถูก Optimize ถ้าตัวเลขเปลี่ยนผิดปกติให้ตรวจจุดนี้ก่อน
+`404.html` เองเป็น fallback ให้ client-side routing ทำงานเวลากด Refresh ที่ deep link แต่หน้าที่ได้ 404 จะไม่ถูก index (หน้าอย่าง `/about` จึงยังไม่ได้ prerender)
 
-### 3.11 post_build - สร้างหน้า HTML ให้มีอยู่จริง เพื่อแก้ปัญหา 404 และ Open Graph (SEO)
+### Upload Artifact และ Deploy Job
 
-```yaml
-- name: Generate static per-post pages
-  # Emit dist/post/<slug>/index.html for each post ... so /post/<slug> is a
-  # real 200 page with per-post Open Graph tags instead of the 404.html fallback.
-  run: cargo run --quiet --bin post_build
-```
-
-GitHub Pages เสิร์ฟหน้าเว็บเฉพาะไฟล์ที่มีอยู่จริงบน Disk เท่านั้น หากไม่มีไฟล์สำหรับเส้นทาง `/post/<slug>` คำขอจะตกไปที่ `404.html` ซึ่ง**ระบบจะส่งกลับไปด้วย HTTP Status Code 404 จริง ๆ**
-
-แม้ว่าผู้ใช้งานทั่วไปที่เปิดผ่านเบราว์เซอร์จะยังเข้าดูเว็บได้ (เพราะโค้ด JavaScript ของแอปแบบ SPA จะถูก Boot ขึ้นมาเพื่อทำ Client-Side Routing ต่อให้เอง) แต่สำหรับ Web Crawler หรือ Social Media Bot (เช่น Facebook, X หรือ Discord) พวกมันจะไม่รัน JavaScript ผลคือเมื่อเรานำลิงก์บทความไปแชร์ ภาพพรีวิว Open Graph (OG Card) จะไม่ขึ้น หรือได้แค่ภาพกลางของเว็บไซต์ไปแทน 
-
-สคริปต์ `post_build` จึงเข้ามาแก้ปัญหานี้ โดยนำไฟล์ `dist/index.html` ที่ Build เสร็จแล้ว มาสร้างเป็นไฟล์ `dist/post/<slug>/index.html` แยกเป็นรายบทความ พร้อมทั้งแทนที่แท็ก `<title>`, Open Graph และ Twitter Card ให้ตรงตามเนื้อหาของแต่ละบทความ เพื่อให้ Crawler สามารถอ่านข้อมูลได้ด้วย HTTP 200 ทันที
-
-สคริปต์นี้ดึงข้อมูลบทความผ่าน Content Loader ตัวเดียวกับที่ตัวเว็บใช้ ทำให้ Slug และ Metadata ตรงกันเสมอ
-
-สคริปต์นี้ต้องรัน **หลัง** `trunk build` เสมอ เพราะต้องรออ่านไฟล์ต้นฉบับจาก `dist/index.html` ถ้าสลับลำดับ สคริปต์จะ Panic ทันที ดีกว่าปล่อยให้ build ผ่านไปแบบเงียบ ๆ ปัจจุบันระบบ Prerender เฉพาะหน้าบทความ ส่วนหน้าอื่นอย่าง `/about` ยังพึ่ง 404 Fallback ตามปกติ
-
-### 3.12 404.html - เตรียม SPA Fallback สำหรับ Client-Side Routing
-
-```yaml
-- name: Prepare SPA fallback (404.html)
-  # Serve the app shell for unknown paths so client-side routing works.
-  run: cp dist/index.html dist/404.html
-```
-
-แอป Leptos CSR เปลี่ยนหน้าผ่าน Client-Side Routing ในเบราว์เซอร์ เมื่อผู้ใช้กด Refresh ขณะอยู่ที่ `/about` หรือ `/post/...` GitHub Pages จะหาไฟล์ตาม Path นั้นไม่พบ ถ้าไม่มี `404.html` ผู้ใช้จะเจอหน้า 404 ของ GitHub การคัดลอก `dist/index.html` เป็น `dist/404.html` ทำให้ Pages ส่ง App Shell กลับมา แล้วให้ Leptos Router แสดงหน้าที่ถูกต้องต่อ
-
-ข้อจำกัดที่ควรรู้
-
-- **อย่าพึ่งพา Fallback นี้กับหน้าสำคัญ**: เนื่องจากหน้า `404.html` จะถูกส่งกลับด้วยสถานะ HTTP 404 ส่งผลให้ **Search Engine จะไม่ทำการเก็บ Index** และ Crawler จะเห็นเฉพาะข้อมูล Meta Tag กลาง ๆ ของเว็บไซต์เท่านั้น (นี่จึงเป็นเหตุผลหลักว่าทำไมเราจึงต้องมีสคริปต์ `post_build` ในข้อ 3.11 สำหรับหน้าบทความ)
-- **การตั้งชื่อไฟล์ผูกกับ `index.html` โดยตรง**: หากในอนาคตมีการเปลี่ยนชื่อ Entry Point ใน `Trunk.toml` จะต้องอย่าลืมมาอัปเดตคำสั่งคัดลอกไฟล์ใน Step นี้ให้ตรงกันด้วย
-
-### 3.13 Upload Artifact - ส่งมอบไฟล์ข้าม Job อย่างเป็นระบบ
+Artifact ต้องมี `index.html` ที่ root และขนาดรวมไม่เกิน 1 GB ตามข้อจำกัดของ Pages
 
 ```yaml
 - name: Upload artifact
@@ -284,11 +157,7 @@ GitHub Pages เสิร์ฟหน้าเว็บเฉพาะไฟล�
     path: dist
 ```
 
-Deploy Job ทำงานบน Runner อีกเครื่องที่ไม่มีไฟล์จาก Build Job การอัปโหลด Artifact จึงเป็นข้อตกลงการส่งมอบงานระหว่างสอง Job และทำให้การ Deploy เป็นการยกชุดในครั้งเดียว
-
-ใน Artifact ต้องมี `index.html` อยู่ที่ Root ของ `path` และขนาดรวมต้องไม่เกิน 1 GB ตามข้อจำกัดของ Pages ถ้ามีไฟล์แปลกปลอมหลุดเข้าไปใน `dist/` ให้แก้ที่ต้นทาง (`.gitignore` หรือ `Trunk.toml`) ไม่ใช่เขียน Exclude หลบที่ปลายทาง
-
-### 3.14 Deploy Job - Job เดียวที่ถือสิทธิ์ในการเผยแพร่เว็บไซต์
+Deploy Job (`pages: write`, `id-token: write`, `environment: github-pages`) ไม่แตะโค้ดโปรเจกต์เลย ความเสียหายจาก dependency จึงจบที่ Build Job `id-token` ทำให้ยืนยันตัวตนผ่าน OIDC ไม่ต้องมี PAT ให้ rotate ส่วน `environment` ทำให้เห็น URL ของ deployment และตั้ง approval gate ได้
 
 ```yaml
 deploy:
@@ -306,82 +175,31 @@ deploy:
       uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
 ```
 
-Job นี้ไม่ Checkout โค้ดและไม่รันคำสั่งใด ๆ ของโปรเจกต์ มีแค่เรียก `deploy-pages` เพื่อนำ Artifact ขึ้นระบบ ถ้าโค้ดในโปรเจกต์หรือ Dependency มีการฝังโค้ดอันตราย ความเสียหายก็จบที่ Build Job ซึ่งไม่มีสิทธิ์เขียน
+## 4. ความเสี่ยงที่ต้องรู้
 
-`id-token: write` เปิดให้ `deploy-pages` ยืนยันตัวตนผ่าน OIDC เพื่อขอ Token อายุสั้นจาก GitHub โดยไม่ต้องมี PAT อายุยาวให้เก็บหรือ rotate
+- **Action ถูกยึด** - Pin SHA ทุกตัว และมี Bot คอยอัปเดตให้
+- **Token รั่วจาก build script** - `contents: read` + `persist-credentials: false` + แยก Deploy Job
+- **`--public-url` ผิด** - หน้าเปล่า ต้องเลือกตามชนิด Repo
+- **Deep link 404** - `404.html` + prerender บทความ
+- **Deploy ชนกัน** - `concurrency: pages` แต่ระวัง deployment ค้างจาก `cancel-in-progress: true`
+- **Toolchain หรือ Lint เปลี่ยน** - Pin `rust-toolchain.toml` อย่าถอด
+- **Advisory ใหม่** - ใส่ `ignore` พร้อมเหตุผล และกลับมาทบทวน
+- **เพดาน Pages** - ไซต์ไม่เกิน 1 GB, แบนด์วิดท์ 100 GB/เดือน, deploy timeout 10 นาที (โควตา 10 builds/ชม. ไม่ใช้กับ Actions workflow)
+- **ไม่มี Rollback ในตัว** - `git revert` แล้ว push ใหม่ ระหว่างนั้น Pages แสดงเวอร์ชันเดิมอยู่
 
-`environment: github-pages` ทำให้ GitHub แสดงกล่อง Deployment พร้อม URL บนหน้า Repository และเปิดทางให้ตั้ง Protection Rules เช่น บังคับให้มีผู้อนุมัติก่อน Deploy ซึ่งเหมาะกับโปรเจกต์ระดับองค์กร
+## 5. อาการที่เจอบ่อย
 
-ความเสี่ยงที่เหลืออยู่
+- **หน้าเว็บขาว หรือ 404 `.wasm`** - `--public-url` ไม่ตรงกับชนิด Repo
+- **Refresh `/post/...` แล้ว 404** - ไม่มี `404.html` หรือ Deploy ยังไม่เสร็จ
+- **แชร์ลิงก์แล้วการ์ด OG ไม่ขึ้น** - `post_build` ไม่ทำงาน หรือถูกรันก่อน `trunk build`
+- **Deploy ล้มด้วย "deployment in progress"** - เปลี่ยน `cancel-in-progress: false` แล้ว Re-run
+- **Permission Denied ตอน Deploy** - Pages Source ยังไม่ใช่ Actions หรือ `permissions` ไม่ครบ
+- **Clippy แดงทั้งที่ไม่ได้แก้โค้ด** - เคยถอด Pin toolchain ออก
+- **Local ผ่าน แต่ CI ไม่ผ่าน** - Cache เสีย หรือเวอร์ชัน rustc/trunk ต่างกัน
 
-- ถ้า Workflow ถูกยกเลิกระหว่าง Deploy (จาก `concurrency` ข้อ 3.3) สถานะ Deployment อาจค้างจน Run ถัดไปเริ่มไม่ได้
-- Pages มี Timeout ของขั้นตอน Deploy อยู่ที่ 10 นาที (นับเฉพาะ Deploy ไม่รวม Build) ปกติใช้ไม่ถึงเว้นแต่ Artifact ใหญ่ผิดปกติ
+## 6. โครง workflow ขั้นต่ำสำหรับโปรเจกต์อื่น
 
-ส่วน `actions/configure-pages` ที่ Starter Workflow ทั่วไปใช้คำนวณ Base URL อัตโนมัตินั้น เราเลือกไม่ใช้เพื่อลดจำนวน Third-party Action ที่ต้องเชื่อถือ แล้วระบุ `--public-url` เองในขั้น Build
-
----
-
-## 4. Risk Register - สรุปความเสี่ยงและมาตรการรับมือทั้งหมด
-
-1. **ถูกแฮก Action หรือ Tag โดนชี้ไปที่อื่น** - เกิดกับทุกคำสั่ง `uses:` ป้องกันด้วยการ Pin Commit SHA ทุกตัว ที่ต้องดูแลต่อคือให้ Renovate หรือ Dependabot ส่ง PR อัปเดต SHA
-2. **Token รั่วไหลจาก Dependency หรือ Script** - เกิดใน Build Job จำกัดด้วย `contents: read`, `persist-credentials: false` และแยก Deploy Job ออกไป
-3. **ระบุ Path เผยแพร่ผิด** - ค่า `--public-url` ผิดทำให้หน้าเว็บขาว ต้องเลือกค่าให้ตรงกับประเภท Repo เอง (ข้อ 2)
-4. **Deep Link ถูก Refresh แล้วติด 404** - ป้องกันด้วย `404.html` และ Prerender รายบทความจาก `post_build` ส่วนหน้าที่ไม่ใช่บทความยังเป็น 404 Fallback
-5. **Deploy ชนกัน** - ใช้ `concurrency: pages` แต่ถ้าตั้ง `cancel-in-progress: true` อาจทิ้ง Deployment ค้างได้ (อ่านข้อ 3.3)
-6. **Toolchain หรือ Lint เปลี่ยน** - Pin `rust-toolchain.toml` ไว้ ห้ามถอด Pin
-7. **Advisory ใหม่** - ใส่ `ignore` พร้อมเหตุผลใน `deny.toml` และ `.cargo/audit.toml` ต้องซิงก์สองไฟล์และกลับมาทบทวน
-8. **Cache เสีย** - ล้าง Cache ในหน้า Actions หรือ Bump Key
-9. **Trunk คัดลอก Asset ก่อนไฟล์ถูกสร้าง** - Pre-build Hook `cargo build -q` บังคับลำดับไว้แล้ว
-10. **เพดานของ GitHub Pages** - ไซต์ไม่เกิน 1 GB, แบนด์วิดท์ 100 GB/เดือน, Deploy timeout 10 นาที (โควตา 10 builds/ชม. ไม่ใช้กับ Actions workflow)
-11. **ไม่มี Rollback ในตัว** - ใช้ `git revert` แล้ว Push ใหม่ ระหว่างนั้น Pages แสดงเวอร์ชันเดิมอยู่จึงไม่มี Downtime
-
----
-
-## 5. Checklist ก่อน Push โค้ดหรือก่อนปรับแก้ Workflow
-
-- [ ] ตั้งค่า Pages Source เป็น **GitHub Actions** ใน Settings ของ Repository เรียบร้อยแล้ว
-- [ ] ตรวจสอบว่าค่า `--public-url` สอดคล้องกับประเภทของ Repo (User Site ใช้ `/`, Project Site ใช้ `/<repo>/`)
-- [ ] ไฟล์ `rust-toolchain.toml` มีการระบุ Target `wasm32-unknown-unknown` รวมถึง Component `rustfmt` และ `clippy` ไว้อย่างครบถ้วน
-- [ ] ไฟล์ `Cargo.lock` ถูก Commit ขึ้น Git เสมอ และโฟลเดอร์ `dist/` อยู่ใน `.gitignore`
-- [ ] ทดสอบ Build บนเครื่อง Local ด้วยคำสั่ง: `trunk build --release --public-url <ค่าเดียวกับบน CI>` แล้วลองเปิดดูไฟล์ใน `dist/` ว่าโหลด Asset ครบถ้วน
-- [ ] หากมีการเพิ่มหรือสลับขั้นตอนใน Workflow ให้ตรวจเช็กลำดับเสมอ: `trunk build` → `post_build` → `cp 404.html` → `upload artifact`
-- [ ] Action ใหม่ทุกตัวต้อง Pin ด้วย Commit SHA เสมอ พร้อมใส่คอมเมนต์ระบุเวอร์ชันกำกับไว้
-- [ ] เปิดใช้งาน Branch Protection โดยตั้งให้ Job `build` เป็น Required Status Check ก่อนจะยอมให้ Merge โค้ด
-
----
-
-## 6. ปัญหาที่พบบ่อยและแนวทางแก้ไข (Troubleshooting)
-
-- **หน้าเว็บขาวโพลน / Console ฟ้อง 404 ไม่พบไฟล์ `.wasm`**
-  - สาเหตุที่พบบ่อย: ค่า `--public-url` ไม่ตรงกับประเภทของ Repo
-  - จุดที่ต้องไปตรวจสอบและแก้ไข: ดูหัวข้อ 2 และตรวจสอบคำสั่ง `trunk build`
-- **กด Refresh หน้า `/post/...` หรือ `/about` แล้วติด 404**
-  - สาเหตุที่พบบ่อย: ไม่มีไฟล์ `404.html` หรือขั้นตอนการ Deploy ยังไม่เสร็จสมบูรณ์
-  - จุดที่ต้องไปตรวจสอบและแก้ไข: ตรวจสอบขั้นตอน 3.12 และดูประวัติการ Deploy ล่าสุด
-- **แชร์ลิงก์บทความแล้วรูปพรีวิวหรือการ์ด OG ไม่แสดงผล**
-  - สาเหตุที่พบบ่อย: สคริปต์ `post_build` ไม่ได้ทำงาน หรือถูกรันก่อนขั้นตอน `trunk build`
-  - จุดที่ต้องไปตรวจสอบและแก้ไข: ตรวจสอบลำดับขั้นตอนใน 3.11
-- **Deploy Job ล้มเหลวพร้อมข้อความ *"deployment in progress"***
-  - สาเหตุที่พบบ่อย: Run ก่อนหน้าถูกสั่งยกเลิกระหว่างทาง ทำให้สถานะ Deploy ค้าง
-  - จุดที่ต้องไปตรวจสอบและแก้ไข: ปรับค่าเป็น `cancel-in-progress: false` แล้วสั่ง Re-run ใหม่ (ดูหัวข้อ 3.3)
-- **Deploy Job ล้มเหลวด้วยข้อผิดพลาดเรื่องสิทธิ์ (Permission Denied)**
-  - สาเหตุที่พบบ่อย: ยังไม่ได้สลับ Pages Source เป็น Actions หรือกำหนด `permissions` ไม่ครบ
-  - จุดที่ต้องไปตรวจสอบและแก้ไข: ตรวจสอบการตั้งค่าใน Pages Settings และดูหัวข้อ 3.14
-- **CI พังเพราะ Clippy แจ้งเตือน ทั้ง ๆ ที่ไม่ได้แก้ไขโค้ดเลย**
-  - สาเหตุที่พบบ่อย: เคยถอดการ Pin เวอร์ชันของ Toolchain ออก หรือเวอร์ชันของ Rust หลุด
-  - จุดที่ต้องไปตรวจสอบและแก้ไข: ตรวจสอบไฟล์ `rust-toolchain.toml` และอย่าถอดการ Pin เวอร์ชัน
-- **ขั้นตอน `cargo audit` หรือ `cargo deny` รันไม่ผ่าน**
-  - สาเหตุที่พบบ่อย: มีการรายงานช่องโหว่ความปลอดภัยใหม่ใน RustSec Advisory
-  - จุดที่ต้องไปตรวจสอบและแก้ไข: ใส่เงื่อนไข `ignore` พร้อมระบุเหตุผลใน `deny.toml` และ `.cargo/audit.toml` หรืออัปเดต Dependency
-- **ในเครื่อง Local รันผ่าน แต่บน CI พังแบบไม่มีเหตุผล**
-  - สาเหตุที่พบบ่อย: แคชบน CI ตกค้าง/เสียหาย หรือคอมไพเลอร์ Rust คนละเวอร์ชัน
-  - จุดที่ต้องไปตรวจสอบและแก้ไข: สั่งลบ Cache ในหน้า Actions และตรวจเช็กเวอร์ชันของ `rustc` กับ `trunk` ให้ตรงกัน
-
----
-
-## 7. ปรับใช้กับโปรเจกต์ Leptos อื่น (โครงสร้างเริ่มต้นแบบขั้นต่ำ)
-
-หากต้องการนำโครงสร้างนี้ไปปรับใช้กับโปรเจกต์ Leptos CSR อื่น ๆ สามารถสร้างไฟล์ `.github/workflows/deploy.yml` แล้วคัดลอกโครงร่างขั้นต่ำด้านล่างนี้ไปใช้งานได้เลย โดยให้แทนที่ `<SHA>` ด้วย Commit SHA จริงของแต่ละ Action (สามารถตรวจสอบ SHA ล่าสุดได้จากหน้า Releases ของแต่ละ Action ครับ)
+ถ้าเริ่มโปรเจกต์ใหม่ เอาโครงนี้ไปวางที่ `.github/workflows/deploy.yml` แล้วแทน `<SHA>` ด้วย Commit SHA จริงของแต่ละ Action (ดูเวอร์ชันล่าสุดได้จากหน้า Releases ของ Action นั้น)
 
 ```yaml
 name: Deploy to GitHub Pages
@@ -443,19 +261,8 @@ jobs:
         id: deployment
 ```
 
-**ส่วนประกอบเพิ่มเติมที่แนะนำให้เพิ่มเข้ามาเมื่อโปรเจกต์เริ่มจริงจังมากขึ้น:**
-- ไฟล์ `rust-toolchain.toml` เพื่อล็อกเวอร์ชัน Rust ให้ตรงกันอย่างแน่นอนระหว่างเครื่อง Dev และ CI
-- ด่านตรวจความปลอดภัยและ License ด้วย `cargo-audit` และ `cargo-deny`
-- สคริปต์ `post_build` สำหรับทำ Prerender หน้าบทความ หากโปรเจกต์มีหน้าที่จำเป็นต้องแชร์ลง Social Media หรือต้องการผลลัพธ์ทาง SEO
+## 7. สรุป
 
----
+`deploy.yml` ตอบโจทย์สามเรื่อง: **ความแน่นอน** (Pin ทุกอย่างที่เลื่อนได้), **ความปลอดภัย** (แยก Job ตามสิทธิ์ ไม่มี Secret) และ **ข้อจำกัดของ GitHub Pages** (static hosting, crawler ไม่รัน JS, base path ต้องตรง)
 
-## 8. บทสรุป
-
-`deploy.yml` ไฟล์นี้ตอบโจทย์สามเรื่องหลัก
-
-1. **ความแน่นอน** - Pin ทุกสิ่งที่เลื่อนได้ ทั้ง SHA ของ Action, Rust Toolchain, Trunk และ Cache Key ในวันที่ CI พัง เราจะรู้ว่าพังเพราะโค้ดที่แก้ ไม่ใช่เพราะสภาพแวดล้อมขยับ
-2. **ความปลอดภัย** - แยก Job ตามสิทธิ์ ไม่มี Long-lived Secret และ Deploy Job ไม่แตะโค้ดของโปรเจกต์เลย
-3. **ข้อจำกัดของ GitHub Pages** - Static Hosting ไม่มี Server Backend และ Crawler ไม่รัน JavaScript หน้าที่ต้องแชร์หรือทำ SEO จึงต้องมีไฟล์ HTML จริง และ Base Path ต้องตรงกับ URL ของ Repo
-
-ถ้าวันหนึ่ง CI พัง ให้เริ่มจาก `concurrency`, `public-url`, toolchain และ artifact ก่อน เพราะสี่จุดนี้ครอบคลุมปัญหาที่พบบ่อยที่สุดของ workflow นี้
+ถ้า CI พัง ให้เริ่มจาก `concurrency`, `public-url`, toolchain และ artifact ก่อน สี่จุดนี้ครอบคลุมปัญหาที่พบบ่อยที่สุด ไฟล์ต้นแบบเต็มดูได้ที่ `.github/workflows/deploy.yml` ของ repo นี้
