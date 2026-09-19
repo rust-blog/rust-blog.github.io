@@ -6,7 +6,7 @@ tags: [rust, leptos, wasm]
 author: "suradet-ps"
 ---
 
-บทความนี้เป็นผมเขียนเป็น **Playbook** สำหรับเปิดอ่านย้อนหลังเมื่อ CI พังหรือต้องตั้งค่า Deploy ใหม่ อ้างอิงจาก `.github/workflows/deploy.yml` ของ rust-blog นี้เอง (Leptos 0.8 CSR + Trunk + Wasm) ใช้ได้กับโปรเจกต์ Leptos CSR ที่ build ด้วย Trunk แต่ใช้กับ Leptos SSR ไม่ได้นะครับ เพราะ GitHub Pages ไม่มี server runtime ในตัว
+บทความนี้ผมเขียนเป็น **Playbook** สำหรับเปิดอ่านย้อนหลังเมื่อ CI พังหรือต้องตั้งค่า Deploy ใหม่ อ้างอิงจาก `.github/workflows/deploy.yml` ของ rust-blog นี้เอง (Leptos 0.8 CSR + Trunk + Wasm) ใช้ได้กับโปรเจกต์ Leptos CSR ที่ build ด้วย Trunk แต่ใช้กับ Leptos SSR ไม่ได้นะครับ เพราะ GitHub Pages ไม่มี server runtime ในตัว
 
 ## 1. มาดูกันว่าเกิดอะไรขึ้นเมื่อ push
 
@@ -24,7 +24,7 @@ author: "suradet-ps"
 8. **SPA Fallback** - คัดลอก `index.html` ไปเป็น `404.html`
 9. **Upload Artifact** - ส่งโฟลเดอร์ `dist/` ไปให้ Deploy Job ถัดไป
 
-จ็อบที่สอง Deploy Job จะเริ่มทำงานเมื่อ Build ผ่านเรียบร้อยแล้วเท่านั้น (`needs: build`) ถือสิทธิ์ `pages: write` + `id-token: write` ไว้กับตัวเอง ไม่มีการ Checkout โค้ดและไม่รันสคริปต์โปรเจกต์ซ้ำ เรียกเพียง `deploy-pages` เพื่อดันเว็บขึ้น `[https://rust-blog.github.io](https://rust-blog.github.io)`
+จ็อบที่สอง Deploy Job จะเริ่มทำงานเมื่อ Build ผ่านเรียบร้อยแล้วเท่านั้น (`needs: build`) ถือสิทธิ์ `pages: write` + `id-token: write` ไว้กับตัวเอง ไม่มีการ Checkout โค้ดและไม่รันสคริปต์โปรเจกต์ซ้ำ เรียกเพียง `deploy-pages` เพื่อดันเว็บขึ้น [https://rust-blog.github.io](https://rust-blog.github.io)
 
 หลักการสำคัญของไฟล์นี้ คือ ให้ Job ที่อ่านได้อย่างเดียวควบคุมโค้ดที่ประเมินความเสี่ยงได้ไม่หมด, จากนั้นใช้ Artifact รับส่งแทน branch `gh-pages` และไม่ใช้ Secret ใดๆ เพราะยืนยันตัวตนด้วย OIDC เพื่อขอ token อายุสั้น
 
