@@ -1,34 +1,34 @@
 ---
 title: "Deploy เว็บ Leptos ขึ้น GitHub Pages"
 date: "2026-09-18"
-description: "คู่มือฉบับ Playbook สำหรับการ deploy เว็บ Leptos (CSR + Trunk + Wasm) ขึ้น GitHub Pages"
+description: "Playbook สำหรับการ deploy เว็บ Leptos ขึ้น GitHub Pages"
 tags: [rust, leptos, wasm]
 author: "suradet-ps"
 ---
 
-บทความนี้เป็น **Playbook** สำหรับเปิดอ่านย้อนหลังเมื่อ CI พังหรือต้องตั้งค่า Deploy ใหม่ อ้างอิงจาก `.github/workflows/deploy.yml` ของ rust-blog นี้เอง (Leptos 0.8 CSR + Trunk + Wasm) ใช้ได้กับโปรเจกต์ Leptos CSR ที่ build ด้วย Trunk แต่ใช้กับ Leptos SSR ไม่ได้ เพราะ GitHub Pages ไม่มี server runtime ในตัว
+บทความนี้เป็นผมเขียนเป็น **Playbook** สำหรับเปิดอ่านย้อนหลังเมื่อ CI พังหรือต้องตั้งค่า Deploy ใหม่ อ้างอิงจาก `.github/workflows/deploy.yml` ของ rust-blog นี้เอง (Leptos 0.8 CSR + Trunk + Wasm) ใช้ได้กับโปรเจกต์ Leptos CSR ที่ build ด้วย Trunk แต่ใช้กับ Leptos SSR ไม่ได้นะครับ เพราะ GitHub Pages ไม่มี server runtime ในตัว
 
-## 1. เกิดอะไรขึ้นเมื่อ push
+## 1. มาดูกันว่าเกิดอะไรขึ้นเมื่อ push
 
 เมื่อ push เข้า branch `main` workflow จะทำงานแบ่งเป็นสอง Job ต่อกัน โดยส่งต่อไฟล์ผ่าน Artifact ของโฟลเดอร์ `dist/`
 
-Build Job (`ubuntu-latest`) มีลำดับการทำงานดังนี้
+จ็อบแรก Build Job (`ubuntu-latest`) มีลำดับการทำงานดังนี้
 
 1. **Checkout** - ดึงโค้ดลงเครื่อง CI พร้อมตั้งค่า `persist-credentials: false`
 2. **ติดตั้ง Rust** - อ่านค่าตาม `rust-toolchain.toml` และเพิ่ม target `wasm32-unknown-unknown`
 3. **Cache cargo** - ช่วยลดเวลาในการคอมไพล์ซ้ำ
-4. **ด่านตรวจสอบคุณภาพ** - รัน `fmt` → `clippy` (โฟกัส target wasm32) → `test`
-5. **ด่านตรวจความปลอดภัย Supply Chain** - รัน `cargo-audit` → `cargo-deny`
+4. **การตรวจสอบคุณภาพ** - รัน `fmt` → `clippy` (โฟกัส target wasm32) → `test`
+5. **การตรวจความปลอดภัย Supply Chain** - รัน `cargo-audit` → `cargo-deny`
 6. **`trunk build --release --public-url /`** - ประมวลผลออกมาได้โฟลเดอร์ `dist/`
 7. **post_build** - สร้างหน้า Static แยกรายบทความเพื่อรองรับ OG tags
 8. **SPA Fallback** - คัดลอก `index.html` ไปเป็น `404.html`
 9. **Upload Artifact** - ส่งโฟลเดอร์ `dist/` ไปให้ Deploy Job ถัดไป
 
-Deploy Job จะเริ่มทำงานเมื่อ Build ผ่านเรียบร้อยแล้วเท่านั้น (`needs: build`) ถือสิทธิ์ `pages: write` + `id-token: write` ไว้กับตัวเอง ไม่มีการ Checkout โค้ดและไม่รันสคริปต์โปรเจกต์ซ้ำ เรียกเพียง `deploy-pages` เพื่อดันเว็บขึ้น `[https://rust-blog.github.io](https://rust-blog.github.io)`
+จ็อบที่สอง Deploy Job จะเริ่มทำงานเมื่อ Build ผ่านเรียบร้อยแล้วเท่านั้น (`needs: build`) ถือสิทธิ์ `pages: write` + `id-token: write` ไว้กับตัวเอง ไม่มีการ Checkout โค้ดและไม่รันสคริปต์โปรเจกต์ซ้ำ เรียกเพียง `deploy-pages` เพื่อดันเว็บขึ้น `[https://rust-blog.github.io](https://rust-blog.github.io)`
 
-หลักการสำคัญของไฟล์นี้ คือ ให้ Job ที่อ่านได้อย่างเดียวควบคุมโค้ดที่ประเมินความเสี่ยงได้ไม่หมด, ใช้ Artifact รับส่งแทน branch `gh-pages` และไม่ใช้ Secret ใดๆ เพราะยืนยันตัวตนด้วย OIDC เพื่อขอ token อายุสั้น
+หลักการสำคัญของไฟล์นี้ คือ ให้ Job ที่อ่านได้อย่างเดียวควบคุมโค้ดที่ประเมินความเสี่ยงได้ไม่หมด, จากนั้นใช้ Artifact รับส่งแทน branch `gh-pages` และไม่ใช้ Secret ใดๆ เพราะยืนยันตัวตนด้วย OIDC เพื่อขอ token อายุสั้น
 
-## 2. ตั้งค่าครั้งเดียว
+## 2. การตั้งค่า (ทำเพียงครั้งเดียว)
 
 * **Pages Source** ต้องเลือกเป็น **GitHub Actions** (Settings → Pages) ไม่งั้นแม้จะอัปโหลด Artifact ได้แต่ตัว Deploy จะไม่ทำงาน
 * **`--public-url`** ต้องตั้งให้ตรงกับประเภท Repo: User/Org Site (`<user>.github.io`) ให้ใช้ `/`, ส่วน Project Site ให้ใช้ `/<repo>/` ถ้าตั้งผิด เบราว์เซอร์จะหาไฟล์ `.wasm` กับ CSS ไม่พบ จนได้หน้าเว็บว่างเปล่า
@@ -37,7 +37,7 @@ Deploy Job จะเริ่มทำงานเมื่อ Build ผ่า�
 
 ก่อน push ควรตั้งค่า Branch Protection ให้ Job `build` เป็น Required Check และหากมีการปรับเปลี่ยน Step ให้เรียงลำดับเป็น `trunk build` → `post_build` → `cp 404.html` → upload เสมอ
 
-## 3. จุดที่ควรรู้ใน deploy.yml
+## 3. มาถึงจุดที่ควรรู้ใน deploy.yml
 
 ### `on` และ `permissions`
 
@@ -52,7 +52,7 @@ permissions:
 
 `workflow_dispatch` มีไว้สั่งรัน Deploy ใหม่เมื่อปรับค่าภายนอก โดยไม่ต้องสร้าง commit หลอก ส่วน `permissions: contents: read` เป็นการจำกัด Token เริ่มต้นให้อ่านได้อย่างเดียว แล้วค่อยให้ Deploy Job ยกระดับสิทธิ์ขึ้นเอง หากลืมเปิดสิทธิ์ให้ Step ใหม่ Job จะฟ้อง Error ทันที ซึ่งช่วยให้รู้ตัวและแก้ไขได้เร็วกว่าการเปิดสิทธิ์กว้างทิ้งไว้
 
-ข้อควรรู้คือไฟล์นี้ยังไม่มี trigger สำหรับ PR ดังนั้นด่านคุณภาพจะทำงานหลัง Merge เข้า `main` แล้วเท่านั้น หากทีมใหญ่ขึ้นควรแยก Workflow สำหรับ PR ออกมาต่างหาก
+ข้อควรรู้คือไฟล์นี้ยังไม่มี trigger สำหรับ PR ดังนั้นการตรวจสอบคุณภาพจะทำงานหลัง Merge เข้า `main` แล้วเท่านั้น หากทีมใหญ่ขึ้นควรแยก Workflow สำหรับ PR ออกมาต่างหากนะครับ
 
 ### `concurrency` จุดที่พลาดง่ายที่สุด
 
@@ -62,7 +62,7 @@ concurrency:
   cancel-in-progress: true
 ```
 
-การตั้งกลุ่ม `pages` ช่วยจัดคิว Deploy ทีละรอบ ป้องกัน Run เก่าประมวลผลแซง Run ใหม่ แต่ `cancel-in-progress: true` มีจุดที่ต้องแลก: Starter Workflow ทางการมักใช้ `false` เพราะ Pages ยอมให้มี deployment ค้างได้ทีละหนึ่งต่อ ref หาก Run A กำลัง Deploy แล้วถูกสั่งยกเลิกกลางคัน สถานะอาจค้างจน Run B เริ่มไม่ได้ (actions/deploy-pages#118) repo นี้เลือก `true` เพื่อเน้นให้หน้าเว็บสดใหม่อยู่ตลอด หากเจอ error ทำนอง "cannot start a new deployment while one is in progress" ให้ปรับกลับเป็น `false` หรือสั่ง Re-run ใหม่
+การตั้งกลุ่ม `pages` ช่วยจัดคิว Deploy ทีละรอบ ป้องกัน Run เก่าประมวลผลแซง Run ใหม่ แต่ `cancel-in-progress: true` มีจุดที่ต้องแลกคือ Starter Workflow ทางการมักใช้ `false` เพราะ Pages ยอมให้มี deployment ค้างได้ทีละหนึ่งต่อ ref หาก Run A กำลัง Deploy แล้วถูกสั่งยกเลิกกลางคัน สถานะอาจค้างจน Run B เริ่มไม่ได้ ([actions/deploy-pages#118](https://github.com/actions/deploy-pages/issues/118)) repo นี้เลือก `true` เพื่อเน้นให้หน้าเว็บสดใหม่อยู่ตลอด หากเจอ error ทำนอง "cannot start a new deployment while one is in progress" ให้ปรับกลับเป็น `false` หรือสั่ง Re-run ใหม่
 
 ### Checkout, Toolchain, Cache
 
@@ -97,7 +97,7 @@ components = ["rustfmt", "clippy"]
   uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
 ```
 
-### ด่านคุณภาพและ Supply Chain
+### การตรวจสอบคุณภาพและ Supply Chain
 
 ```yaml
 - name: Check formatting
@@ -133,7 +133,7 @@ Clippy ต้องเจาะจงไปที่ target wasm32 เพรา�
   run: cp dist/index.html dist/404.html
 ```
 
-Trunk ต้องล็อกเวอร์ชันไว้ (`v0.21.14`) เพราะพฤติกรรมการ build และ `wasm-opt` อาจเปลี่ยนได้ในระดับ minor และใน `Trunk.toml` จะมี pre_build hook `cargo build -q` ที่ห้ามลบเด็ดขาด: เนื่องจากฟีเจอร์ `copy-file` ทำงานขนานไปกับ Rust pipeline บน clean checkout หากไม่มี hook นี้บังคับให้ `build.rs` ทำงานเสร็จก่อน ไฟล์อย่าง `rss.xml`, `sitemap.xml`, `robots.txt` จะยังไม่ถูกสร้าง และส่งผลให้ build พังทันที
+Trunk ต้องล็อกเวอร์ชันไว้ (เช่น `v0.21.14`) เพราะพฤติกรรมการ build และ `wasm-opt` อาจเปลี่ยนได้ในระดับ minor และใน `Trunk.toml` จะมี pre_build hook `cargo build -q` ที่ห้ามลบเด็ดขาด เนื่องจากฟีเจอร์ `copy-file` ทำงานขนานไปกับ Rust pipeline บน clean checkout หากไม่มี hook นี้บังคับให้ `build.rs` ทำงานเสร็จก่อน ไฟล์อย่าง `rss.xml`, `sitemap.xml`, `robots.txt` จะยังไม่ถูกสร้าง และส่งผลให้ build พังทันที
 
 ```toml
 [[hooks]]
@@ -179,7 +179,7 @@ deploy:
 
 * **Action ถูกเข้าควบคุม** - ป้องกันด้วยการ Pin SHA ทุกตัว และใช้ Bot คอยช่วยอัปเดต
 * **Token รั่วไหลจาก build script** - จำกัดสิทธิ์ด้วย `contents: read` + `persist-credentials: false` และแยก Deploy Job ออกมา
-* **กำหนด `--public-url` ไม่ถูกต้อง** - หน้าเว็บจะขาวเปล่า ต้องเลือกให้ตรงตามประเภทของ Repo
+* **กำหนด `--public-url` ไม่ถูกต้อง** - หน้าเว็บจะขาว ต้องเลือกให้ตรงตามประเภทของ Repo
 * **เข้าผ่าน Deep link แล้วเจอ 404** - แก้ด้วยการทำ `404.html` + prerender หน้าบทความ
 * **กระบวนการ Deploy ชนกัน** - ควบคุมด้วย `concurrency: pages` แต่ต้องระวังปัญหาค้างจาก `cancel-in-progress: true`
 * **Toolchain หรือ Lint มีการเปลี่ยนแปลง** - ล็อกเวอร์ชันใน `rust-toolchain.toml` ห้ามปลดออก
@@ -261,8 +261,8 @@ jobs:
         id: deployment
 ```
 
-## 7. สรุป
+## 7. เน้นย้ำ
 
-`deploy.yml` ออกแบบมาเพื่อตอบโจทย์สามเรื่องหลัก: **ความเสถียรแน่นอน** (Pin ทุกอย่างที่อาจเปลี่ยนแปลงได้), **ความปลอดภัย** (แยก Job ตามระดับสิทธิ์ ไม่ใช้ Secret) และ **การก้าวข้ามข้อจำกัดของ GitHub Pages** ( static hosting, crawler ไม่รัน JS, base path ต้องตรง)
+`deploy.yml` ออกแบบมาเพื่อตอบโจทย์สามเรื่องหลักคือ **ความเสถียร** (Pin ทุกอย่างที่อาจเปลี่ยนแปลงได้), **ความปลอดภัย** (แยก Job ตามระดับสิทธิ์ ไม่ใช้ Secret) และ **การก้าวข้ามข้อจำกัดของ GitHub Pages** ( static hosting, crawler ไม่รัน JS, base path ต้องตรง)
 
-หากระบบ CI มีปัญหา แนะนำให้เริ่มไล่เช็กจาก `concurrency`, `public-url`, toolchain และ artifact ก่อน เพราะสี่จุดนี้ครอบคลุมสาเหตุส่วนใหญ่ที่พบได้บ่อยที่สุด โดยสามารถดูไฟล์ต้นแบบฉบับเต็มได้ที่ `.github/workflows/deploy.yml` ของ repository นี้
+หากระบบ CI มีปัญหา แนะนำให้เริ่มไล่เช็กจาก `concurrency`, `public-url`, toolchain และ artifact ก่อน เพราะสี่จุดนี้ครอบคลุมสาเหตุส่วนใหญ่ที่พบได้บ่อยที่สุด โดยสามารถดูไฟล์ต้นแบบฉบับเต็มได้ที่ `.github/workflows/deploy.yml` ของ repository นี้ครับ
