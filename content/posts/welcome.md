@@ -8,6 +8,8 @@ author: "suradet-ps"
 
 Hello, and welcome to the first post on **rust-blog**. This blog isn't just about the Rust language - it's built with, and runs on, Rust itself.
 
+![A rust-colored gear, the rust-blog mark](assets/rust-blog-gear.svg)
+
 ## Powered by Rust 100%
 
 What sets this blog apart from most websites is that the frontend relies on almost no JavaScript at all. Everything runs on:
