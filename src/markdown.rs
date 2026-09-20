@@ -42,7 +42,8 @@ fn theme() -> &'static syntect::highlighting::Theme {
 /// Fenced code blocks are highlighted with `syntect` at render time - no
 /// JavaScript, no CDN - and wrapped in the framed code block: traffic-light
 /// dots, an optional filename (` ```rust title="src/main.rs" `), the language
-/// badge, and a copy button.
+/// badge, and a copy button. Image references into `content/assets/` are
+/// rewritten to their fingerprinted public URLs (see `src/assets.rs`).
 pub fn render(md: &str) -> String {
   let parser = Parser::new_ext(md, Options::all());
   let mut events = parser.collect::<Vec<_>>();
@@ -58,6 +59,14 @@ pub fn render(md: &str) -> String {
       ));
     } else if let Event::End(TagEnd::Table) = &events[i] {
       events[i] = Event::Html(pulldown_cmark::CowStr::from("</tbody></table></div>\n"));
+    } else if let Event::Start(Tag::Image { dest_url, .. }) = &mut events[i] {
+      // Content images live in `content/assets/` and ship with a content
+      // hash in the file name; rewrite the markdown reference to the URL the
+      // build staged. Anything else (external URLs, unknown paths) stays as
+      // written.
+      if let Some(url) = crate::assets::resolve(dest_url) {
+        *dest_url = pulldown_cmark::CowStr::from(url);
+      }
     } else if let Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(info))) = &events[i] {
       let info = info.to_string();
       // The fence language is the first comma/space-separated token, so
@@ -362,6 +371,25 @@ mod tests {
     assert!(html.contains("<h1>Hello</h1>"));
     assert!(html.contains("<em>emphasis</em>"));
     assert!(!html.contains("code-plate"));
+  }
+
+  #[test]
+  fn content_asset_images_get_fingerprinted_urls() {
+    let url = crate::assets::resolve("assets/rust-blog-gear.svg").expect("sample asset");
+    let html = render("![gear](assets/rust-blog-gear.svg)");
+    assert!(
+      html.contains(&format!("<img src=\"{url}\" alt=\"gear\" />")),
+      "{html}"
+    );
+  }
+
+  #[test]
+  fn external_images_are_left_alone() {
+    let html = render("![remote](https://example.com/photo.png)");
+    assert!(
+      html.contains("<img src=\"https://example.com/photo.png\" alt=\"remote\" />"),
+      "{html}"
+    );
   }
 
   #[test]

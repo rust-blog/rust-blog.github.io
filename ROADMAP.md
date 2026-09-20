@@ -139,7 +139,13 @@ calendar dates; build fails on any invalid date.
   typos); drafts are exempt by contract. `build.rs` prints the warnings
   with the file path; malformed posts still fail the build hard.
 - [ ] **Open:** no post template / `cargo xtask new` - authors copy by hand.
-- [ ] **Open:** no `content/assets/` handling (images un-fingerprinted).
+- [x] **Content assets:** images live in `content/assets/`; `build.rs`
+  fingerprints every file (16-hex SHA-256 in the name, the same shape Trunk
+  gives CSS/JS) into `dist-assets/`, Trunk copies that staged directory to
+  `dist/assets/`, and markdown `![alt](assets/x.png)` renders the hashed URL.
+  A reference to a missing asset fails the build loudly. Covered by
+  `tests/assets_pipeline` + `src/fingerprint.rs` tests.
+  (Closes the open asset item; Phase 6.)
 
 **Acceptance:** `cargo xtask new "<title>"` scaffolds a valid post; assets
 fingerprint into `dist/`; linter rejects malformed frontmatter in CI.
@@ -168,7 +174,13 @@ generated; no a11y lint failures.
 
 ### Phase 6 - Asset pipeline & multi-format (open)
 
-- [ ] Fingerprint `content/assets/**` into `dist/` (Trunk already fingerprints CSS/JS).
+- [x] Fingerprint `content/assets/**` into `dist/` (Trunk already fingerprints
+  CSS/JS). - Done: the same truncated-SHA-256 convention Trunk uses for CSS/JS
+  is applied by `build.rs`, which stages `<stem>-<hash>.<ext>` files in
+  `dist-assets/` (wiped and rebuilt each build); Trunk `copy-dir`s them to
+  `dist/assets/` and the embedded manifest (only text enters the WASM, never
+  the bytes) resolves markdown image references. `content/posts/` is now the
+  only embedded content directory, so images cannot bloat the binary.
 - [ ] **Deliberately skipped:** Code-fence language label - implemented and
   then removed on design review: the plate speaks for itself and the label
   added furniture. (Highlighting for known languages stays, as always.)

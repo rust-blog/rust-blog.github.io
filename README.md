@@ -72,6 +72,11 @@ One folder, one binary, a quiet set of honest services.
   into HTML; `syntect` highlights fenced code blocks at render time -
   no CDN, no JavaScript - and the hand-crafted CSS design system
   (light and dark, no framework) carries the look.
+- **Illustrates** - images live in `content/assets/` and are referenced as
+  `![alt](assets/name.png)`. The build fingerprints every file (a content
+  hash joins the name, like Trunk does for CSS/JS), rewrites the reference
+  to the hashed URL, and fails loudly on a missing file - no broken images,
+  no stale caches.
 - **Searches** - the home page filters in memory by substring and tag
   chips - no index to maintain, no backend to ask.
 - **Syndicates** - `build.rs` generates `rss.xml` (plus `sitemap.xml` and
@@ -98,6 +103,11 @@ One folder, one binary, a quiet set of honest services.
 **The ceremony of the markdown file** - a post is a file, not a form:
 no admin panel, no database, no per-post code. The content model is
 the folder structure, and the folder is the CMS.
+
+**The ceremony of the image** - an image is a file in `content/assets/`,
+referenced as `![alt](assets/name.png)`. The build fingerprints it,
+rewrites the reference to the hashed URL, and fails loudly when the file
+is missing.
 
 **The ceremony of the compiled site** - everything the reader sees
 was embedded when the binary was built: posts, search terms, RSS. A
