@@ -50,6 +50,14 @@
         <link data-trunk rel="copy-file" href="robots.txt" />
         <link data-trunk rel="copy-file" href="og-image.png" />
 
+        <!-- Content images: build.rs fingerprints every file under
+             content/assets/ into dist-assets/ (the pre_build hook in
+             Trunk.toml runs cargo build first), and Trunk copies that staged
+             directory to dist/assets/ untouched. Trunk does not hash
+             copy-dir assets, which is why the hash is already in the staged
+             file name. -->
+        <link data-trunk rel="copy-dir" href="dist-assets" data-target-path="assets" />
+
         <link data-trunk rel="rust" data-bin="rust-blog" data-wasm-opt="z" />
     </head>
     <body></body>

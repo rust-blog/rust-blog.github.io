@@ -5,7 +5,9 @@
 //! the same parsing/rendering code is also reachable from `tests/`
 //! integration tests (golden HTML, RSS round-trip, render fuzzing).
 
+pub mod assets;
 pub mod content;
+pub mod fingerprint;
 pub mod frontmatter;
 pub mod markdown;
 pub mod site;

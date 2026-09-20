@@ -34,12 +34,18 @@ js-sys = "0.3"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 
+# Fingerprinting runs at build time on the host (build.rs) and in host tests;
+# no hashing code is reachable from the wasm target (see src/fingerprint.rs).
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+sha2 = "0.10"
+
 [build-dependencies]
 pulldown-cmark = "0.13"
 serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
 rss = "2"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
+sha2 = "0.10"
 
 [dev-dependencies]
 proptest = "1"

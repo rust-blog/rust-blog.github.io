@@ -1753,6 +1753,7 @@ dependencies = [
  "rss",
  "serde",
  "serde_yaml",
+ "sha2",
  "syntect",
  "wasm-bindgen",
  "wasm-bindgen-futures",

@@ -2,9 +2,13 @@ use crate::frontmatter::{self, Frontmatter};
 use crate::markdown;
 use include_dir::{Dir, File, include_dir};
 
-/// Embedded content directory. Drop a new `content/posts/<slug>.md` file in and
+/// Embedded posts directory. Drop a new `content/posts/<slug>.md` file in and
 /// it is picked up automatically at compile time - no code changes required.
-static CONTENT_DIR: Dir = include_dir!("content");
+///
+/// Only `posts/` is embedded: `content/assets/**` is fingerprinted into
+/// `dist/assets/` by `build.rs` (see `src/assets.rs`) and must never inflate
+/// the WASM binary.
+static POSTS_DIR: Dir = include_dir!("content/posts");
 
 /// A fully processed blog post, ready to render.
 #[derive(Debug, Clone, PartialEq)]
@@ -24,9 +28,9 @@ pub fn load_posts() -> Vec<Post> {
   let mut posts = Vec::new();
 
   // include_dir's `files()` is non-recursive, so collect every file in the
-  // tree (including the nested `posts/` directory) first.
+  // tree (including nested category directories) first.
   let mut files = Vec::new();
-  collect_files(&CONTENT_DIR, &mut files);
+  collect_files(&POSTS_DIR, &mut files);
 
   for file in files {
     let path = file.path();
@@ -35,12 +39,8 @@ pub fn load_posts() -> Vec<Post> {
       .and_then(|e| e.to_str())
       .map(|e| e.eq_ignore_ascii_case("md"))
       .unwrap_or(false);
-    let in_posts = path
-      .components()
-      .any(|c| c.as_os_str().to_string_lossy() == "posts");
 
     if is_markdown
-      && in_posts
       && let Some(raw) = file.contents_utf8()
       && let Some(post) = parse_post(raw, path)
       && !post.meta.draft
