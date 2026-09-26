@@ -34,13 +34,13 @@ acceptance is checked against it.
 | ----------------- | --------------------------------------------------------------- |
 | Language / stack  | Rust edition 2024, Leptos 0.8 (CSR), Trunk, `wasm32-unknown-unknown` |
 | Rendering         | Client-side in the browser (WASM), no SSR                       |
-| Content           | 2 Markdown posts in `content/posts/` (`welcome`, `rust-variables`) |
+| Content           | 14 Markdown posts in `content/posts/` (no drafts; the folder is the CMS) |
 | Interactive demos | markdown `demo` directive mounts live Rust/WASM components (e.g. counter) |
 | Styling           | Hand-written CSS design system, light/dark, no framework        |
 | Syndication       | `rss.xml` built by `build.rs`, copied to `dist/`                |
 | Search / filter   | In-memory substring scan + tag chips on the home page           |
 | Hosting / CI      | GitHub Pages via `deploy.yml` (fmt + clippy + test + trunk gates); Renovate on deps |
-| Tests             | 23 unit + 12 integration (golden HTML, RSS round-trip, sitemap, render fuzzing) |
+| Tests             | 41 unit + 15 integration (golden HTML, RSS round-trip, sitemap, assets pipeline, render fuzzing) |
 | Third-party JS    | None - zero runtime network requests (highlight.js and Google Fonts removed, syntect at build, system Thai font stack) |
 | License           | MIT                                                             |
 
