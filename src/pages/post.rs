@@ -5,7 +5,7 @@ use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::{JsFuture, spawn_local};
 
-use crate::components::PostCard;
+use crate::components::{LangBadge, PostCard};
 use crate::pages::not_found::NotFound;
 use crate::util::format_date;
 use rust_blog::content::Post;
@@ -76,6 +76,7 @@ pub fn Post() -> impl IntoView {
                           .unwrap_or_else(|| site::AUTHOR.to_string());
                       let tags = p.meta.tags.clone();
                       let date = format_date(&p.meta.date);
+                      let lang = p.meta.lang;
                       let reading = p.reading_time;
                       let has_related = !related.is_empty();
 
@@ -86,7 +87,7 @@ pub fn Post() -> impl IntoView {
                           <Meta property="og:description" content=desc.clone()/>
                           <Meta property="og:type" content="article"/>
 
-                          <article class="article">
+                          <article class="article" lang=lang.code()>
                               <header class="article-header">
                                   <leptos_router::components::A href="/">
                                       <span class="back-link">"← Back to articles"</span>
@@ -100,6 +101,7 @@ pub fn Post() -> impl IntoView {
                                   </div>
                                   <h1 class="article-title">{title}</h1>
                                   <div class="article-meta">
+                                      <LangBadge lang=lang/>
                                       <span>{date}</span>
                                       <span class="dot">"·"</span>
                                       <span>{format!("{reading} min read")}</span>

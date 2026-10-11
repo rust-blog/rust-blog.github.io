@@ -4,6 +4,7 @@ date: "2026-08-30"
 description: "A pediatric Favipiravir dosing calculator where the code must not be wrong."
 tags: [rust, testing, wasm, leptos]
 author: "suradet-ps"
+lang: en
 ---
 
 This article comes from a small project of mine called favi-child (https://github.com/suradet-ps/favi-child), a calculator for pediatric Favipiravir suspension dosing. The brief sounds deceptively simple. Take a child's weight and tell the caregiver how to prepare each dose. But once I started writing the code, I found a layer of responsibility hidden behind every line. If I got the math wrong, the person affected would be a child whose family measures the medicine following my instructions.
