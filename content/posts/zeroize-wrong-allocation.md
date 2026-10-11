@@ -1,5 +1,5 @@
 ---
-title: "ลึกสุดใจกับ Memory Leak"
+title: "ล้างรหัสผ่านผิดก้อน: เมื่อ zeroize ไม่เคยแตะข้อมูลตัวจริง"
 date: "2026-09-28"
 description: "ทำไม get_untracked() ถึงทำให้ zeroize ผิดก้อน"
 tags: [rust, security, wasm]
@@ -204,7 +204,7 @@ assertion `left == right` failed: wipe_field zeroed a clone; the real allocation
 
 ```
 
-dlmalloc เขียน free-list pointer ทับไป 8 ไบต์แรก (ทำให้คำว่า "SuperSec" หายไป) แต่ **รหัสผ่านส่วนที่เหลือยังอ่านได้จาก linear memory อย่างชัดเจน** นี่คือข้อมูลรั่วไหล (Memory Leak) จริงในระบบ production เพราะ Leptos CSR ทำงานอยู่บน dlmalloc ตัวนี้นั่นเองครับ
+dlmalloc เขียน free-list pointer ทับไป 8 ไบต์แรก (ทำให้คำว่า "SuperSec" หายไป) แต่ **รหัสผ่านส่วนที่เหลือยังอ่านได้จาก linear memory อย่างชัดเจน** นี่คือข้อมูลรั่วไหลจริงในระบบ production เพราะ Leptos CSR ทำงานอยู่บน dlmalloc ตัวนี้นั่นเองครับ
 
 > 💡 **บทเรียนสำคัญ:** OS และ allocator เป็นเพียง "การทำงานแฝง" ไม่ใช่ "ข้อตกลงที่การันตีได้" หน้าที่ในการทำ zeroize จึงต้องเป็นสิ่งที่แอปพลิเคชันต้องรับผิดชอบเองเสมอ
 
