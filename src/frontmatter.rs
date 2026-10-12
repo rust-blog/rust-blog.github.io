@@ -1,8 +1,47 @@
 use serde::Deserialize;
 
+/// A post's content language.
+///
+/// The blog is Thai-first, so [`Lang::Th`] is the default and an English post
+/// must opt in with `lang: en` in its frontmatter. The value drives the `lang`
+/// attribute of the rendered article and the small language badge shown for
+/// posts that differ from the default.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Lang {
+  #[default]
+  Th,
+  En,
+}
+
+impl Lang {
+  /// BCP 47 language tag (`th` / `en`), for the `lang` attribute.
+  pub fn code(self) -> &'static str {
+    match self {
+      Lang::Th => "th",
+      Lang::En => "en",
+    }
+  }
+
+  /// Short badge label (`TH` / `EN`).
+  pub fn badge(self) -> &'static str {
+    match self {
+      Lang::Th => "TH",
+      Lang::En => "EN",
+    }
+  }
+
+  /// Full language name, for `aria-label` and tooltips.
+  pub fn label(self) -> &'static str {
+    match self {
+      Lang::Th => "ภาษาไทย",
+      Lang::En => "English",
+    }
+  }
+}
+
 /// Post metadata shared by the RSS build (`build.rs`) and the in-app render
 /// (`content.rs`). Both call [`parse`] so the feed and the page can never
-/// disagree about a post's title, date, slug, or tags.
+/// disagree about a post's title, date, slug, tags, or language.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Frontmatter {
   pub title: String,
@@ -11,6 +50,8 @@ pub struct Frontmatter {
   pub description: String,
   pub tags: Vec<String>,
   pub author: Option<String>,
+  /// Content language; defaults to Thai when the frontmatter omits `lang`.
+  pub lang: Lang,
   pub draft: bool,
   pub slug: Option<Slug>,
 }
@@ -182,6 +223,8 @@ struct Raw {
   #[serde(default)]
   author: Option<String>,
   #[serde(default)]
+  lang: Option<String>,
+  #[serde(default)]
   draft: bool,
   #[serde(default)]
   slug: Option<String>,
@@ -215,12 +258,14 @@ pub fn parse(raw: &str) -> Result<Parsed, FrontmatterError> {
   for unknown in raw_meta.unknown.keys() {
     warnings.push(format!("unknown frontmatter key `{unknown}`"));
   }
-  warnings.sort();
 
   let date = raw_meta.date.ok_or(FrontmatterError::MissingDate)?;
   if !is_valid_iso_date(&date) {
     return Err(FrontmatterError::InvalidDate(date));
   }
+
+  let lang = parse_lang(raw_meta.lang.as_deref(), &mut warnings);
+  warnings.sort();
 
   let mut body = rest[end + 4..].to_string();
   if let Some(stripped) = body.strip_prefix('\n') {
@@ -243,12 +288,28 @@ pub fn parse(raw: &str) -> Result<Parsed, FrontmatterError> {
       description: raw_meta.description,
       tags,
       author: raw_meta.author,
+      lang,
       draft: raw_meta.draft,
       slug,
     },
     body,
     warnings,
   })
+}
+
+/// Map the raw `lang` string to a [`Lang`], warning on unknown values so a
+/// typo surfaces instead of silently falling back.
+fn parse_lang(raw: Option<&str>, warnings: &mut Vec<String>) -> Lang {
+  match raw {
+    None | Some("th") => Lang::Th,
+    Some("en") => Lang::En,
+    Some(other) => {
+      warnings.push(format!(
+        "unknown `lang` value `{other}` (expected `th` or `en`), defaulting to `th`"
+      ));
+      Lang::Th
+    }
+  }
 }
 
 /// Strict `YYYY-MM-DD` check: exact digit counts, plus a real calendar check
@@ -537,6 +598,44 @@ mod tests {
   }
 
   #[test]
+  fn lang_defaults_to_thai_when_absent() {
+    assert_eq!(parse(&sample()).unwrap().meta.lang, Lang::Th);
+  }
+
+  #[test]
+  fn lang_parses_english() {
+    let raw = "---\ntitle: \"Hello\"\ndate: \"2026-08-29\"\nlang: en\n---\nBody";
+    assert_eq!(parse(raw).unwrap().meta.lang, Lang::En);
+  }
+
+  #[test]
+  fn lang_parses_explicit_thai() {
+    let raw = "---\ntitle: \"Hello\"\ndate: \"2026-08-29\"\nlang: th\n---\nBody";
+    assert_eq!(parse(raw).unwrap().meta.lang, Lang::Th);
+  }
+
+  #[test]
+  fn unknown_lang_warns_and_defaults_to_thai() {
+    let raw = "---\ntitle: \"Hello\"\ndate: \"2026-08-29\"\nlang: fr\n---\nBody";
+    let parsed = parse(raw).unwrap();
+    assert_eq!(parsed.meta.lang, Lang::Th);
+    assert_eq!(
+      parsed.warnings,
+      vec!["unknown `lang` value `fr` (expected `th` or `en`), defaulting to `th`"]
+    );
+  }
+
+  #[test]
+  fn lang_maps_to_code_badge_and_label() {
+    assert_eq!(Lang::Th.code(), "th");
+    assert_eq!(Lang::En.code(), "en");
+    assert_eq!(Lang::Th.badge(), "TH");
+    assert_eq!(Lang::En.badge(), "EN");
+    assert_eq!(Lang::Th.label(), "ภาษาไทย");
+    assert_eq!(Lang::En.label(), "English");
+  }
+
+  #[test]
   fn duplicate_tags_are_deduplicated() {
     let raw = "---\ntitle: \"Hello\"\ndate: \"2026-08-29\"\ntags: [rust, wasm, rust]\n---\nBody";
     assert_eq!(parse(raw).unwrap().meta.tags, vec!["rust", "wasm"]);
@@ -553,6 +652,7 @@ mod tests {
       description: "A description".to_string(),
       tags: tags.iter().map(|t| t.to_string()).collect(),
       author: None,
+      lang: Lang::Th,
       draft,
       slug: None,
     }

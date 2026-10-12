@@ -95,6 +95,8 @@ One folder, one binary, a quiet set of honest services.
 1. Write the markdown with its frontmatter: title, date, description,
    tags - `draft: true` hides it until it is ready. The optional `slug`
    override must be lowercase ASCII letters, digits, and hyphens only.
+   The optional `lang: en` marks an English post so the site badges it
+   and sets the correct `lang` attribute; Thai is the default.
 2. Drop the file into `content/posts/`. That is the whole deployment.
 3. The build picks it up: home page, filtering, tags, and the RSS
    feed update together.
