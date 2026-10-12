@@ -209,8 +209,11 @@ $ cargo clippy --all-targets --all-features -- -D warnings
 
 สำหรับซอฟต์แวร์สุขภาพที่ผมเขียนอยู่ ข้อสุดท้ายเกี่ยวกับ build script นี้สำคัญเป็นพิเศษ เพราะเครื่องที่ build คือเครื่องที่มี credential ของระบบจริงอยู่เต็มไปหมด และการ rotate credential ทั้งหมดเพราะเผลอ `cargo update` ในวันที่โชคร้าย ก็ไม่ใช่ราคาที่เราอยากจ่ายเท่ากับการใส่ `--locked` ตั้งแต่แรก
 
-## อ้างอิง
+สุดท้ายนี้ หนังสือเล่มนี้เขียนไว้ตั้งแต่ยุคที่ rustup ยังไม่ตรวจลายเซ็น และทุกวันนี้มันก็ยังไม่ตรวจ ซึ่งอาจฟังดูน่าผิดหวัง แต่สิ่งที่เปลี่ยนไปคือเรามีเครื่องมือมากขึ้นเรื่อย ๆ ในการจำกัดวงความเสียหาย เมื่อ build script ตัวหนึ่งตัดสินใจทำสิ่งที่ไม่ควรทำระหว่าง `cargo build` ของเราครับ
 
+---
+
+**Credit & Reference:**
 - [Secure Rust Guidelines: Development environment (ANSSI)](https://anssi-fr.github.io/rust-guide/devenv.html) (บทต้นทาง, Rules DENV-STABLE, DENV-TIERS, DENV-CARGO-LOCK, DENV-CARGO-OPTS, DENV-CARGO-ENVVARS, DENV-FORMAT, DENV-LINTER, DENV-AUTOFIX)
 - [Rustup Security](https://rust-lang.github.io/rustup/security.html) และ [rustup update: แผนรุ่น 1.30](https://blog.rust-lang.org/inside-rust/2026/07/03/rustup-update-1.30/)
 - [Rust Project Goal 2026: Implement Verifiable Mirroring Prototype (TUF)](https://goals.rust-lang.org/2026/mirroring.html)
@@ -225,5 +228,3 @@ $ cargo clippy --all-targets --all-features -- -D warnings
 - [cargo-audit/RustSec](https://rustsec.org/), [cargo-vet](https://mozilla.github.io/cargo-vet/), [cargo-crev](https://github.com/crev-dev/cargo-crev), [cackle](https://github.com/cackle-rs/cackle), [cargo-careful](https://github.com/RalfJung/cargo-careful)
 - [Clippy lint categories](https://doc.rust-lang.org/stable/clippy/lints.html) และ [Rust Project Goal 2026: Safety-Critical Lints in Clippy](https://goals.rust-lang.org/2026/safety-critical-lints-in-clippy.html)
 - [Rustfmt style edition (Rust 2024 Edition Guide)](https://doc.rust-lang.org/stable/edition-guide/rust-2024/rustfmt-style-edition.html)
-
-สุดท้ายนี้ หนังสือเล่มนี้เขียนไว้ตั้งแต่ยุคที่ rustup ยังไม่ตรวจลายเซ็น และทุกวันนี้มันก็ยังไม่ตรวจ ซึ่งอาจฟังดูน่าผิดหวัง แต่สิ่งที่เปลี่ยนไปคือเรามีเครื่องมือมากขึ้นเรื่อย ๆ ในการจำกัดวงความเสียหาย เมื่อ build script ตัวหนึ่งตัดสินใจทำสิ่งที่ไม่ควรทำระหว่าง `cargo build` ของเราครับ

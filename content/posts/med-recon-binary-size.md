@@ -194,3 +194,11 @@ cargo clean
 2. **`target/` ที่มีขนาดใหญ่เกิดจาก cache ของ dependencies ไม่ใช่ปัญหาของตัว binary** โดยขนาด 1.6G คือพื้นที่ปกติสำหรับการคอมไพล์โปรเจกต์นี้ ปัญหาที่แท้จริงคือไฟล์ขยะที่ตกค้างจากการสลับ config ไปมา ซึ่งสามารถจัดการได้ง่ายๆ ด้วยการใช้ `cargo-sweep`
 3. **สิ่งที่ค้นพบระหว่างการทดลอง** คือ trunk 0.21 ทำงานร่วมกับ wasm-opt ล้มเหลวแบบเงียบๆ เมื่อเจอกับ wasm มาตรฐานใหม่ (bulk-memory ที่สร้างโดย `wasm-bindgen`) โปรเจกต์ที่ใช้ Tauri/Leptos บน rustc ≥1.82 ควรนำแนวทางการใช้ custom hook นี้ไปปรับใช้
 4. **ยึดการวัดผลจากเครื่องจริงเสมอ** เพราะตัวเลขจากการ "คาดคะเน" เทียบไม่ได้กับการรันคำสั่ง `du -sh` เพื่อดูขนาดไฟล์ที่เกิดขึ้นจริงในระบบ
+
+---
+
+**Credit & Reference:**
+- [คู่มือแนะนำเรื่องขนาดของ Tauri v2](https://v2.tauri.app/concept/size/)
+- [โปรเจกต์ med-recon](https://github.com/suradet-ps/med-recon)
+- [Experiment in reducing target directory size on nightly](https://blog.rust-lang.org/inside-rust/2026/08/18/reducing-target-dir-size-on-nightly/)
+- [pipelined compilation (Rust 1.38)](https://blog.rust-lang.org/2019/09/26/Rust-1.38.0/#pipelined-compilation)

@@ -172,6 +172,9 @@ tiberius ช่วยย่อยภาษาเหล่านั้นออ�
 
 ถ้าใครกำลังเจอปัญหาหรือโจทย์แนวๆ นี้อยู่ ลองสละเวลาเข้าไปเปิดสเปกดูภาษาที่ระบบพวกนี้มันคุยกันดูครับ บางทีคำตอบของปัญหาอาจจะไม่ได้อยู่ที่การวิ่งตามไลบรารีใหม่ล่าสุด แต่อาจจะอยู่ที่การยอมถอยลงมาดูว่า เครื่องจักรยุคเก่าพวกนี้มันสื่อสารกันยังไงมาตั้งแต่แรกเริ่มนั่นเอง
 
-- ซอร์สโค้ด tiberius: [github.com/tiberius-rs/tiberius](https://github.com/tiberius-rs/tiberius)
-- สเปก TDS ของ Microsoft: [MS-TDS](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/)
-- โปรเจกต์ Swift Bill: [github.com/suradet-ps/swift-bill](https://github.com/suradet-ps/swift-bill)
+---
+
+**Credit & Reference:**
+- [ซอร์สโค้ด tiberius](https://github.com/tiberius-rs/tiberius)
+- [สเปก TDS ของ Microsoft (MS-TDS)](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/)
+- [โปรเจกต์ Swift Bill](https://github.com/suradet-ps/swift-bill)

@@ -867,7 +867,7 @@ Ownership ฟังดูเป็นกำแพงตอนแรก แต่
 
 ---
 
-**แหล่งอ้างอิงที่ใช้ในบทความนี้**
+**Credit & Reference:**
 
 - [The Rust Book - ch. 4: Understanding Ownership](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)
 - [The Rust Book - ch. 4.1: What Is Ownership?](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html)
@@ -876,4 +876,4 @@ Ownership ฟังดูเป็นกำแพงตอนแรก แต่
 - [error E0382 - borrow of moved value](https://doc.rust-lang.org/error_codes/E0382.html)
 - [error E0502 - cannot borrow as mutable because also borrowed as immutable](https://doc.rust-lang.org/error_codes/E0502.html)
 - [Rust Variables: Deep Dive](/post/rust-variables-deep-dive)
-- โค้ดอ้างอิงจากโปรเจกต์ [AllerX](https://github.com/suradet-ps/allerx) (`crates/models`, `crates/search-core`, `crates/hosxp-connector`, `src-tauri`, `app`)
+- [โค้ดอ้างอิงจากโปรเจกต์ AllerX](https://github.com/suradet-ps/allerx) (`crates/models`, `crates/search-core`, `crates/hosxp-connector`, `src-tauri`, `app`)

@@ -361,10 +361,10 @@ unit test ตัวเดิมที่เป็นจุดเริ่มต�
 
 ---
 
-## แหล่งข้อมูลอ้างอิง
+**Credit & Reference:**
 
-* [`zeroize` crate](https://docs.rs/zeroize) เอกสารอธิบายการใช้งาน `Zeroize`/`Zeroizing` และรายละเอียดเกี่ยวกับ volatile semantics
-* [`secrecy` crate](https://docs.rs/secrecy) เอกสารการใช้งาน `SecretString` สำหรับจัดการข้อมูลความลับ
-* [`RwSignal` / `UpdateUntracked` (Leptos 0.8)](https://docs.rs/leptos/latest/leptos/prelude/trait.UpdateUntracked.html) เอกสารอธิบายการใช้งาน trait สำหรับอัปเดตค่าใน Signal
-* [`core::ptr::write_volatile`](https://doc.rust-lang.org/std/ptr/fn.write_volatile.html) เอกสารฟังก์ชันมาตรฐานของ Rust
-* [Cryptocoding: Clean memory of secret data](https://github.com/veorq/cryptocoding#clean-memory-of-secret-data) แนวทางปฏิบัติด้านความปลอดภัยสำหรับการจัดการหน่วยความจำของข้อมูลความลับ
+- [`zeroize` crate](https://docs.rs/zeroize) เอกสารอธิบายการใช้งาน `Zeroize`/`Zeroizing` และรายละเอียดเกี่ยวกับ volatile semantics
+- [`secrecy` crate](https://docs.rs/secrecy) เอกสารการใช้งาน `SecretString` สำหรับจัดการข้อมูลความลับ
+- [`RwSignal` / `UpdateUntracked` (Leptos 0.8)](https://docs.rs/leptos/latest/leptos/prelude/trait.UpdateUntracked.html) เอกสารอธิบายการใช้งาน trait สำหรับอัปเดตค่าใน Signal
+- [`core::ptr::write_volatile`](https://doc.rust-lang.org/std/ptr/fn.write_volatile.html) เอกสารฟังก์ชันมาตรฐานของ Rust
+- [Cryptocoding: Clean memory of secret data](https://github.com/veorq/cryptocoding#clean-memory-of-secret-data) แนวทางปฏิบัติด้านความปลอดภัยสำหรับการจัดการหน่วยความจำของข้อมูลความลับ

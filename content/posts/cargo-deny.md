@@ -141,3 +141,10 @@ allow-git = []
 การนำ `cargo-deny` ไปผสานรวมกับ `cargo audit`, `cargo clippy` และชุดทดสอบอัตโนมัติบน CI/CD คือหนึ่งในวิธีที่ดีที่สุดในการแสดงให้เห็นว่าคุณให้ความสำคัญกับความปลอดภัยของ Supply Chain อย่างจริงจัง
 
 ดังนั้นแล้วเริ่มต้นตั้งค่าโปรเจกต์ของคุณด้วย `cargo deny init` ตั้งแต่วันนี้ ดีกว่าต้องมาตามแก้ปัญหาหลังจากมัลแวร์หลุดเข้าไปในระบบแล้วครับ
+
+---
+
+**Credit & Reference:**
+- [cargo-deny (EmbarkStudios)](https://github.com/EmbarkStudios/cargo-deny)
+- [RustSec advisory-db](https://github.com/rustsec/advisory-db)
+- [`cargo-deny-action`](https://github.com/EmbarkStudios/cargo-deny-action)
