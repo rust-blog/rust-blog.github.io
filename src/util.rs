@@ -1,20 +1,9 @@
 use web_sys::{Document, Storage, window};
 
-/// Detect the router base path at runtime.
-///
-/// On GitHub Pages the app is served from `/<repo>/`, so the router needs a
-/// matching base. Locally (and on any custom domain) the base is empty.
+/// The site is deployed at the origin root, so router paths use an empty base.
 pub fn detect_base() -> String {
-  let path = window()
-    .and_then(|w| w.location().pathname().ok())
-    .unwrap_or_default();
-  if path.starts_with("/rust-blog") {
-    "/rust-blog".to_string()
-  } else {
-    String::new()
-  }
+  String::new()
 }
-
 fn local_storage() -> Option<Storage> {
   window()?.local_storage().ok().flatten()
 }
@@ -103,4 +92,12 @@ pub fn apply_theme(theme: Theme) {
 #[allow(dead_code)]
 pub fn document() -> Option<Document> {
   window().and_then(|w| w.document())
+}
+
+#[cfg(test)]
+mod tests {
+  #[test]
+  fn router_base_matches_root_deployment() {
+    assert_eq!(super::detect_base(), "");
+  }
 }
