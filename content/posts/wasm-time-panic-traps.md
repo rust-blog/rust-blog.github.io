@@ -276,3 +276,8 @@ If you want a short list to review before writing code, try to remember these:
 If you only remember one sentence, remember this: **compiling does not mean it runs**. Especially on `wasm32-unknown-unknown`, where much of std is an empty shell waiting to panic.
 
 Three habits help a lot: read the clock in one place, keep time logic pure so it can be tested natively, and make CI check the wasm target every time. Do all three and these traps get caught before you even open the browser, so you never have to guess what caused that `unreachable executed` again.
+
+---
+
+**Credit & Reference:**
+- [`web-time`](https://docs.rs/web-time)

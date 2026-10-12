@@ -266,3 +266,9 @@ jobs:
 `deploy.yml` ออกแบบมาเพื่อตอบโจทย์สามเรื่องหลักคือ **ความเสถียร** (Pin ทุกอย่างที่อาจเปลี่ยนแปลงได้), **ความปลอดภัย** (แยก Job ตามระดับสิทธิ์ ไม่ใช้ Secret) และ **การก้าวข้ามข้อจำกัดของ GitHub Pages** ( static hosting, crawler ไม่รัน JS, base path ต้องตรง)
 
 หากระบบ CI มีปัญหา แนะนำให้เริ่มไล่เช็กจาก `concurrency`, `public-url`, toolchain และ artifact ก่อน เพราะสี่จุดนี้ครอบคลุมสาเหตุส่วนใหญ่ที่พบได้บ่อยที่สุด โดยสามารถดูไฟล์ต้นแบบฉบับเต็มได้ที่ `.github/workflows/deploy.yml` ของ repository นี้ครับ
+
+---
+
+**Credit & Reference:**
+- [actions/deploy-pages issue #118](https://github.com/actions/deploy-pages/issues/118)
+- [rust-blog](https://rust-blog.github.io)

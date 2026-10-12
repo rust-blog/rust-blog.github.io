@@ -245,4 +245,4 @@ skip = [
 - [cargo-deny: bans check](https://embarkstudios.github.io/cargo-deny/checks/bans/index.html)
 - [The semver trick (dtolnay)](https://github.com/dtolnay/semver-trick)
 - [How Rust Solved Dependency Hell (Stephen Coakley)](https://stephencoakley.com/2019/04/24/how-rust-solved-dependency-hell)
-- ซอร์สโค้ด rust-blog [github.com/rust-blog/rust-blog.github.io](https://github.com/rust-blog/rust-blog.github.io)
+- [ซอร์สโค้ด rust-blog](https://github.com/rust-blog/rust-blog.github.io)

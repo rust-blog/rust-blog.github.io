@@ -233,3 +233,10 @@ error ทั้งคู่เป็น error ธรรมดาที่เร�
 หลังอ่านจบผมมองว่านี่เป็นก้าวที่หลายคนรออยู่ ฝั่ง host ของระบบ AI ย้ายมา Rust กันเยอะมากในช่วงสองปีที่ผ่านมา kernel เหลือเป็นชิ้นสุดท้ายที่ยังต้องพึ่งภาษาอื่น ข่าวนี้ปิดช่องนั้นได้ในทางเทคนิคแล้ว เหลือแค่รอให้ toolchain นิ่งพอจะเอาไปใช้จริง
 
 ใครมีเครื่อง Linux กับ GPU NVIDIA ลองเริ่มจาก `cargo add cutile` แล้วรัน hello world ดูครับ ส่วนผมคงได้แต่อ่าน [cuda-oxide book](https://nvlabs.github.io/cuda-oxide/) กับ[เอกสาร cutile-rs](https://nvlabs.github.io/cutile-rs/main/) ไปก่อน อย่างน้อยเวลามีคนถามว่า Rust เขียน GPU ได้จริงไหม จะได้ตอบได้ว่าตอนนี้ได้แล้ว พร้อมบอกต่อได้ด้วยว่าตรงไหนที่ยังต้องระวัง
+
+---
+
+**Credit & Reference:**
+- [ประกาศของ NVIDIA เรื่อง CUDA Rust](https://developer.nvidia.com/blog/introducing-cuda-rust-two-tracks-for-writing-gpu-kernels/)
+- [cuda-oxide book](https://nvlabs.github.io/cuda-oxide/)
+- [เอกสาร cutile-rs](https://nvlabs.github.io/cutile-rs/main/)

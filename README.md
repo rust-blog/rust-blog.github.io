@@ -112,6 +112,11 @@ referenced as `![alt](assets/name.png)`. The build fingerprints it,
 rewrites the reference to the hashed URL, and fails loudly when the file
 is missing.
 
+**The ceremony of the credit** - a post that cites outside sources closes
+with the shared block: a `---` separator, the `**Credit & Reference:**`
+heading, and `- [label](url)` bullets. It is always the last section, and
+`tests/credit_reference.rs` fails the suite when a post drifts from it.
+
 **The ceremony of the compiled site** - everything the reader sees
 was embedded when the binary was built: posts, search terms, RSS. A
 static file cannot be taken down by a failing backend, because there

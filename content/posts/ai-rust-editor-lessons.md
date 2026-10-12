@@ -241,8 +241,11 @@ Jamie บอกว่า AI ทำให้ทักษะหลายอย่�
 
 สำหรับซอฟต์แวร์สุขภาพที่ผมเขียนอยู่ เครื่องมือชุดนี้ยิ่งสำคัญ เพราะ AI ทำให้เราสร้างได้เร็วขึ้น แต่ความรับผิดชอบต่อผู้ป่วยไม่ได้ลดลงตาม แนวคิดแบบ [property tests ที่ผมเขียนไว้ในบทความ favi-child](/post/favi-child-property-tests) จึงเป็นคู่หูที่ขาดไม่ได้ของ workflow แบบนี้
 
-## อ้างอิง
+สุดท้าย Jamie เขียนปิดไว้ว่า *"I wouldn't mind slowing down."* ซึ่งผมเข้าใจดี เพราะบางทีการได้ออกไปเดินเล่นแล้วกลับมาอ่าน diff ก็ให้ผลดีกว่าการนั่งเฝ้าหน้าจอทั้งวันครับ
 
+---
+
+**Credit & Reference:**
 - [Synthetic sagas - Jamie Brandon](https://www.scattered-thoughts.net/writing/synthetic-sagas/) (บทความต้นทาง)
 - [Artificial adventures - Jamie Brandon](https://www.scattered-thoughts.net/writing/artificial-adventures/)
 - [focus - minimalist text editor](https://github.com/jamii/focus)
@@ -250,5 +253,3 @@ Jamie บอกว่า AI ทำให้ทักษะหลายอย่�
 - [sansio](https://github.com/webrtc-rs/sansio), [cackle](https://github.com/cackle-rs/cackle), [cargo-public-api](https://github.com/cargo-public-api/cargo-public-api), [cargo-semver-checks](https://github.com/obi1kenobi/cargo-semver-checks), [insta](https://github.com/mitsuhiko/insta)
 - [gungraun (iai-callgrind)](https://github.com/gungraun/gungraun), [divan](https://github.com/nvzqz/divan), [criterion](https://github.com/bheisler/criterion.rs)
 - [slotmap](https://docs.rs/slotmap), [generational-arena](https://docs.rs/generational-arena), [typed-index-collections](https://docs.rs/typed-index-collections), [index_vec](https://docs.rs/index_vec)
-
-สุดท้าย Jamie เขียนปิดไว้ว่า *"I wouldn't mind slowing down."* ซึ่งผมเข้าใจดี เพราะบางทีการได้ออกไปเดินเล่นแล้วกลับมาอ่าน diff ก็ให้ผลดีกว่าการนั่งเฝ้าหน้าจอทั้งวันครับ
