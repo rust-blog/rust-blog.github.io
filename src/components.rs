@@ -5,6 +5,7 @@ use leptos_router::components::A;
 use crate::icons::{MoonIcon, RustLogo, SunIcon};
 use crate::util::{Theme, apply_theme, load_theme, save_theme};
 use rust_blog::content::Post;
+use rust_blog::frontmatter::Lang;
 use rust_blog::site;
 
 fn post_card_description(description: &str) -> String {
@@ -147,15 +148,34 @@ pub fn TagChip(
   }
 }
 
+/// A small badge marking a post whose language differs from the site default.
+///
+/// The blog is Thai-first, so Thai posts stay unbadged to keep the editorial
+/// index quiet; posts that opt into another language are marked so readers
+/// know before opening them. Every post still carries the correct `lang`
+/// attribute where it matters.
+#[component]
+pub fn LangBadge(lang: Lang) -> impl IntoView {
+  (!matches!(lang, Lang::Th)).then(|| {
+    view! {
+        <span class="lang-badge" lang=lang.code() aria-label=lang.label()>
+            {lang.badge()}
+        </span>
+    }
+  })
+}
+
 /// A single post preview row in the editorial index.
 #[component]
 pub fn PostCard(post: Post) -> impl IntoView {
   let date = crate::util::format_date(&post.meta.date);
   let description = post_card_description(&post.meta.description);
+  let lang = post.meta.lang;
   view! {
     <A href=format!("/post/{}", post.slug)>
         <article class="post-row">
             <div class="post-row-meta">
+                <LangBadge lang=lang/>
                 <span>{date}</span>
                 <span class="dot">"·"</span>
                 <span>{format!("{} min read", post.reading_time)}</span>

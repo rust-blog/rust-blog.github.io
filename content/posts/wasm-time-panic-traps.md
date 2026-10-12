@@ -4,6 +4,7 @@ date: "2026-09-13"
 description: "Time and panic traps in WebAssembly that compile and pass tests, yet break only when they run in the browser, with fixes you can actually use."
 tags: [rust, wasm, leptos]
 author: "suradet-ps"
+lang: en
 ---
 
 If you have ever put Rust on the web with Leptos, Yew, or Sycamore, you have probably run into this: everything passes on your machine, but the browser gives you a blank page or just `RuntimeError: unreachable executed`.

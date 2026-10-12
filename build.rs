@@ -2,6 +2,7 @@
 mod fingerprint;
 
 #[path = "src/frontmatter.rs"]
+#[allow(dead_code)]
 mod frontmatter;
 
 #[path = "src/site.rs"]

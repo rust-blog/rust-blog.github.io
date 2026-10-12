@@ -4,6 +4,7 @@ date: "2026-08-29"
 description: "A blog written in Rust and Leptos, running in your browser as WebAssembly"
 tags: [announcement, rust, leptos]
 author: "suradet-ps"
+lang: en
 ---
 
 Hello, and welcome to the first post on **rust-blog**. This blog isn't just about the Rust language - it's built with, and runs on, Rust itself.

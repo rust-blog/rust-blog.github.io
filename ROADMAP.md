@@ -231,7 +231,10 @@ shows drafts without publishing.
   `content.rs`; RSS and in-app render become impossible to disagree. - Done:
   `src/frontmatter.rs` with typed errors + strict date validation; both sides
   call the same `parse()`.
-- [ ] **(gap 3-adjacent)** Set `lang="th"` (or dynamic per-post).
+- [ ] **(gap 3-adjacent)** Set `lang="th"` (or dynamic per-post). - Partial:
+  the `lang` frontmatter field now sets the article element and badges
+  non-Thai posts (#36); swapping `<html lang>` in the `post_build` output
+  remains.
 - [ ] **(gap 5)** Search scaling: prebuilt embed-time inverted index when
   justified; naive path stays correct for small N. No premature `tantivy`/
   `fuzzy` dependency.
@@ -301,7 +304,7 @@ validate a post locally; site verifiable against the tag.
 ## Future / Ecosystem
 
 - [ ] **Multi-locale** (Thai + English) via a `lang` frontmatter field + locale
-  switcher - the Phase 5 `lang` bug becomes the seed of this feature.
+  switcher - the field landed in #36 as the seed; the switcher remains.
 - [ ] **Archive pages** `/tag/:tag`, `/author/:name` reusing Home filtering.
 - [x] **Lightweight SSG for posts** - a CI step runs `cargo run --bin
   post_build` (`src/bin/post_build.rs`) right after `trunk build` and writes
