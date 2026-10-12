@@ -228,6 +228,11 @@ struct Raw {
   draft: bool,
   #[serde(default)]
   slug: Option<String>,
+  /// Keys outside the schema, captured so [`parse`] can warn about typos
+  /// instead of silently dropping them. The named fields above are the one
+  /// source of truth for the known key set.
+  #[serde(flatten)]
+  unknown: std::collections::BTreeMap<String, serde::de::IgnoredAny>,
 }
 
 /// Split a post file into frontmatter and body, validating both.
@@ -248,19 +253,11 @@ pub fn parse(raw: &str) -> Result<Parsed, FrontmatterError> {
   let fm_text = &rest[..end];
 
   let mut warnings = Vec::new();
-  let value: serde_yaml::Value =
-    serde_yaml::from_str(fm_text).map_err(|e| FrontmatterError::InvalidYaml(e.to_string()))?;
-  if let serde_yaml::Value::Mapping(map) = &value {
-    for key in map.keys() {
-      if let serde_yaml::Value::String(k) = key
-        && !KNOWN_KEYS.contains(&k.as_str())
-      {
-        warnings.push(format!("unknown frontmatter key `{k}`"));
-      }
-    }
-  }
   let raw_meta: Raw =
-    serde_yaml::from_value(value).map_err(|e| FrontmatterError::InvalidYaml(e.to_string()))?;
+    serde_saphyr::from_str(fm_text).map_err(|e| FrontmatterError::InvalidYaml(e.to_string()))?;
+  for unknown in raw_meta.unknown.keys() {
+    warnings.push(format!("unknown frontmatter key `{unknown}`"));
+  }
 
   let date = raw_meta.date.ok_or(FrontmatterError::MissingDate)?;
   if !is_valid_iso_date(&date) {
@@ -314,19 +311,6 @@ fn parse_lang(raw: Option<&str>, warnings: &mut Vec<String>) -> Lang {
     }
   }
 }
-
-/// Keys the frontmatter schema accepts; anything else is reported as a
-/// warning so typos surface instead of being silently dropped.
-const KNOWN_KEYS: [&str; 8] = [
-  "title",
-  "date",
-  "description",
-  "tags",
-  "author",
-  "lang",
-  "draft",
-  "slug",
-];
 
 /// Strict `YYYY-MM-DD` check: exact digit counts, plus a real calendar check
 /// (leap years included). No chrono dependency in the WASM binary.
