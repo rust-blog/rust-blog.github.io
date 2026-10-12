@@ -13,7 +13,10 @@ leptos_meta = "0.8"
 pulldown-cmark = "0.13"
 syntect = { version = "5.2", default-features = false, features = ["default-fancy"] }
 serde = { version = "1", features = ["derive"] }
-serde_yaml = "0.9"
+# Pure-Rust YAML deserialization (no `unsafe`, no unmaintained libyaml
+# bindings); see src/frontmatter.rs. Deserializer only: the app never
+# serializes YAML.
+serde-saphyr = { version = "1", default-features = false, features = ["deserialize"] }
 include_dir = "0.7"
 console_error_panic_hook = "0.1"
 web-sys = { version = "0.3", features = [
@@ -42,7 +45,7 @@ sha2 = "0.10"
 [build-dependencies]
 pulldown-cmark = "0.13"
 serde = { version = "1", features = ["derive"] }
-serde_yaml = "0.9"
+serde-saphyr = { version = "1", default-features = false, features = ["deserialize"] }
 rss = "2"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 sha2 = "0.10"
