@@ -1,6 +1,8 @@
 //! One shared block closes every post that credits sources: a `---`
-//! separator, the `**Credit & Reference:**` heading, and `- [label](url)`
-//! bullets. Legacy heading variants and stray prose after the block fail
+//! separator, the `**Credit & Reference:**` heading followed directly by
+//! `- [label](url)` bullets (an optional short description may follow the
+//! link). Legacy heading variants, a blank line after the heading, bullets
+//! that do not start with a link, and stray prose after the block all fail
 //! here, so the house pattern cannot drift again (issue #41).
 
 use rust_blog::frontmatter;
@@ -69,8 +71,8 @@ fn credit_reference_block_is_the_final_section() {
         continue;
       }
       assert!(
-        line.starts_with("- "),
-        "{path}: only `- ` bullets may follow the heading, found {line:?}"
+        line.starts_with("- ["),
+        "{path}: every bullet must start with a markdown link, found {line:?}"
       );
       assert!(
         line.contains("]("),
@@ -79,5 +81,25 @@ fn credit_reference_block_is_the_final_section() {
       bullets += 1;
     }
     assert!(bullets > 0, "{path} block must list at least one link");
+  }
+}
+
+#[test]
+fn heading_is_followed_directly_by_the_first_bullet() {
+  for (path, body) in posts() {
+    let Some(heading_at) = body.find(HEADING) else {
+      continue;
+    };
+    let rest = &body[heading_at + HEADING.len()..];
+    let mut lines = rest.lines();
+    assert_eq!(
+      lines.next(),
+      Some(""),
+      "{path}: the heading must end its own line"
+    );
+    assert!(
+      lines.next().is_some_and(|line| line.starts_with("- ")),
+      "{path}: the first bullet must follow the heading with no blank line"
+    );
   }
 }

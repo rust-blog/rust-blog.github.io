@@ -868,7 +868,6 @@ Ownership ฟังดูเป็นกำแพงตอนแรก แต่
 ---
 
 **Credit & Reference:**
-
 - [The Rust Book - ch. 4: Understanding Ownership](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)
 - [The Rust Book - ch. 4.1: What Is Ownership?](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html)
 - [The Rust Book - ch. 4.2: References and Borrowing](https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html)

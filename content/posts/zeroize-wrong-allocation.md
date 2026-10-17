@@ -362,7 +362,6 @@ unit test ตัวเดิมที่เป็นจุดเริ่มต�
 ---
 
 **Credit & Reference:**
-
 - [`zeroize` crate](https://docs.rs/zeroize) เอกสารอธิบายการใช้งาน `Zeroize`/`Zeroizing` และรายละเอียดเกี่ยวกับ volatile semantics
 - [`secrecy` crate](https://docs.rs/secrecy) เอกสารการใช้งาน `SecretString` สำหรับจัดการข้อมูลความลับ
 - [`RwSignal` / `UpdateUntracked` (Leptos 0.8)](https://docs.rs/leptos/latest/leptos/prelude/trait.UpdateUntracked.html) เอกสารอธิบายการใช้งาน trait สำหรับอัปเดตค่าใน Signal
