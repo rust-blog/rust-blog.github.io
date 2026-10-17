@@ -319,4 +319,4 @@ assert!(parsed.is_err()); // หยุดและคืน Err ทันที 
 - [`Result::unwrap_or_default` (std docs)](https://doc.rust-lang.org/std/result/enum.Result.html#method.unwrap_or_default)
 - [The Rust Book: Chapter 9 Error Handling](https://doc.rust-lang.org/book/ch09-00-error-handling.html)
 - [sqlx-mysql 0.9.0: src/types/float.rs](https://github.com/launchbadge/sqlx/blob/main/sqlx-mysql/src/types/float.rs)
-- MySQL 8.0 Source Code [`sql/protocol_classic.h`](https://github.com/mysql/mysql-server/blob/8.0/sql/protocol_classic.h) และ [`sql/protocol_classic.cc`](https://github.com/mysql/mysql-server/blob/8.0/sql/protocol_classic.cc)
+- [MySQL 8.0 Source Code: `sql/protocol_classic.h`](https://github.com/mysql/mysql-server/blob/8.0/sql/protocol_classic.h) และ [`sql/protocol_classic.cc`](https://github.com/mysql/mysql-server/blob/8.0/sql/protocol_classic.cc)

@@ -397,7 +397,6 @@ main:
 ---
 
 **Credit & Reference:**
-
 - [The Rust Book - ch. 3.1: Variables and Mutability](https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html)
 - [The Rust Book - ch. 4: Understanding Ownership](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)
 - [Rust Reference - Variables](https://doc.rust-lang.org/reference/variables.html)
