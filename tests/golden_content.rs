@@ -3,7 +3,6 @@
 //! output fails the test instead of silently shipping different pages.
 
 use rust_blog::frontmatter;
-use rust_blog::markdown;
 
 const GOLDEN_HTML: &str = r##"<h1>Golden fixture</h1>
 <p>A paragraph with <em>emphasis</em>, <strong>strong</strong>, and a <a href="https://rust-lang.org">link</a>.</p>
@@ -38,7 +37,7 @@ fn golden_post_renders_exact_html() {
   assert_eq!(parsed.meta.title, "Golden fixture");
   assert_eq!(parsed.meta.date, "2026-08-29");
 
-  let html = markdown::render(&parsed.body);
+  let html = rust_blog::render_markdown(&parsed.body);
   assert_eq!(html, GOLDEN_HTML);
 }
 
@@ -50,13 +49,13 @@ fn golden_detects_markdown_changes() {
     "{}\n\nA new paragraph that must break the golden.",
     parsed.body
   );
-  assert_ne!(markdown::render(&changed), GOLDEN_HTML);
+  assert_ne!(rust_blog::render_markdown(&changed), GOLDEN_HTML);
 }
 
 #[test]
 fn golden_code_plate_has_no_stray_closing_tag() {
   let raw = include_str!("fixtures/golden.md");
   let parsed = frontmatter::parse(raw).unwrap();
-  let html = markdown::render(&parsed.body);
+  let html = rust_blog::render_markdown(&parsed.body);
   assert_eq!(html.matches("</pre>").count(), 1);
 }

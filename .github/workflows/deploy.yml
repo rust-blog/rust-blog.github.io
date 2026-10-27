@@ -60,6 +60,9 @@ jobs:
         # public-url is "/" for GitHub Pages org/user sites, or "/<repo>/" for project sites.
         run: trunk build --release --public-url /
 
+      - name: Enforce WASM gzip budget
+        run: sh scripts/check-wasm-size.sh
+
       - name: Generate static per-post pages
         # Emit dist/post/<slug>/index.html for each post (from the built
         # index.html + the same Rust content loader the app uses) so

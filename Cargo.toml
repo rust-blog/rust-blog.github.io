@@ -10,14 +10,6 @@ repository = "https://github.com/rust-blog/rust-blog.github.io"
 leptos = { version = "0.8", features = ["csr"] }
 leptos_router = "0.8"
 leptos_meta = "0.8"
-pulldown-cmark = "0.13"
-syntect = { version = "5.2", default-features = false, features = ["default-fancy"] }
-serde = { version = "1", features = ["derive"] }
-# Pure-Rust YAML deserialization (no `unsafe`, no unmaintained libyaml
-# bindings); see src/frontmatter.rs. Deserializer only: the app never
-# serializes YAML.
-serde-saphyr = { version = "1", default-features = false, features = ["deserialize"] }
-include_dir = "0.7"
 console_error_panic_hook = "0.1"
 web-sys = { version = "0.3", features = [
     "Window",
@@ -37,13 +29,22 @@ js-sys = "0.3"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 
-# Fingerprinting runs at build time on the host (build.rs) and in host tests;
-# no hashing code is reachable from the wasm target (see src/fingerprint.rs).
+# Markdown rendering, frontmatter parsing, and fingerprinting run at build
+# time on the host (build.rs) and in host tests. None of it is reachable from
+# the wasm target: the app only embeds the generated content model and HTML.
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+pulldown-cmark = "0.13"
+syntect = { version = "5.2", default-features = false, features = ["default-fancy"] }
+serde = { version = "1", features = ["derive"] }
+# Pure-Rust YAML deserialization (no `unsafe`, no unmaintained libyaml
+# bindings); see src/frontmatter.rs. Deserializer only: the app never
+# serializes YAML.
+serde-saphyr = { version = "1", default-features = false, features = ["deserialize"] }
 sha2 = "0.10"
 
 [build-dependencies]
 pulldown-cmark = "0.13"
+syntect = { version = "5.2", default-features = false, features = ["default-fancy"] }
 serde = { version = "1", features = ["derive"] }
 serde-saphyr = { version = "1", default-features = false, features = ["deserialize"] }
 rss = "2"

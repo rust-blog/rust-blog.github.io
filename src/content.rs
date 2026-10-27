@@ -1,90 +1,56 @@
-use crate::frontmatter::{self, Frontmatter, Slug};
-use crate::markdown;
-use include_dir::{Dir, File, include_dir};
+use crate::frontmatter::{Frontmatter, Lang, Slug};
 
-/// Embedded posts directory. Drop a new `content/posts/<slug>.md` file in and
-/// it is picked up automatically at compile time - no code changes required.
-///
-/// Only `posts/` is embedded: `content/assets/**` is fingerprinted into
-/// `dist/assets/` by `build.rs` (see `src/assets.rs`) and must never inflate
-/// the WASM binary.
-static POSTS_DIR: Dir = include_dir!("content/posts");
-
-/// A fully processed blog post, ready to render.
+/// A published blog post, ready to render.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Post {
   pub slug: Slug,
   pub meta: Frontmatter,
-  /// Raw markdown body (kept for RSS / future use).
-  pub body: String,
-  /// Rendered HTML body.
-  pub html: String,
-  /// Estimated reading time in minutes.
+  /// HTML rendered once by `build.rs` and embedded verbatim in the WASM
+  /// binary. The app never runs a markdown renderer at startup.
+  pub html: &'static str,
+  /// Estimated reading time in minutes (computed at build time).
   pub reading_time: usize,
 }
 
-/// Load, parse and sort every published post from the embedded content tree.
-pub fn load_posts() -> Vec<Post> {
-  let mut posts = Vec::new();
-
-  // include_dir's `files()` is non-recursive, so collect every file in the
-  // tree (including nested category directories) first.
-  let mut files = Vec::new();
-  collect_files(&POSTS_DIR, &mut files);
-
-  for file in files {
-    let path = file.path();
-    let is_markdown = path
-      .extension()
-      .and_then(|e| e.to_str())
-      .map(|e| e.eq_ignore_ascii_case("md"))
-      .unwrap_or(false);
-
-    if is_markdown
-      && let Some(raw) = file.contents_utf8()
-      && let Some(post) = parse_post(raw, path)
-      && !post.meta.draft
-    {
-      posts.push(post);
-    }
-  }
-
-  posts.sort_by(|a, b| b.meta.date.cmp(&a.meta.date));
-  posts
+/// One row of the build-time generated manifest.
+struct GeneratedPost {
+  slug: &'static str,
+  title: &'static str,
+  date: &'static str,
+  description: &'static str,
+  tags: &'static [&'static str],
+  author: Option<&'static str>,
+  lang: Lang,
+  html: &'static str,
+  reading_time: usize,
 }
 
-/// Recursively gather every file beneath a directory.
-fn collect_files(dir: &Dir<'static>, out: &mut Vec<&File<'static>>) {
-  for file in dir.files() {
-    out.push(file);
-  }
-  for sub in dir.dirs() {
-    collect_files(sub, out);
-  }
-}
+include!(concat!(env!("OUT_DIR"), "/posts_manifest.rs"));
 
-/// Parse a single markdown file into a [`Post`].
+/// Every published post embedded at build time, newest first (the manifest is
+/// generated in that order, with the slug as a deterministic tie-break).
 ///
-/// Uses the shared [`frontmatter::parse`] so the in-app render and the RSS
-/// feed (built in `build.rs`) can never disagree about a post. Errors cannot
-/// reach runtime: `build.rs` already fails the build on any malformed post.
-fn parse_post(raw: &str, path: &std::path::Path) -> Option<Post> {
-  let parsed = frontmatter::parse(raw).ok()?;
-
-  let stem = path.file_stem().map(|s| s.to_string_lossy());
-  let slug = frontmatter::derive_slug(&parsed.meta, stem.as_deref()).ok()?;
-
-  let html = markdown::render(&parsed.body);
-  let reading_time =
-    ((parsed.body.split_whitespace().count() as f64 / 200.0).ceil() as usize).max(1);
-
-  Some(Post {
-    slug,
-    meta: parsed.meta,
-    body: parsed.body,
-    html,
-    reading_time,
-  })
+/// No parsing or rendering happens here: `build.rs` already validated each
+/// file and rendered its HTML, so loading a post is a handful of allocations.
+pub fn load_posts() -> Vec<Post> {
+  POSTS
+    .iter()
+    .map(|post| Post {
+      slug: Slug::new(post.slug).expect("build.rs validated every slug"),
+      meta: Frontmatter {
+        title: post.title.to_string(),
+        date: post.date.to_string(),
+        description: post.description.to_string(),
+        tags: post.tags.iter().map(|tag| tag.to_string()).collect(),
+        author: post.author.map(str::to_string),
+        lang: post.lang,
+        draft: false,
+        slug: None,
+      },
+      html: post.html,
+      reading_time: post.reading_time,
+    })
+    .collect()
 }
 
 /// Collect the unique, sorted list of tags across all posts.
@@ -115,6 +81,8 @@ mod tests {
     assert!(posts.iter().any(|p| p.slug == "rust-variables"));
     // newest first
     assert!(posts[0].meta.date >= posts[1].meta.date);
+    assert!(posts.iter().all(|p| !p.html.is_empty()));
+    assert!(posts.iter().all(|p| !p.meta.draft));
   }
 
   #[test]
@@ -127,6 +95,36 @@ mod tests {
         "duplicate post slug `{}` - two posts would overwrite the same dist/post/<slug>/ page",
         post.slug
       );
+    }
+  }
+
+  #[test]
+  fn manifest_ships_pre_rendered_html_with_fingerprinted_assets() {
+    let posts = load_posts();
+    let welcome = posts
+      .iter()
+      .find(|p| p.slug == "welcome")
+      .expect("welcome post is embedded");
+    assert!(welcome.html.contains("<h2>Powered by Rust 100%</h2>"));
+    assert!(
+      !welcome.html.contains("assets/rust-blog-gear.svg"),
+      "content asset references must already be fingerprinted at build time"
+    );
+    assert!(welcome.reading_time >= 1);
+  }
+
+  #[test]
+  fn same_date_posts_have_a_deterministic_order() {
+    let posts = load_posts();
+    for pair in posts.windows(2) {
+      if pair[0].meta.date == pair[1].meta.date {
+        assert!(
+          pair[0].slug.as_str() <= pair[1].slug.as_str(),
+          "same-date posts must be ordered by slug: {} then {}",
+          pair[0].slug,
+          pair[1].slug
+        );
+      }
     }
   }
 }

@@ -1,3 +1,4 @@
+#[cfg(not(target_arch = "wasm32"))]
 use serde::Deserialize;
 
 /// A post's content language.
@@ -57,7 +58,9 @@ pub struct Frontmatter {
 }
 
 /// A successfully parsed post: frontmatter plus the markdown body with a
-/// single, shared leading-newline convention.
+/// single, shared leading-newline convention. Build-time only: the app consumes
+/// the generated post manifest and never parses YAML.
+#[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Parsed {
   pub meta: Frontmatter,
@@ -211,6 +214,7 @@ impl PartialEq<&str> for Slug {
 }
 
 /// Lenient YAML shape so the parser can distinguish "absent" from "invalid".
+#[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug, Deserialize)]
 struct Raw {
   title: String,
@@ -238,8 +242,9 @@ struct Raw {
 /// Split a post file into frontmatter and body, validating both.
 ///
 /// Tolerates a UTF-8 BOM and CRLF line endings. The body keeps exactly one
-/// leading newline stripped, so `build.rs` and `content.rs` render the same
-/// markdown.
+/// leading newline stripped. Build-time only: `build.rs` is the single caller
+/// that turns content files into the generated post manifest.
+#[cfg(not(target_arch = "wasm32"))]
 pub fn parse(raw: &str) -> Result<Parsed, FrontmatterError> {
   let trimmed = raw.strip_prefix('\u{feff}').unwrap_or(raw);
   if !trimmed.starts_with("---\n") && !trimmed.starts_with("---\r\n") {
@@ -299,6 +304,7 @@ pub fn parse(raw: &str) -> Result<Parsed, FrontmatterError> {
 
 /// Map the raw `lang` string to a [`Lang`], warning on unknown values so a
 /// typo surfaces instead of silently falling back.
+#[cfg(not(target_arch = "wasm32"))]
 fn parse_lang(raw: Option<&str>, warnings: &mut Vec<String>) -> Lang {
   match raw {
     None | Some("th") => Lang::Th,
@@ -313,7 +319,8 @@ fn parse_lang(raw: Option<&str>, warnings: &mut Vec<String>) -> Lang {
 }
 
 /// Strict `YYYY-MM-DD` check: exact digit counts, plus a real calendar check
-/// (leap years included). No chrono dependency in the WASM binary.
+/// (leap years included). Build-time only; no calendar dependency ships.
+#[cfg(not(target_arch = "wasm32"))]
 fn is_valid_iso_date(s: &str) -> bool {
   let mut parts = s.split('-');
   let (Some(year), Some(month), Some(day), None) =
@@ -375,6 +382,7 @@ pub fn derive_slug(meta: &Frontmatter, file_stem: Option<&str>) -> Result<Slug, 
 /// `today_iso` is an ISO `YYYY-MM-DD` string; ISO dates compare correctly
 /// as strings, so no calendar dependency is needed in the WASM binary.
 /// `tag_counts` maps every tag to how many published posts use it.
+#[cfg(not(target_arch = "wasm32"))]
 pub fn lint_post(
   meta: &Frontmatter,
   today_iso: &str,

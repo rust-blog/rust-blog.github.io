@@ -9,7 +9,6 @@ use std::path::{Path, PathBuf};
 
 use rust_blog::assets;
 use rust_blog::fingerprint;
-use rust_blog::markdown;
 
 /// Recursively gather every file beneath a directory.
 fn collect_files(dir: &Path, out: &mut Vec<PathBuf>) {
@@ -102,7 +101,7 @@ fn markdown_images_resolve_to_fingerprinted_urls() {
     "./assets/rust-blog-gear.svg",
     "/assets/rust-blog-gear.svg",
   ] {
-    let html = markdown::render(&format!("![the gear]({src})"));
+    let html = rust_blog::render_markdown(&format!("![the gear]({src})"));
     assert!(html.contains(url), "{src} did not resolve: {html}");
   }
 }

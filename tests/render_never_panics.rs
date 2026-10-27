@@ -4,7 +4,6 @@
 
 use proptest::prelude::*;
 use rust_blog::frontmatter;
-use rust_blog::markdown;
 
 fn any_string() -> impl Strategy<Value = String> {
   prop::collection::vec(any::<char>(), 0..1024).prop_map(|chars| chars.into_iter().collect())
@@ -15,7 +14,7 @@ proptest! {
 
     #[test]
     fn any_markdown_renders_without_panicking(md in any_string()) {
-        let _ = markdown::render(&md);
+        let _ = rust_blog::render_markdown(&md);
     }
 
     #[test]

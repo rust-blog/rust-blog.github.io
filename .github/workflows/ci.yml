@@ -133,6 +133,9 @@ jobs:
       - name: Build (release)
         run: trunk build --release --public-url /
 
+      - name: Enforce WASM gzip budget
+        run: sh scripts/check-wasm-size.sh
+
       - name: Generate static per-post pages
         run: cargo run --quiet --locked --bin post_build
 
