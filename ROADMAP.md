@@ -90,9 +90,11 @@ Pages from a clean checkout.
 
 ### Phase 1 - Content model & markdown (done)
 
-- [x] `PostMeta` / `Post` models; embedded `include_dir!` content (no runtime fetch)
+- [x] `PostMeta` / `Post` models; build-time generated content manifest (no
+  runtime fetch)
 - [x] Recursive post collection; `pulldown-cmark` with `Options::all()`
-- [x] BOM-tolerant parsing; `all_tags()`; reading-time estimate
+- [x] BOM-tolerant parsing; `all_tags()`; language-aware reading-time
+  estimate (words for spaced scripts, characters for Thai/CJK)
 - [x] Unit test `loads_embedded_posts` (≥2 posts, newest-first)
 
 **Acceptance (met):** at least two posts render and sort correctly.

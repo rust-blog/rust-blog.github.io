@@ -8,7 +8,8 @@ pub struct Post {
   /// HTML rendered once by `build.rs` and embedded verbatim in the WASM
   /// binary. The app never runs a markdown renderer at startup.
   pub html: &'static str,
-  /// Estimated reading time in minutes (computed at build time).
+  /// Estimated reading time in minutes (computed at build time; Thai and CJK
+  /// are counted by character, see `src/reading_time.rs`).
   pub reading_time: usize,
 }
 

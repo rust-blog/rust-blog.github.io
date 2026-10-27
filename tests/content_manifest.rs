@@ -13,6 +13,7 @@ use std::path::Path;
 
 use rust_blog::content::load_posts;
 use rust_blog::frontmatter::{self, Frontmatter};
+use rust_blog::reading_time;
 use rust_blog::render_markdown;
 
 struct Source {
@@ -113,8 +114,7 @@ fn published_sources() -> BTreeMap<String, Source> {
     let stem = path.file_stem().map(|stem| stem.to_string_lossy());
     let slug = frontmatter::derive_slug(&parsed.meta, stem.as_deref())
       .unwrap_or_else(|e| panic!("invalid slug in {}: {e}", path.display()));
-    let reading_time =
-      ((parsed.body.split_whitespace().count() as f64 / 200.0).ceil() as usize).max(1);
+    let reading_time = reading_time::estimate_minutes(&parsed.body);
     let previous = sources.insert(
       slug.as_str().to_string(),
       Source {
