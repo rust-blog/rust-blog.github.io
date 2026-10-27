@@ -65,13 +65,16 @@ The release artifact: `⟫ trunk build --release --public-url /`
 
 One folder, one binary, a quiet set of honest services.
 
-- **Publishes** - content is embedded at compile time via
-  `include_dir!`, never fetched at runtime: drop a markdown file into
-  `content/posts/` and the build collects it, recursively.
-- **Renders** - `pulldown-cmark` with `Options::all()` turns the post
-  into HTML; `syntect` highlights fenced code blocks at render time -
-  no CDN, no JavaScript - and the hand-crafted CSS design system
-  (light and dark, no framework) carries the look.
+- **Publishes** - content is embedded at compile time, never fetched at
+  runtime: `build.rs` reads every markdown file in `content/posts/` and
+  emits a generated manifest of metadata plus pre-rendered HTML.
+- **Renders** - at build time, not in the reader's browser:
+  `pulldown-cmark` with `Options::all()` turns the post into HTML and
+  `syntect` highlights fenced code blocks - no CDN, no JavaScript. The
+  WASM bundle ships only the content model and the finished HTML (gzip
+  budget enforced in CI by `scripts/check-wasm-size.sh`), and the
+  hand-crafted CSS design system (light and dark, no framework) carries
+  the look.
 - **Illustrates** - images live in `content/assets/` and are referenced as
   `![alt](assets/name.png)`. The build fingerprints every file (a content
   hash joins the name, like Trunk does for CSS/JS), rewrites the reference

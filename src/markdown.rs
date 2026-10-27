@@ -1,3 +1,12 @@
+//! Build-time markdown renderer: pulldown-cmark plus syntect.
+//!
+//! `build.rs` renders every post into the generated manifest, so neither crate
+//! (nor syntect's syntax set) is part of the WASM bundle. This module is
+//! compiled for the host only; `src/lib.rs` exposes [`render_markdown`] for
+//! `post_build` and the test suite.
+//!
+//! [`render_markdown`]: crate::render_markdown
+
 use std::sync::OnceLock;
 
 use pulldown_cmark::{CodeBlockKind, Event, Options, Parser, Tag, TagEnd, html};
@@ -37,14 +46,16 @@ fn theme() -> &'static syntect::highlighting::Theme {
 
 /// Render markdown source to an HTML string.
 ///
-/// Enables GitHub-flavoured extensions (tables, strikethrough, task lists,
-/// footnotes, and heading attributes) so authors can write rich posts.
-/// Fenced code blocks are highlighted with `syntect` at render time - no
-/// JavaScript, no CDN - and wrapped in the framed code block: traffic-light
+/// Runs at build time (`build.rs`) so `pulldown-cmark` and `syntect` never
+/// enter the WASM binary. Enables GitHub-flavoured extensions (tables,
+/// strikethrough, task lists, footnotes, and heading attributes) so authors
+/// can write rich posts. Fenced code blocks are highlighted with `syntect` -
+/// no JavaScript, no CDN - and wrapped in the framed code block: traffic-light
 /// dots, an optional filename (` ```rust title="src/main.rs" `), the language
 /// badge, and a copy button. Image references into `content/assets/` are
-/// rewritten to their fingerprinted public URLs (see `src/assets.rs`).
-pub fn render(md: &str) -> String {
+/// rewritten by `resolve_asset` to their fingerprinted public URLs (see
+/// `src/assets.rs`).
+pub fn render_with(md: &str, resolve_asset: &dyn Fn(&str) -> Option<String>) -> String {
   let parser = Parser::new_ext(md, Options::all());
   let mut events = parser.collect::<Vec<_>>();
   let mut out = String::with_capacity(md.len() + md.len() / 2);
@@ -64,7 +75,7 @@ pub fn render(md: &str) -> String {
       // hash in the file name; rewrite the markdown reference to the URL the
       // build staged. Anything else (external URLs, unknown paths) stays as
       // written.
-      if let Some(url) = crate::assets::resolve(dest_url) {
+      if let Some(url) = resolve_asset(dest_url) {
         *dest_url = pulldown_cmark::CowStr::from(url);
       }
     } else if let Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(info))) = &events[i] {
@@ -259,6 +270,12 @@ fn scrub_backgrounds(html: &str) -> String {
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  /// Test helper: render with the embedded content asset manifest, the same
+  /// resolver `build.rs` uses when it renders posts into the WASM bundle.
+  fn render(md: &str) -> String {
+    render_with(md, &|src| crate::assets::resolve(src).map(str::to_string))
+  }
 
   #[test]
   fn highlights_fenced_rust_block() {

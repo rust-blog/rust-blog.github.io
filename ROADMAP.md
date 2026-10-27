@@ -241,8 +241,13 @@ shows drafts without publishing.
 - [x] **(gap 4)** highlight.js removed; `syntect` highlights at render time;
   Google Fonts dropped for the system Thai font stack → **zero runtime network
   requests, no third-party JS**. (Closed.)
-- [ ] First-paint budget: document TTI on a throttled link; WASM gzip ceiling
-  (e.g. `< 300KB`) verified in CI, not claimed.
+- [x] **(performance)** WASM gzip ceiling `< 320 KiB`,
+  enforced in CI by `scripts/check-wasm-size.sh` (current: ~309 KiB).
+  Markdown rendering moved to `build.rs`: the app embeds only the content
+  model and pre-rendered HTML, so `pulldown-cmark` and `syntect` (and their
+  full syntax set) never enter the WASM binary, and startup no longer renders
+  every post.
+- [ ] First-paint budget: document TTI on a throttled link.
 - [x] a11y audit: focus rings (`:focus-visible`), `prefers-reduced-motion`
   (verified present), skip-to-content (added to Nav).
 
