@@ -9,6 +9,10 @@ mod frontmatter;
 #[allow(dead_code)]
 mod markdown;
 
+#[path = "src/reading_time.rs"]
+#[allow(dead_code)]
+mod reading_time;
+
 #[path = "src/site.rs"]
 #[allow(dead_code)]
 mod site;
@@ -301,8 +305,7 @@ fn write_posts_manifest(posts: &[Published], assets: &BTreeMap<String, String>) 
   );
   for post in posts {
     let html = markdown::render_with(&post.body, &resolve_asset);
-    let reading_time =
-      ((post.body.split_whitespace().count() as f64 / 200.0).ceil() as usize).max(1);
+    let reading_time = reading_time::estimate_minutes(&post.body);
     let tags = post
       .meta
       .tags

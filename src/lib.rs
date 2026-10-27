@@ -13,6 +13,7 @@ pub mod fingerprint;
 pub mod frontmatter;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod markdown;
+pub mod reading_time;
 pub mod site;
 pub mod xml;
 
